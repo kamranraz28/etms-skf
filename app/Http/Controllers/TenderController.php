@@ -5,6 +5,7 @@ use App\Models\Pr;
 use App\Models\Tender;
 use App\Models\TenderVendor;
 use App\Models\Vendor;
+use App\Models\VendorCategory;
 use App\Models\Bid;
 use App\Services\CsGenerator;
 use Illuminate\Http\Request;
@@ -21,7 +22,8 @@ class TenderController extends Controller {
     public function create(Request $r) {
         return Inertia::render('Tenders/New', [
             'prs' => Pr::orderByDesc('created_at')->get(['id','pr_number','title','status']),
-            'vendors' => Vendor::orderBy('name')->get(['id','name','email','erp_code','status']),
+            'vendors' => Vendor::orderBy('name')->get(['id','name','email','erp_code','status','vendor_category_id']),
+            'categories' => VendorCategory::orderBy('name')->get(['id','name']),
             'preselect_pr' => $r->query('pr'),
         ]);
     }
@@ -33,9 +35,23 @@ class TenderController extends Controller {
             'title' => 'required|string',
             'description' => 'nullable|string',
             'deadline' => 'required|date',
-            'vendor_ids' => 'required|array|min:1',
+            'vendor_ids' => 'nullable|array',
             'vendor_ids.*' => 'exists:vendors,id',
+            'vendor_category_ids' => 'nullable|array',
+            'vendor_category_ids.*' => 'exists:vendor_categories,id',
         ]);
+
+        // Merge vendors from individual selection and categories
+        $vendorIds = collect($data['vendor_ids'] ?? [])
+            ->merge(
+                Vendor::whereIn('vendor_category_id', $data['vendor_category_ids'] ?? [])
+                    ->pluck('id')
+            )->unique()->values()->all();
+
+        if (empty($vendorIds)) {
+            return back()->with('error', 'Please select vendors or categories');
+        }
+
         $tender = Tender::create([
             'tender_number' => $data['tender_number'],
             'pr_id' => $data['pr_id'],
@@ -45,7 +61,7 @@ class TenderController extends Controller {
             'status' => 'open',
             'created_by' => $r->user()->id,
         ]);
-        foreach ($data['vendor_ids'] as $vid) {
+        foreach ($vendorIds as $vid) {
             TenderVendor::create(['tender_id' => $tender->id, 'vendor_id' => $vid]);
         }
         Pr::where('id', $data['pr_id'])->update(['status' => 'tendered']);
