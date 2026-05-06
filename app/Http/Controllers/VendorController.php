@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\UserRole;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,7 +22,29 @@ class VendorController extends Controller {
             'notes' => 'nullable|string',
         ]);
         $data['email'] = strtolower($data['email']);
-        Vendor::create($data);
+
+        //create user if not there by this email
+        $user = User::where('email', $data['email'])->first();
+        if (!$user) {
+            $user = User::create([
+                'full_name' => $data['name'],
+                'email' => $data['email'],
+                'password' => bcrypt('password'),
+                'role' => 'vendor',
+            ]);
+
+            UserRole::create(['user_id' => $user->id, 'role' => 'vendor']);
+        }
+        //create vendor with data and user_id
+        Vendor::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'erp_code' => $data['erp_code'],
+            'status' => $data['status'],
+            'notes' => $data['notes'],
+            'user_id' => $user->id,
+        ]);
         return back()->with('success', 'Vendor created');
     }
     public function update(Request $r, Vendor $vendor) {
