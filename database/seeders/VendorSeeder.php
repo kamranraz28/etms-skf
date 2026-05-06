@@ -10,9 +10,9 @@ class VendorSeeder extends Seeder
     public function run(): void
     {
         $rows = [
-            ['vendor1@etms.test', 'Acme Industrial Pvt Ltd', 'V100245', 'active'],
-            ['vendor2@etms.test', 'Globex Supplies Ltd', 'V100246', 'active'],
-            ['vendor3@etms.test', 'Initech Solutions', 'V100247', 'active'],
+            ['vendor1@etms.test', 'Acme Industrial Pvt Ltd', 'V100001', 'active'],
+            ['vendor2@etms.test', 'Globex Supplies Ltd', 'V100002', 'active'],
+            ['vendor3@etms.test', 'Initech Solutions', 'V100003', 'active'],
         ];
         foreach ($rows as [$email, $name, $erp, $status]) {
             $u = User::where('email', $email)->first();

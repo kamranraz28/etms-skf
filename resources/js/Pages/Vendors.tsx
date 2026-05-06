@@ -121,16 +121,7 @@ export default function Vendors({ vendors }: any) {
                         }
                       />
                     </div>
-                    <div>
-                      <Label>ERP Vendor Code</Label>
-                      <Input
-                        value={form.erp_code}
-                        onChange={(e) =>
-                          setForm({ ...form, erp_code: e.target.value })
-                        }
-                        placeholder="e.g. V100245"
-                      />
-                    </div>
+
                     <div className="col-span-2">
                       <Label>Status</Label>
                       <select
