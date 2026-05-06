@@ -1,0 +1,52 @@
+import { useState } from "react";
+import { router, Head } from "@inertiajs/react";
+import { AppShell } from "@/components/AppShell";
+import { PageHeader } from "@/components/PageHeader";
+import { StatusBadge } from "@/components/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+export default function VendorProfile({ vendor }: any) {
+  const [form, setForm] = useState({
+    name: vendor?.name ?? "",
+    email: vendor?.email ?? "",
+    phone: vendor?.phone ?? "",
+    notes: vendor?.notes ?? "",
+  });
+  const locked = vendor && vendor.status !== "pending";
+  const save = () => router.post("/app/profile", form);
+
+  return (
+    <AppShell>
+      <Head title="Vendor profile" />
+      <div className="max-w-2xl">
+        <PageHeader
+          title="Vendor profile"
+          description={vendor ? "Your company details on file." : "Submit your registration. An admin will activate your account and assign your ERP code."}
+          actions={vendor ? <StatusBadge status={vendor.status} /> : null}
+        />
+        <div className="panel p-5 space-y-3">
+          <div><Label>Company name</Label><Input value={form.name} disabled={locked} onChange={(e)=>setForm({...form, name:e.target.value})} /></div>
+          <div><Label>Email</Label><Input type="email" value={form.email} disabled={locked} onChange={(e)=>setForm({...form, email:e.target.value})} /></div>
+          <div><Label>Phone</Label><Input value={form.phone} disabled={locked} onChange={(e)=>setForm({...form, phone:e.target.value})} /></div>
+          <div><Label>About / capabilities</Label><Textarea rows={4} value={form.notes} disabled={locked} onChange={(e)=>setForm({...form, notes:e.target.value})} /></div>
+          {vendor && (
+            <div className="text-xs bg-muted/50 rounded p-3 border border-border">
+              <div className="flex justify-between"><span className="text-muted-foreground">ERP Vendor Code</span>
+                <span className="font-mono">{vendor.erp_code ?? <span className="text-warning">Not assigned yet</span>}</span></div>
+              <div className="flex justify-between mt-1"><span className="text-muted-foreground">Registered</span>
+                <span>{new Date(vendor.created_at).toLocaleDateString()}</span></div>
+            </div>
+          )}
+          {!locked && (
+            <div className="pt-2 flex justify-end">
+              <Button onClick={save}>{vendor ? "Save changes" : "Submit registration"}</Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </AppShell>
+  );
+}
