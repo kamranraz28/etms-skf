@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\VendorCategoryController;
 use App\Http\Controllers\PrController;
 use App\Http\Controllers\TenderController;
 use App\Http\Controllers\BidController;
@@ -32,6 +33,11 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::post('/vendors', [VendorController::class, 'store'])->name('vendors.store')->middleware('role:admin');
         Route::put('/vendors/{vendor}', [VendorController::class, 'update'])->name('vendors.update')->middleware('role:admin');
         Route::delete('/vendors/{vendor}', [VendorController::class, 'destroy'])->name('vendors.destroy')->middleware('role:admin');
+
+        Route::get('/vendor-categories', [VendorCategoryController::class, 'index'])->name('vendor-categories.index');
+        Route::post('/vendor-categories', [VendorCategoryController::class, 'store'])->name('vendor-categories.store')->middleware('role:admin');
+        Route::put('/vendor-categories/{vendorCategory}', [VendorCategoryController::class, 'update'])->name('vendor-categories.update')->middleware('role:admin');
+        Route::delete('/vendor-categories/{vendorCategory}', [VendorCategoryController::class, 'destroy'])->name('vendor-categories.destroy')->middleware('role:admin');
 
         Route::get('/prs', [PrController::class, 'index'])->name('prs.index');
         Route::post('/prs/sync', [PrController::class, 'sync'])->name('prs.sync');

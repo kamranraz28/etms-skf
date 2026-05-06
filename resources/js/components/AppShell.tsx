@@ -1,7 +1,7 @@
 import { ReactNode, useMemo } from "react";
 import { Link, usePage, router } from "@inertiajs/react";
 import {
-  LayoutDashboard, Users, FileStack, Gavel, FileText, LogOut, Boxes, ShieldCheck, Building2, Scale,
+  LayoutDashboard, Users, FileStack, Gavel, FileText, LogOut, Boxes, ShieldCheck, Building2, Scale, Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ interface NavItem { href: string; label: string; icon: ReactNode; roles: AppRole
 
 const NAV: NavItem[] = [
   { href: "/app", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" />, roles: ["admin","procurement","approver","vendor"] },
+  { href: "/app/vendor-categories", label: "Vendor Categories", icon: <Tag className="h-4 w-4" />, roles: ["admin","procurement","approver"] },
   { href: "/app/vendors", label: "Vendors", icon: <Building2 className="h-4 w-4" />, roles: ["admin","procurement","approver"] },
   { href: "/app/prs", label: "Purchase Requisitions", icon: <FileStack className="h-4 w-4" />, roles: ["admin","procurement","approver"] },
   { href: "/app/tenders", label: "Tenders", icon: <Gavel className="h-4 w-4" />, roles: ["admin","procurement","approver"] },
