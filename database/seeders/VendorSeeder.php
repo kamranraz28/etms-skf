@@ -3,22 +3,27 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Vendor;
+use App\Models\VendorCategory;
 use Illuminate\Database\Seeder;
 
 class VendorSeeder extends Seeder
 {
     public function run(): void
     {
+        $categories = VendorCategory::pluck('id')->toArray();
+
         $rows = [
             ['vendor1@etms.test', 'Acme Industrial Pvt Ltd', 'V100001', 'active', '01609758311'],
-            ['vendor2@etms.test', 'Globex Supplies Ltd', 'V100002', 'active', '01609758312'],
-            ['vendor3@etms.test', 'Initech Solutions', 'V100003', 'active', '01609758313'],
+            ['vendor2@etms.test', 'Global Supplies Ltd', 'V100002', 'active', '01712345678'],
+            ['vendor3@etms.test', 'TechSolve Inc', 'V100003', 'pending', '01811112222'],
+            ['vendor4@etms.test', 'BuildRight Construction', 'V100004', 'inactive', '01999887766'],
+            ['vendor5@etms.test', 'MediEquip Co', 'V100005', 'active', '01555666777'],
         ];
         foreach ($rows as [$email, $name, $erp, $status, $phone]) {
             $u = User::where('email', $email)->first();
             Vendor::updateOrCreate(['email' => $email], [
                 'user_id' => $u?->id, 'name' => $name, 'erp_code' => $erp, 'status' => $status,
-                'phone' => $phone,
+                'phone' => $phone, 'vendor_category_id' => $categories[array_rand($categories)],
             ]);
         }
     }

@@ -13,6 +13,7 @@ return new class extends Migration {
             $t->string('erp_code')->nullable()->unique();
             $t->enum('status', ['pending','active','inactive','blacklisted'])->default('pending');
             $t->text('notes')->nullable();
+            $t->foreignId('vendor_category_id')->nullable()->constrained('vendor_categories')->nullOnDelete();
             $t->timestamps();
             $t->foreign('user_id')->references('id')->on('users')->nullOnDelete();
         });

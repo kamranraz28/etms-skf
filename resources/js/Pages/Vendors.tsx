@@ -18,7 +18,7 @@ import { Head, router, usePage } from "@inertiajs/react";
 import { Pencil, Plus, ShieldCheck, ShieldOff, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-export default function Vendors({ vendors }: any) {
+export default function Vendors({ vendors, categories }: any) {
   const { props } = usePage<PageSharedProps>();
   const isAdmin = !!props.auth.user?.roles.includes("admin");
   const [open, setOpen] = useState(false);
@@ -30,6 +30,7 @@ export default function Vendors({ vendors }: any) {
     erp_code: "",
     notes: "",
     status: "pending" as VendorStatus,
+    vendor_category_id: "",
   });
 
   const openNew = () => {
@@ -41,6 +42,7 @@ export default function Vendors({ vendors }: any) {
       erp_code: "",
       notes: "",
       status: "pending",
+      vendor_category_id: "",
     });
     setOpen(true);
   };
@@ -53,6 +55,7 @@ export default function Vendors({ vendors }: any) {
       erp_code: v.erp_code ?? "",
       notes: v.notes ?? "",
       status: v.status,
+      vendor_category_id: v.vendor_category_id ?? "",
     });
     setOpen(true);
   };
@@ -140,16 +143,33 @@ export default function Vendors({ vendors }: any) {
                         <option value="blacklisted">Blacklisted</option>
                       </select>
                     </div>
-                    <div className="col-span-2">
-                      <Label>Notes</Label>
-                      <Textarea
-                        rows={3}
-                        value={form.notes}
-                        onChange={(e) =>
-                          setForm({ ...form, notes: e.target.value })
-                        }
-                      />
-                    </div>
+                  <div className="col-span-2">
+                    <Label>Category</Label>
+                    <select
+                      value={form.vendor_category_id}
+                      onChange={(e) =>
+                        setForm({ ...form, vendor_category_id: e.target.value })
+                      }
+                      className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+                    >
+                      <option value="">No category</option>
+                      {categories.map((cat: any) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-span-2">
+                    <Label>Notes</Label>
+                    <Textarea
+                      rows={3}
+                      value={form.notes}
+                      onChange={(e) =>
+                        setForm({ ...form, notes: e.target.value })
+                      }
+                    />
+                  </div>
                   </div>
                 </div>
                 <DialogFooter>
@@ -169,6 +189,7 @@ export default function Vendors({ vendors }: any) {
           <thead>
             <tr>
               <th>Vendor</th>
+              <th>Category</th>
               <th>Phone</th>
               <th>ERP code</th>
               <th>Status</th>
@@ -192,6 +213,9 @@ export default function Vendors({ vendors }: any) {
                 <td>
                   <div className="font-medium">{v.name}</div>
                   <div className="text-xs text-muted-foreground">{v.email}</div>
+                </td>
+                <td className="text-xs">
+                  {v.vendor_category?.name ?? "—"}
                 </td>
 
                 <td className="text-xs">{v.phone ?? "—"}</td>

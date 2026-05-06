@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Vendor;
+use App\Models\VendorCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,8 +13,9 @@ class VendorController extends Controller
 {
     public function index()
     {
-        $vendors = Vendor::orderByDesc('created_at')->get();
-        return Inertia::render('Vendors', ['vendors' => $vendors]);
+        $vendors = Vendor::with('vendorCategory')->orderByDesc('created_at')->get();
+        $categories = VendorCategory::orderBy('name')->get();
+        return Inertia::render('Vendors', ['vendors' => $vendors, 'categories' => $categories]);
     }
     public function store(Request $r)
     {
@@ -24,6 +26,7 @@ class VendorController extends Controller
             'erp_code' => 'nullable|string',
             'status' => 'required|in:pending,active,inactive,blacklisted',
             'notes' => 'nullable|string',
+            'vendor_category_id' => 'nullable|exists:vendor_categories,id',
         ]);
         $data['email'] = strtolower($data['email']);
 
@@ -57,6 +60,7 @@ class VendorController extends Controller
             'status' => $data['status'],
             'notes' => $data['notes'],
             'user_id' => $user->id,
+            'vendor_category_id' => $data['vendor_category_id'],
         ]);
         return back()->with('success', 'Vendor created');
     }
@@ -69,6 +73,7 @@ class VendorController extends Controller
             'erp_code' => 'nullable|string',
             'status' => 'required|in:pending,active,inactive,blacklisted',
             'notes' => 'nullable|string',
+            'vendor_category_id' => 'nullable|exists:vendor_categories,id',
         ]);
         $data['email'] = strtolower($data['email']);
         $vendor->update($data);
