@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class CsItem extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
 
     protected $table = 'cs_items';
     protected $fillable = ['cs_id', 'bid_id', 'vendor_id', 'total_price', 'rank', 'selected'];

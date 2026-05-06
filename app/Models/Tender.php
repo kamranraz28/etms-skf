@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Tender extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
 
     protected $table = 'tenders';
     protected $fillable = ['tender_number', 'pr_id', 'title', 'description', 'deadline', 'status', 'created_by'];

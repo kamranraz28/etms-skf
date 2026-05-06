@@ -5,9 +5,9 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void {
         Schema::create('bids', function (Blueprint $t) {
-            $t->uuid('id')->primary();
-            $t->uuid('tender_id');
-            $t->uuid('vendor_id');
+            $t->id();
+            $t->unsignedBigInteger('tender_id');
+            $t->unsignedBigInteger('vendor_id');
             $t->decimal('total_price', 14, 2);
             $t->string('currency', 8)->default('INR');
             $t->json('item_prices')->nullable();

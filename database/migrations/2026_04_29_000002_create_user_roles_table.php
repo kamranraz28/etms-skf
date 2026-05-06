@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void {
         Schema::create('user_roles', function (Blueprint $t) {
-            $t->uuid('id')->primary();
-            $t->uuid('user_id');
+            $t->id();
+            $t->unsignedBigInteger('user_id');
             $t->enum('role', ['admin','procurement','approver','vendor']);
             $t->timestamps();
             $t->unique(['user_id','role']);

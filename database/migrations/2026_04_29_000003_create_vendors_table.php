@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void {
         Schema::create('vendors', function (Blueprint $t) {
-            $t->uuid('id')->primary();
-            $t->uuid('user_id')->nullable();
+            $t->id();
+            $t->unsignedBigInteger('user_id')->nullable();
             $t->string('name');
             $t->string('email');
             $t->string('phone')->nullable();

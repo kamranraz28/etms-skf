@@ -5,20 +5,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void {
         Schema::create('cs', function (Blueprint $t) {
-            $t->uuid('id')->primary();
-            $t->uuid('tender_id');
+            $t->id();
+            $t->unsignedBigInteger('tender_id');
             $t->enum('status', ['draft','pending_approver','pending_admin','approved','rejected'])->default('draft');
             $t->timestamp('submitted_at')->nullable();
             $t->timestamp('approved_at')->nullable();
-            $t->uuid('created_by')->nullable();
+            $t->unsignedBigInteger('created_by')->nullable();
             $t->timestamps();
             $t->foreign('tender_id')->references('id')->on('tenders')->cascadeOnDelete();
         });
         Schema::create('cs_items', function (Blueprint $t) {
-            $t->uuid('id')->primary();
-            $t->uuid('cs_id');
-            $t->uuid('bid_id');
-            $t->uuid('vendor_id');
+            $t->id();
+            $t->unsignedBigInteger('cs_id');
+            $t->unsignedBigInteger('bid_id');
+            $t->unsignedBigInteger('vendor_id');
             $t->decimal('total_price', 14, 2);
             $t->integer('rank');
             $t->boolean('selected')->default(false);
@@ -28,11 +28,11 @@ return new class extends Migration {
             $t->foreign('vendor_id')->references('id')->on('vendors')->cascadeOnDelete();
         });
         Schema::create('cs_item_selections', function (Blueprint $t) {
-            $t->uuid('id')->primary();
-            $t->uuid('cs_id');
+            $t->id();
+            $t->unsignedBigInteger('cs_id');
             $t->integer('item_index');
-            $t->uuid('vendor_id');
-            $t->uuid('bid_id');
+            $t->unsignedBigInteger('vendor_id');
+            $t->unsignedBigInteger('bid_id');
             $t->decimal('unit_price', 14, 2);
             $t->decimal('qty', 14, 2);
             $t->boolean('selected')->default(false);
@@ -43,19 +43,19 @@ return new class extends Migration {
             $t->foreign('bid_id')->references('id')->on('bids')->cascadeOnDelete();
         });
         Schema::create('cs_approvals', function (Blueprint $t) {
-            $t->uuid('id')->primary();
-            $t->uuid('cs_id');
+            $t->id();
+            $t->unsignedBigInteger('cs_id');
             $t->enum('step', ['approver','admin']);
             $t->enum('decision', ['approved','rejected']);
             $t->text('comment')->nullable();
-            $t->uuid('acted_by');
+            $t->unsignedBigInteger('acted_by');
             $t->timestamp('acted_at')->useCurrent();
             $t->timestamps();
             $t->foreign('cs_id')->references('id')->on('cs')->cascadeOnDelete();
         });
         Schema::create('erp_sync', function (Blueprint $t) {
-            $t->uuid('id')->primary();
-            $t->uuid('cs_id');
+            $t->id();
+            $t->unsignedBigInteger('cs_id');
             $t->enum('status', ['success','failed']);
             $t->json('request_payload')->nullable();
             $t->json('response_data')->nullable();

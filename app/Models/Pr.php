@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Pr extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
 
     protected $table = 'prs';
     protected $fillable = ['pr_number', 'title', 'department', 'requested_by', 'items', 'status', 'created_by'];

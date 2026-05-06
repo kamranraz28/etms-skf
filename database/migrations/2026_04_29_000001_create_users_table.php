@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void {
         Schema::create('users', function (Blueprint $t) {
-            $t->uuid('id')->primary();
+            $t->id();
             $t->string('full_name');
             $t->string('email')->unique();
             $t->timestamp('email_verified_at')->nullable();
@@ -20,7 +20,7 @@ return new class extends Migration {
         });
         Schema::create('sessions', function (Blueprint $t) {
             $t->string('id')->primary();
-            $t->uuid('user_id')->nullable()->index();
+            $t->unsignedBigInteger('user_id')->nullable()->index();
             $t->string('ip_address', 45)->nullable();
             $t->text('user_agent')->nullable();
             $t->longText('payload');
