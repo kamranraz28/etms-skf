@@ -16,8 +16,6 @@ class VendorSeeder extends Seeder
             ['vendor1@etms.test', 'Acme Industrial Pvt Ltd', 'V100001', 'active', '01609758311'],
             ['vendor2@etms.test', 'Global Supplies Ltd', 'V100002', 'active', '01712345678'],
             ['vendor3@etms.test', 'TechSolve Inc', 'V100003', 'pending', '01811112222'],
-            ['vendor4@etms.test', 'BuildRight Construction', 'V100004', 'inactive', '01999887766'],
-            ['vendor5@etms.test', 'MediEquip Co', 'V100005', 'active', '01555666777'],
         ];
         foreach ($rows as [$email, $name, $erp, $status, $phone]) {
             $u = User::where('email', $email)->first();
