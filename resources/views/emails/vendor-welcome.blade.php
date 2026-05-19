@@ -27,11 +27,10 @@ th { background: #f8fafc; font-weight: 600; }
 <tr><th>ERP Code</th><td>{{ $vendor->erp_code ?? '—' }}</td></tr>
 <tr><th>Email</th><td>{{ $vendor->email }}</td></tr>
 <tr><th>Status</th><td>{{ ucfirst($vendor->status) }}</td></tr>
-<tr><th>Login URL</th><td>{{ url('/auth') }}</td></tr>
 <tr><th>Password</th><td>{{ $password }}</td></tr>
 </table>
 
-<p>Please sign in using your email and the password above. We recommend changing your password after first login.</p>
+<p>Please <a href="{{ url('/auth') }}">log in</a> using your email and the password above. We recommend changing your password after first login.</p>
 <p>If you have any questions, please contact the procurement team.</p>
 </div>
 <div class="footer">&copy; {{ date('Y') }} ETMS. All rights reserved.</div>

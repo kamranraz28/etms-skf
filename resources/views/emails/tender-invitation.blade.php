@@ -28,7 +28,7 @@ th { background: #f8fafc; font-weight: 600; }
 <tr><th>Deadline</th><td>{{ \Carbon\Carbon::parse($tender->deadline)->format('d M Y, h:i A') }}</td></tr>
 </table>
 
-<p>Please log in to the ETMS portal to view the full tender details and submit your bid before the deadline.</p>
+<p>Please <a href="{{ url('/auth') }}">log in</a> to the ETMS portal to view the full tender details and submit your bid before the deadline.</p>
 <p>If you have any questions, please contact the procurement team.</p>
 </div>
 <div class="footer">&copy; {{ date('Y') }} ETMS — Eskayef Pharmaceuticals Limited. All rights reserved.</div>

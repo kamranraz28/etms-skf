@@ -35,7 +35,7 @@ th { background: #f8fafc; font-weight: 600; }
 @endforeach
 </table>
 
-<p>Please log in to the ETMS portal to review the full details.</p>
+<p>Please <a href="{{ url('/auth') }}">log in</a> to the ETMS portal to review the full details.</p>
 <p>Thank you for your participation.</p>
 </div>
 <div class="footer">&copy; {{ date('Y') }} ETMS — Eskayef Pharmaceuticals Limited. All rights reserved.</div>
