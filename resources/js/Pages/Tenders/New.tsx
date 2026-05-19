@@ -76,14 +76,23 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
       <PageHeader title="Create tender" description="Convert a PR into a tender and invite vendor categories per item." />
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 panel p-5 space-y-4">
-          <div>
-            <Label>From Purchase Requisition</Label>
-            <select value={prId} onChange={(e)=>setPrId(e.target.value)}
-              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm">
-              <option value="">— Select PR —</option>
-              {prs.map((p: any) => <option key={p.id} value={p.id}>{p.pr_number} · {p.title}{p.status==="tendered"?" (already tendered)":""}</option>)}
-            </select>
-          </div>
+          {preselect_pr ? (
+            <div>
+              <Label>Purchase Requisition</Label>
+              <div className="text-sm font-medium py-1.5 px-1">
+                {selectedPr?.pr_number} · {selectedPr?.title}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <Label>From Purchase Requisition</Label>
+              <select value={prId} onChange={(e)=>setPrId(e.target.value)}
+                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm">
+                <option value="">— Select PR —</option>
+                {prs.map((p: any) => <option key={p.id} value={p.id}>{p.pr_number} · {p.title}{p.status==="tendered"?" (already tendered)":""}</option>)}
+              </select>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Tender number</Label><Input value={tenderNumber} onChange={(e)=>setTenderNumber(e.target.value)} /></div>
             <div><Label>Submission deadline</Label><Input type="datetime-local" value={deadline} onChange={(e)=>setDeadline(e.target.value)} /></div>
