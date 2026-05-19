@@ -19,6 +19,16 @@ const STYLES: Record<string, string> = {
   failed: "bg-destructive/15 text-destructive border-destructive/30",
   selected: "bg-success/15 text-success border-success/30",
   not_selected: "bg-muted text-muted-foreground border-border",
+  // Claim statuses
+  submitted: "bg-info/15 text-info border-info/30",
+  under_review_procurement: "bg-warning/15 text-warning border-warning/30",
+  under_review_approver: "bg-warning/15 text-warning border-warning/30",
+  under_review_admin: "bg-warning/15 text-warning border-warning/30",
+  // Document types
+  invoice: "bg-primary/10 text-primary border-primary/30",
+  delivery_challan: "bg-accent/15 text-accent border-accent/30",
+  payment_receipt: "bg-success/15 text-success border-success/30",
+  other: "bg-muted text-muted-foreground border-border",
 };
 export const StatusBadge = ({ status, className }: { status: Status; className?: string }) => {
   const style = STYLES[status] ?? "bg-muted text-muted-foreground border-border";

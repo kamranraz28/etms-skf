@@ -16,5 +16,6 @@ class Vendor extends Model
     public function user() { return $this->belongsTo(User::class); }
     public function bids() { return $this->hasMany(Bid::class); }
     public function vendorCategory() { return $this->belongsTo(VendorCategory::class); }
+    public function claims() { return $this->hasMany(Claim::class); }
 
 }

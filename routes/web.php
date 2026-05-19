@@ -12,6 +12,7 @@ use App\Http\Controllers\CsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorProfileController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ClaimController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -58,15 +59,19 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::post('/cs/{cs}/submit', [CsController::class, 'submit'])->name('cs.submit');
         Route::post('/cs/{cs}/decide', [CsController::class, 'decide'])->name('cs.decide');
         Route::post('/cs/{cs}/erp', [CsController::class, 'sendToErp'])->name('cs.erp');
+
+        // Claims (staff) — index only, parameterized routes come later
+        Route::get('/claims', [ClaimController::class, 'index'])->name('claims.index');
     });
 
     // Admin only
     Route::middleware('role:admin')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users/{user}/roles/{role}', [UserController::class, 'toggleRole'])->name('users.roles.toggle');
+        Route::get('/claims/history', [ClaimController::class, 'history'])->name('claims.history');
     });
 
-    // Vendor only
+    // Vendor only — define fixed claim paths BEFORE parameterised staff routes
     Route::middleware('role:vendor')->group(function () {
         Route::get('/profile', [VendorProfileController::class, 'show'])->name('profile.show');
         Route::post('/profile', [VendorProfileController::class, 'save'])->name('profile.save');
@@ -74,5 +79,16 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::get('/my-tenders/{tender}/bid', [BidController::class, 'create'])->name('bids.create');
         Route::post('/my-tenders/{tender}/bid', [BidController::class, 'store'])->name('bids.store');
         Route::get('/my-bids', [BidController::class, 'myBids'])->name('my-bids');
+        Route::get('/my-claims', [ClaimController::class, 'myClaims'])->name('my-claims');
+        Route::get('/my-claims/{claim}', [ClaimController::class, 'myClaimShow'])->name('my-claims.show');
+        Route::get('/claims/new', [ClaimController::class, 'createClaim'])->name('claims.create');
+        Route::post('/claims', [ClaimController::class, 'storeClaim'])->name('claims.store');
+    });
+
+    // Parameterised claim routes (must be after fixed paths like /claims/new, /claims/history)
+    Route::middleware('role:admin,procurement,approver')->group(function () {
+        Route::get('/claims/{claim}', [ClaimController::class, 'show'])->name('claims.show');
+        Route::post('/claims/{claim}/decide', [ClaimController::class, 'decide'])->name('claims.decide');
+        Route::get('/claims/{claim}/documents/{docId}', [ClaimController::class, 'document'])->name('claims.document');
     });
 });

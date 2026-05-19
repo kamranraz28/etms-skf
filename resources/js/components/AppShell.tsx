@@ -1,7 +1,7 @@
 import { ReactNode, useMemo } from "react";
 import { Link, usePage, router } from "@inertiajs/react";
 import {
-  LayoutDashboard, Users, FileStack, Gavel, FileText, LogOut, Boxes, ShieldCheck, Building2, Scale, Tag,
+  LayoutDashboard, Users, FileStack, Gavel, FileText, LogOut, Boxes, ShieldCheck, Building2, Scale, Tag, Receipt, ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -16,8 +16,11 @@ const NAV: NavItem[] = [
   { href: "/app/prs", label: "Purchase Requisitions", icon: <FileStack className="h-4 w-4" />, roles: ["admin","procurement","approver"] },
   { href: "/app/tenders", label: "Tenders", icon: <Gavel className="h-4 w-4" />, roles: ["admin","procurement","approver"] },
   { href: "/app/cs", label: "Comparative Statements", icon: <Scale className="h-4 w-4" />, roles: ["admin","procurement","approver"] },
+  { href: "/app/claims", label: "Claims", icon: <Receipt className="h-4 w-4" />, roles: ["procurement","approver"] },
+  { href: "/app/claims/history", label: "Claim History", icon: <ClipboardList className="h-4 w-4" />, roles: ["admin"] },
   { href: "/app/my-tenders", label: "My Tenders", icon: <Gavel className="h-4 w-4" />, roles: ["vendor"] },
   { href: "/app/my-bids", label: "My Bids", icon: <FileText className="h-4 w-4" />, roles: ["vendor"] },
+  { href: "/app/my-claims", label: "My Claims", icon: <Receipt className="h-4 w-4" />, roles: ["vendor"] },
   { href: "/app/profile", label: "Vendor Profile", icon: <Boxes className="h-4 w-4" />, roles: ["vendor"] },
   { href: "/app/users", label: "Users & Roles", icon: <ShieldCheck className="h-4 w-4" />, roles: ["admin"] },
 ];

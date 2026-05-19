@@ -16,6 +16,8 @@ class User extends Authenticatable
 
     public function roles() { return $this->hasMany(UserRole::class); }
     public function vendor() { return $this->hasOne(Vendor::class); }
+    public function claimApprovals() { return $this->hasMany(ClaimApproval::class, 'acted_by'); }
+    public function createdClaims() { return $this->hasMany(Claim::class, 'created_by'); }
 
     public function primaryRole(): ?string
     {
