@@ -16,7 +16,6 @@ export default function CSShow({ cs, items, selections, approvals, erpLogs, prIt
   const isAdmin = primary === "admin";
   const [comment, setComment] = useState("");
 
-  // group selections by item_index
   const matrix = useMemo(() => {
     const m: Record<number, any[]> = {};
     selections.forEach((s: any) => { (m[s.item_index] ??= []).push(s); });
@@ -30,7 +29,6 @@ export default function CSShow({ cs, items, selections, approvals, erpLogs, prIt
 
   const setSelected = (item_index: number, vendor_id: string) =>
     router.post(`/app/cs/${cs.id}/select`, { item_index, vendor_id }, { preserveScroll: true });
-
   const submitForApproval = () => router.post(`/app/cs/${cs.id}/submit`);
   const decide = (decision: "approved"|"rejected") => router.post(`/app/cs/${cs.id}/decide`, { decision, comment }, { onSuccess: ()=>setComment("") });
   const sendToErp = () => router.post(`/app/cs/${cs.id}/erp`);
@@ -46,20 +44,19 @@ export default function CSShow({ cs, items, selections, approvals, erpLogs, prIt
       <PageHeader title={`CS · ${cs.tender?.tender_number ?? ""}`} description={cs.tender?.title} actions={<StatusBadge status={cs.status} />} />
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Vendor totals */}
-          <div className="panel">
+        <div className="lg:col-span-2 space-y-6 min-w-0">
+          <div className="panel overflow-x-auto">
             <div className="panel-header"><div className="panel-title">Bid comparison (vendor totals)</div></div>
             <table className="data-table">
               <thead><tr><th>Rank</th><th>Vendor</th><th>ERP</th><th className="text-right">Total price</th><th>Status</th></tr></thead>
               <tbody>
-                {items.length === 0 && <tr><td colSpan={5} className="text-center text-muted-foreground py-6">No bids in this CS.</td></tr>}
+                {items.length === 0 && <tr><td colSpan={5} className="text-center text-muted-foreground py-6">No bids.</td></tr>}
                 {items.map((it: any) => (
                   <tr key={it.id} className={lowest?.id === it.id ? "bg-success/5" : ""}>
-                    <td className="font-mono text-xs">L{it.rank}{it.rank===1 && <span className="ml-1 text-[10px] uppercase text-success">low</span>}</td>
-                    <td className="font-medium">{it.vendor?.name}</td>
-                    <td className="font-mono text-xs">{it.vendor?.erp_code ?? <span className="text-warning">—</span>}</td>
-                    <td className="text-right font-mono">{Number(it.total_price).toLocaleString()}</td>
+                    <td className="font-mono text-xs whitespace-nowrap">L{it.rank}{it.rank===1 && <span className="ml-1 text-[10px] uppercase text-success">low</span>}</td>
+                    <td className="font-medium whitespace-nowrap">{it.vendor?.name}</td>
+                    <td className="font-mono text-xs whitespace-nowrap">{it.vendor?.erp_code ?? <span className="text-warning">—</span>}</td>
+                    <td className="text-right font-mono whitespace-nowrap">{Number(it.total_price).toLocaleString()}</td>
                     <td>{it.selected ? <StatusBadge status="selected" /> : <span className="text-xs text-muted-foreground">—</span>}</td>
                   </tr>
                 ))}
@@ -67,14 +64,12 @@ export default function CSShow({ cs, items, selections, approvals, erpLogs, prIt
             </table>
           </div>
 
-          {/* Per-item matrix */}
-          <div className="panel">
+          <div className="panel overflow-x-auto">
             <div className="panel-header"><div className="panel-title">Per-item award matrix</div></div>
             <table className="data-table">
               <thead>
-                <tr>
-                  <th>Item</th><th>Qty</th>
-                  {vendorsInCs.map((v) => <th key={v.id} className="text-right">{v.name}</th>)}
+                <tr><th>Item</th><th>Qty</th>
+                  {vendorsInCs.map((v) => <th key={v.id} className="text-right whitespace-nowrap">{v.name}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -83,14 +78,14 @@ export default function CSShow({ cs, items, selections, approvals, erpLogs, prIt
                   const lowestUnit = Math.min(...row.map((r: any) => Number(r.unit_price)));
                   return (
                     <tr key={idx}>
-                      <td>{pr.name}</td>
-                      <td className="text-xs">{pr.qty} {pr.unit}</td>
+                      <td className="whitespace-nowrap">{pr.name}</td>
+                      <td className="text-xs whitespace-nowrap">{pr.qty} {pr.unit}</td>
                       {vendorsInCs.map((v) => {
                         const s = row.find((r: any) => r.vendor_id === v.id);
                         if (!s) return <td key={v.id} className="text-right text-xs text-muted-foreground">—</td>;
                         const isLow = Number(s.unit_price) === lowestUnit;
                         return (
-                          <td key={v.id} className={`text-right ${isLow ? "bg-success/5" : ""}`}>
+                          <td key={v.id} className={`text-right whitespace-nowrap ${isLow ? "bg-success/5" : ""}`}>
                             <div className="font-mono text-xs">{Number(s.unit_price).toLocaleString()}{isLow && <span className="ml-1 text-[10px] uppercase text-success">low</span>}</div>
                             {cs.status === "draft" ? (
                               <label className="flex items-center justify-end gap-1.5 cursor-pointer text-[11px] mt-1">
@@ -111,15 +106,14 @@ export default function CSShow({ cs, items, selections, approvals, erpLogs, prIt
             </table>
           </div>
 
-          {/* Approval timeline */}
           <div className="panel">
             <div className="panel-header"><div className="panel-title">Approval history</div></div>
             <ul className="divide-y divide-border">
               {approvals.length === 0 && <li className="px-4 py-3 text-sm text-muted-foreground">No actions yet.</li>}
               {approvals.map((a: any) => (
                 <li key={a.id} className="px-4 py-3 flex items-start gap-3">
-                  {a.decision === "approved" ? <CheckCircle2 className="h-4 w-4 text-success mt-0.5" /> : <XCircle className="h-4 w-4 text-destructive mt-0.5" />}
-                  <div className="text-sm">
+                  {a.decision === "approved" ? <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" /> : <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />}
+                  <div className="text-sm min-w-0">
                     <div><span className="font-medium uppercase text-xs">{a.step}</span> · {a.decision}
                       <span className="ml-2 text-xs text-muted-foreground">{new Date(a.acted_at).toLocaleString()}</span>
                     </div>
@@ -136,7 +130,7 @@ export default function CSShow({ cs, items, selections, approvals, erpLogs, prIt
               <ul className="divide-y divide-border">
                 {erpLogs.map((l: any) => (
                   <li key={l.id} className="px-4 py-3 text-sm">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <StatusBadge status={l.status} />
                       <span className="text-xs text-muted-foreground">{new Date(l.synced_at).toLocaleString()}</span>
                     </div>
@@ -158,7 +152,7 @@ export default function CSShow({ cs, items, selections, approvals, erpLogs, prIt
               <>
                 <Textarea value={comment} onChange={(e)=>setComment(e.target.value)} placeholder="Optional comment" rows={3} />
                 {((cs.status === "pending_approver" && isApprover) || (cs.status === "pending_admin" && isAdmin)) ? (
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button className="flex-1" onClick={()=>decide("approved")}><CheckCircle2 className="h-4 w-4 mr-1" /> Approve</Button>
                     <Button className="flex-1" variant="destructive" onClick={()=>decide("rejected")}><XCircle className="h-4 w-4 mr-1" /> Reject</Button>
                   </div>
@@ -171,7 +165,7 @@ export default function CSShow({ cs, items, selections, approvals, erpLogs, prIt
               <Button className="w-full" onClick={sendToErp}><Upload className="h-4 w-4 mr-1" /> Send to ERP</Button>
             )}
             {cs.status === "approved" && erpDone && (
-              <div className="text-xs text-success flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Pushed to ERP · ref {lastErp?.response_data?.erp_reference}</div>
+              <div className="text-xs text-success flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> Pushed to ERP · ref {lastErp?.response_data?.erp_reference}</div>
             )}
             {cs.status === "rejected" && <p className="text-xs text-destructive">This CS was rejected.</p>}
           </div>

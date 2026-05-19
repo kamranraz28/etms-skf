@@ -39,31 +39,29 @@ export default function ClaimsShow({ claim }: any) {
       <PageHeader title={`Claim · ${claim.claim_number}`} description={claim.title} actions={<StatusBadge status={claim.status} />} />
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Details */}
+        <div className="lg:col-span-2 space-y-6 min-w-0">
           <div className="panel p-4 space-y-3">
             <div className="panel-title mb-2">Claim details</div>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
               <div><span className="text-muted-foreground">Vendor</span><div className="font-medium">{claim.vendor?.name}</div></div>
               <div><span className="text-muted-foreground">ERP code</span><div className="font-mono">{claim.vendor?.erp_code ?? "—"}</div></div>
               <div><span className="text-muted-foreground">Tender #</span><div className="font-mono">{claim.tender_number}</div></div>
               <div><span className="text-muted-foreground">Amount</span><div className="font-mono font-semibold">{Number(claim.amount).toLocaleString()} BDT</div></div>
               <div><span className="text-muted-foreground">Submitted</span><div>{new Date(claim.submitted_at).toLocaleString()}</div></div>
-              <div className="col-span-2"><span className="text-muted-foreground">Description</span><div className="text-sm mt-0.5">{claim.description ?? "—"}</div></div>
+              <div className="sm:col-span-2"><span className="text-muted-foreground">Description</span><div className="text-sm mt-0.5">{claim.description ?? "—"}</div></div>
             </div>
           </div>
 
-          {/* Documents */}
           <div className="panel">
             <div className="panel-header"><div className="panel-title">Supporting documents</div></div>
             <ul className="divide-y divide-border">
               {claim.documents?.length === 0 && <li className="px-4 py-3 text-sm text-muted-foreground">No documents uploaded.</li>}
               {claim.documents?.map((doc: any) => (
-                <li key={doc.id} className="px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <StatusBadge status={doc.document_type} className="capitalize" />
-                    <div>
-                      <div className="text-sm font-medium">{doc.original_name}</div>
+                <li key={doc.id} className="px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <StatusBadge status={doc.document_type} className="capitalize shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium truncate">{doc.original_name}</div>
                       {doc.file_size && <div className="text-xs text-muted-foreground">{(doc.file_size / 1024).toFixed(1)} KB</div>}
                     </div>
                   </div>
@@ -73,15 +71,14 @@ export default function ClaimsShow({ claim }: any) {
             </ul>
           </div>
 
-          {/* Approval timeline */}
           <div className="panel">
             <div className="panel-header"><div className="panel-title">Claim lifecycle</div></div>
             <ul className="divide-y divide-border">
               <li className="px-4 py-3 flex items-start gap-3">
-                <div className="h-4 w-4 rounded-full bg-primary/20 flex items-center justify-center mt-0.5">
+                <div className="h-4 w-4 rounded-full bg-primary/20 flex items-center justify-center mt-0.5 shrink-0">
                   <span className="h-2 w-2 rounded-full bg-primary" />
                 </div>
-                <div className="text-sm">
+                <div className="text-sm min-w-0">
                   <div className="font-medium">Submitted</div>
                   <div className="text-xs text-muted-foreground">{new Date(claim.submitted_at).toLocaleString()}</div>
                 </div>
@@ -89,8 +86,8 @@ export default function ClaimsShow({ claim }: any) {
               {claim.approvals?.length === 0 && <li className="px-4 py-3 text-sm text-muted-foreground">No decisions yet.</li>}
               {claim.approvals?.map((a: any) => (
                 <li key={a.id} className="px-4 py-3 flex items-start gap-3">
-                  {a.decision === "approved" ? <CheckCircle2 className="h-4 w-4 text-success mt-0.5" /> : <XCircle className="h-4 w-4 text-destructive mt-0.5" />}
-                  <div className="text-sm">
+                  {a.decision === "approved" ? <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" /> : <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />}
+                  <div className="text-sm min-w-0">
                     <div><span className="font-medium uppercase text-xs">{a.panel}</span> · {a.decision}
                       <span className="ml-2 text-xs text-muted-foreground">{new Date(a.acted_at).toLocaleString()}</span>
                     </div>
@@ -101,7 +98,7 @@ export default function ClaimsShow({ claim }: any) {
               ))}
               {claim.status === "approved" && (
                 <li className="px-4 py-3 flex items-start gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-success mt-0.5" />
+                  <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
                   <div className="text-sm">
                     <div className="font-medium text-success">Approved</div>
                     <div className="text-xs text-muted-foreground">{new Date(claim.approved_at).toLocaleString()}</div>
@@ -110,8 +107,8 @@ export default function ClaimsShow({ claim }: any) {
               )}
               {claim.status === "rejected" && (
                 <li className="px-4 py-3 flex items-start gap-3">
-                  <XCircle className="h-4 w-4 text-destructive mt-0.5" />
-                  <div className="text-sm">
+                  <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                  <div className="text-sm min-w-0">
                     <div className="font-medium text-destructive">Rejected</div>
                     <div className="text-xs text-muted-foreground">{new Date(claim.rejected_at).toLocaleString()}</div>
                     {claim.rejection_reason && <div className="text-xs text-muted-foreground mt-0.5">Reason: "{claim.rejection_reason}"</div>}
@@ -129,7 +126,7 @@ export default function ClaimsShow({ claim }: any) {
             {canDecide && (
               <>
                 <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Optional comment" rows={3} />
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button className="flex-1" onClick={() => decide("approved")}><CheckCircle2 className="h-4 w-4 mr-1" /> Approve</Button>
                   <Button className="flex-1" variant="destructive" onClick={() => decide("rejected")}><XCircle className="h-4 w-4 mr-1" /> Reject</Button>
                 </div>

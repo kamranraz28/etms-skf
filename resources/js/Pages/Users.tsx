@@ -12,14 +12,14 @@ export default function Users({ rows }: any) {
     <AppShell>
       <Head title="Users & roles" />
       <PageHeader title="Users & roles" description="Promote users between Admin, Procurement, Approver, and Vendor roles." />
-      <div className="panel">
+      <div className="panel overflow-x-auto">
         <table className="data-table">
           <thead><tr><th>User</th><th>Email</th><th>Roles</th></tr></thead>
           <tbody>
             {rows.map((u: any) => (
               <tr key={u.id}>
-                <td className="font-medium">{u.full_name}</td>
-                <td className="text-xs text-muted-foreground">{u.email}</td>
+                <td className="font-medium whitespace-nowrap">{u.full_name}</td>
+                <td className="text-xs text-muted-foreground whitespace-nowrap">{u.email}</td>
                 <td>
                   <div className="flex flex-wrap gap-1.5">
                     {ALL.map((r) => {

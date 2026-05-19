@@ -13,7 +13,6 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState(() => { const d = new Date(); d.setDate(d.getDate()+7); return d.toISOString().slice(0,16); });
-  // per-item category selections: { [itemIndex]: Set<categoryId> }
   const [itemCategoryMap, setItemCategoryMap] = useState<Record<number, Set<string>>>({});
   const [saving, setSaving] = useState(false);
 
@@ -21,11 +20,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
   const items: any[] = selectedPr?.items ?? [];
 
   useEffect(() => { if (prId && !title) { const pr = prs.find((p: any) => p.id === prId); if (pr) setTitle(pr.title); } }, [prId]);
-
-  // When PR changes, reset item selections
-  useEffect(() => {
-    setItemCategoryMap({});
-  }, [prId]);
+  useEffect(() => { setItemCategoryMap({}); }, [prId]);
 
   const toggleItemCategory = (itemIndex: number, catId: string) => {
     setItemCategoryMap(prev => {
@@ -36,38 +31,21 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
     });
   };
 
-  // aggregate all selected category IDs across all items
   const allSelectedCategoryIds = useMemo(() => {
     const ids = new Set<string>();
     Object.values(itemCategoryMap).forEach(set => set.forEach(id => ids.add(id)));
     return ids;
   }, [itemCategoryMap]);
 
-  // compute eligible vendors count (for info only)
-  const eligibleVendorCount = useMemo(() => {
-    // We don't have the vendors list anymore, but we can just show the category count
-    return allSelectedCategoryIds.size;
-  }, [allSelectedCategoryIds]);
-
   const hasSelection = Object.values(itemCategoryMap).some(s => s.size > 0);
 
   const submit = () => {
-    if (!hasSelection) { return; }
+    if (!hasSelection) return;
     setSaving(true);
     const itemCategories = Object.entries(itemCategoryMap)
       .filter(([, cats]) => cats.size > 0)
-      .map(([idx, cats]) => ({
-        item_index: Number(idx),
-        category_ids: Array.from(cats).map(Number),
-      }));
-    router.post("/app/tenders", {
-      tender_number: tenderNumber,
-      pr_id: prId,
-      title,
-      description,
-      deadline,
-      item_categories: itemCategories,
-    }, { onFinish: () => setSaving(false) });
+      .map(([idx, cats]) => ({ item_index: Number(idx), category_ids: Array.from(cats).map(Number) }));
+    router.post("/app/tenders", { tender_number: tenderNumber, pr_id: prId, title, description, deadline, item_categories: itemCategories }, { onFinish: () => setSaving(false) });
   };
 
   return (
@@ -79,9 +57,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
           {preselect_pr ? (
             <div>
               <Label>Purchase Requisition</Label>
-              <div className="text-sm font-medium py-1.5 px-1">
-                {selectedPr?.pr_number} · {selectedPr?.title}
-              </div>
+              <div className="text-sm font-medium py-1.5 px-1">{selectedPr?.pr_number} · {selectedPr?.title}</div>
             </div>
           ) : (
             <div>
@@ -93,7 +69,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
               </select>
             </div>
           )}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div><Label>Tender number</Label><Input value={tenderNumber} onChange={(e)=>setTenderNumber(e.target.value)} /></div>
             <div><Label>Submission deadline</Label><Input type="datetime-local" value={deadline} onChange={(e)=>setDeadline(e.target.value)} /></div>
           </div>
@@ -106,7 +82,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
               <div className="space-y-4">
                 {items.map((it: any, idx: number) => (
                   <div key={idx} className="border border-border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                       <div className="text-sm font-medium">Item {idx + 1}: {it.name}</div>
                       <div className="text-xs text-muted-foreground">{it.qty} × {it.unit}</div>
                     </div>
@@ -114,29 +90,16 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
                       {categories.map((cat: any) => {
                         const selected = itemCategoryMap[idx]?.has(cat.id.toString());
                         return (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => toggleItemCategory(idx, cat.id.toString())}
+                          <button key={cat.id} type="button" onClick={() => toggleItemCategory(idx, cat.id.toString())}
                             className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                              selected
-                                ? 'bg-primary text-primary-foreground border-primary'
-                                : 'bg-background border-input hover:bg-muted'
-                            }`}
-                          >
+                              selected ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-input hover:bg-muted'
+                            }`}>
                             {cat.name}
                           </button>
                         );
                       })}
-                      {categories.length === 0 && (
-                        <span className="text-xs text-muted-foreground">No categories defined. Create vendor categories first.</span>
-                      )}
+                      {categories.length === 0 && <span className="text-xs text-muted-foreground">No categories defined.</span>}
                     </div>
-                    {itemCategoryMap[idx]?.size > 0 && (
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        {itemCategoryMap[idx].size} categor{itemCategoryMap[idx].size === 1 ? 'y' : 'ies'} selected for this item
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -145,9 +108,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
 
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={()=>history.back()}>Cancel</Button>
-            <Button onClick={submit} disabled={saving || !hasSelection}>
-              {saving ? "Creating…" : "Create tender"}
-            </Button>
+            <Button onClick={submit} disabled={saving || !hasSelection}>{saving ? "Creating…" : "Create tender"}</Button>
           </div>
         </div>
 
@@ -161,7 +122,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
                 const cats = itemCategoryMap[idx];
                 return (
                   <div key={idx} className="text-sm border-b border-border pb-2">
-                    <div className="font-medium">{it.name}</div>
+                    <div className="font-medium truncate">{it.name}</div>
                     <div className="text-xs text-muted-foreground">{it.qty} {it.unit}</div>
                     {cats && cats.size > 0 ? (
                       <div className="mt-1 flex flex-wrap gap-1">
@@ -176,9 +137,6 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
                   </div>
                 );
               })}
-              <div className="text-xs text-muted-foreground pt-1">
-                {allSelectedCategoryIds.size} categor{allSelectedCategoryIds.size === 1 ? 'y' : 'ies'} selected in total
-              </div>
             </div>
           )}
         </div>

@@ -8,7 +8,7 @@ export default function MyBids({ bids }: any) {
     <AppShell>
       <Head title="My bids" />
       <PageHeader title="My bids" description="Every bid you've submitted." />
-      <div className="panel">
+      <div className="panel overflow-x-auto">
         <table className="data-table">
           <thead><tr><th>Tender #</th><th>Title</th><th className="text-right">Total</th><th>Currency</th><th>Submitted</th><th>Tender</th><th>CS result</th></tr></thead>
           <tbody>
@@ -18,13 +18,13 @@ export default function MyBids({ bids }: any) {
               const csApproved = ci?.cs?.status === "approved";
               return (
                 <tr key={b.id}>
-                  <td className="font-mono text-xs">{b.tender?.tender_number}</td>
-                  <td>{b.tender?.title}</td>
-                  <td className="text-right font-mono">{Number(b.total_price).toLocaleString()}</td>
-                  <td className="text-xs">{b.currency}</td>
-                  <td className="text-xs text-muted-foreground">{new Date(b.submitted_at).toLocaleString()}</td>
+                  <td className="font-mono text-xs whitespace-nowrap">{b.tender?.tender_number}</td>
+                  <td className="min-w-0 max-w-[200px] truncate">{b.tender?.title}</td>
+                  <td className="text-right font-mono whitespace-nowrap">{Number(b.total_price).toLocaleString()}</td>
+                  <td className="text-xs whitespace-nowrap">{b.currency}</td>
+                  <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(b.submitted_at).toLocaleString()}</td>
                   <td>{b.tender?.status && <StatusBadge status={b.tender.status} />}</td>
-                  <td>
+                  <td className="whitespace-nowrap">
                     {!ci ? <span className="text-xs text-muted-foreground">—</span>
                       : !csApproved ? <span className="text-xs text-muted-foreground">CS {ci.cs?.status}</span>
                       : ci.selected ? <StatusBadge status="selected" /> : <StatusBadge status="not_selected" />}

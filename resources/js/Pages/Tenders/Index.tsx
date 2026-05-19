@@ -1,48 +1,45 @@
-import { Link, router, Head } from "@inertiajs/react";
+import { Link, Head } from "@inertiajs/react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
-import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Lock } from "lucide-react";
+import { Plus } from "lucide-react";
 
-export default function TendersIndex({ tenders }: any) {
-  const closeTender = (t: any) => router.post(`/app/tenders/${t.id}/close`);
+export default function TenderIndex({ tenders }: any) {
   return (
     <AppShell>
       <Head title="Tenders" />
-      <PageHeader title="Tenders" description="Tenders generated from PRs. Vendors invited here submit bids before the deadline."
-        actions={<Link href="/app/tenders/new"><Button>New tender</Button></Link>} />
-      <div className="panel">
-        <table className="data-table">
-          <thead>
-            <tr><th>Tender #</th><th>Title</th><th>From PR</th><th>Deadline</th><th>Vendors</th><th>Bids</th><th>Status</th><th className="text-right">Actions</th></tr>
-          </thead>
-          <tbody>
-            {tenders.length === 0 && (
-              <tr><td colSpan={8} className="text-center text-muted-foreground py-8">No tenders yet. Create one from a PR.</td></tr>
-            )}
-            {tenders.map((t: any) => {
-              const past = new Date(t.deadline) < new Date();
-              return (
-                <tr key={t.id}>
-                  <td className="font-mono text-xs">{t.tender_number}</td>
-                  <td className="font-medium">{t.title}</td>
-                  <td className="font-mono text-xs">{t.pr?.pr_number ?? "—"}</td>
-                  <td className="text-xs">{new Date(t.deadline).toLocaleString()}{past && t.status==="open" && <span className="ml-2 text-warning">(deadline passed)</span>}</td>
-                  <td>{t.vendor_count}</td>
-                  <td>{t.bid_count}</td>
-                  <td><StatusBadge status={t.status} /></td>
-                  <td className="text-right">
-                    <div className="inline-flex items-center gap-1">
-                      {t.status === "open" && <Button size="sm" variant="ghost" onClick={()=>closeTender(t)}><Lock className="h-4 w-4" /></Button>}
-                      <Link href={`/app/tenders/${t.id}`}><Button size="sm" variant="outline">Open <ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button></Link>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <PageHeader
+        title="Tenders"
+        description="All tenders created from Purchase Requisitions."
+        actions={<Link href="/app/tenders/new"><Button><Plus className="h-4 w-4 mr-1" /> New tender</Button></Link>}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {tenders.length === 0 && (
+          <div className="sm:col-span-2 lg:col-span-3 text-center text-muted-foreground py-12">No tenders created yet.</div>
+        )}
+        {tenders.map((t: any) => (
+          <Link key={t.id} href={`/app/tenders/${t.id}`} className="panel hover:border-accent/50 transition-colors block">
+            <div className="p-4 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-xs text-muted-foreground">{t.tender_number}</span>
+                <span className={`text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full ${
+                  t.status === "open" ? "bg-info/10 text-info" :
+                  t.status === "closed" ? "bg-muted text-muted-foreground" :
+                  "bg-success/10 text-success"
+                }`}>
+                  {t.status === "awarded" ? "Awarded" : t.status}
+                </span>
+              </div>
+              <div className="font-medium text-sm line-clamp-2">{t.title}</div>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span>{t.vendor_count} vendor{t.vendor_count !== 1 ? "s" : ""}</span>
+                <span>·</span>
+                <span>{t.bid_count} bid{t.bid_count !== 1 ? "s" : ""}</span>
+              </div>
+              <div className="text-[10px] text-muted-foreground">{t.pr?.pr_number ?? "—"}</div>
+            </div>
+          </Link>
+        ))}
       </div>
     </AppShell>
   );

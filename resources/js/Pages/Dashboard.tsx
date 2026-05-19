@@ -18,7 +18,7 @@ export default function Dashboard({ stats, recentTenders, recentVendors }: any) 
           title={`Welcome${fullName ? `, ${fullName}` : ""}`}
           description="Submit your registration and respond to tenders you've been invited to."
         />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           <Link href="/app/profile" className="stat-card hover:border-accent/50 transition-colors">
             <span className="label">Vendor profile</span><span className="value">Manage</span>
             <span className="text-xs text-muted-foreground">Complete your profile to be selected.</span>
@@ -50,10 +50,10 @@ export default function Dashboard({ stats, recentTenders, recentVendors }: any) 
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <div className="panel">
+        <div className="panel overflow-x-auto">
           <div className="panel-header">
             <div className="panel-title flex items-center gap-2"><Gavel className="h-4 w-4" /> Recent tenders</div>
-            <Link href="/app/tenders" className="text-xs text-accent hover:underline">View all</Link>
+            <Link href="/app/tenders" className="text-xs text-accent hover:underline shrink-0">View all</Link>
           </div>
           <table className="data-table">
             <thead><tr><th>Number</th><th>Title</th><th>Deadline</th><th>Status</th></tr></thead>
@@ -63,9 +63,9 @@ export default function Dashboard({ stats, recentTenders, recentVendors }: any) 
               )}
               {recentTenders.map((t: any) => (
                 <tr key={t.id}>
-                  <td className="font-mono text-xs">{t.tender_number}</td>
-                  <td>{t.title}</td>
-                  <td className="text-xs text-muted-foreground">{new Date(t.deadline).toLocaleDateString()}</td>
+                  <td className="font-mono text-xs whitespace-nowrap">{t.tender_number}</td>
+                  <td className="min-w-0 max-w-[200px] truncate">{t.title}</td>
+                  <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(t.deadline).toLocaleDateString()}</td>
                   <td><StatusBadge status={t.status} /></td>
                 </tr>
               ))}
@@ -73,10 +73,10 @@ export default function Dashboard({ stats, recentTenders, recentVendors }: any) 
           </table>
         </div>
 
-        <div className="panel">
+        <div className="panel overflow-x-auto">
           <div className="panel-header">
             <div className="panel-title flex items-center gap-2"><Building2 className="h-4 w-4" /> Recent vendors</div>
-            <Link href="/app/vendors" className="text-xs text-accent hover:underline">View all</Link>
+            <Link href="/app/vendors" className="text-xs text-accent hover:underline shrink-0">View all</Link>
           </div>
           <table className="data-table">
             <thead><tr><th>Name</th><th>ERP code</th><th>Status</th></tr></thead>
@@ -86,8 +86,8 @@ export default function Dashboard({ stats, recentTenders, recentVendors }: any) 
               )}
               {recentVendors.map((v: any) => (
                 <tr key={v.id}>
-                  <td><div>{v.name}</div><div className="text-xs text-muted-foreground">{v.email}</div></td>
-                  <td className="font-mono text-xs">{v.erp_code ?? <span className="text-muted-foreground">—</span>}</td>
+                  <td><div className="font-medium truncate max-w-[150px]">{v.name}</div><div className="text-xs text-muted-foreground truncate max-w-[150px]">{v.email}</div></td>
+                  <td className="font-mono text-xs whitespace-nowrap">{v.erp_code ?? <span className="text-muted-foreground">—</span>}</td>
                   <td><StatusBadge status={v.status} /></td>
                 </tr>
               ))}
