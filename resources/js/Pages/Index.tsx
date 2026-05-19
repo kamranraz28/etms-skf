@@ -1,12 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Head, Link } from "@inertiajs/react";
-import {
-  ArrowRight,
-  Building2,
-  FileStack,
-  Gavel,
-  ShieldCheck,
-} from "lucide-react";
+import { Building2, FileStack, Gavel, ShieldCheck } from "lucide-react";
 
 export default function Index() {
   return (
@@ -26,18 +20,11 @@ export default function Index() {
                 </div>
               </div>
             </Link>
-            <div className="flex items-center gap-2">
-              <Link href="/auth">
-                <Button variant="ghost" size="sm">
-                  Sign in
-                </Button>
-              </Link>
-              <Link href="/auth">
-                <Button size="sm">
-                  Get started <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                </Button>
-              </Link>
-            </div>
+            <Link href="/auth">
+              <Button variant="ghost" size="sm">
+                Sign in
+              </Button>
+            </Link>
           </div>
         </header>
 
@@ -45,23 +32,11 @@ export default function Index() {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-muted px-2 py-0.5 text-xs uppercase tracking-wider text-muted-foreground mb-4">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              ERP-integrated · Production-ready foundation
+              Eskayef Pharmaceuticals Ltd.
             </div>
             <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground leading-tight">
               E-Tender & Vendor Management
             </h1>
-            <div className="mt-6 flex gap-3">
-              <Link href="/auth">
-                <Button size="lg">
-                  Open the workspace <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/auth">
-                <Button size="lg" variant="outline">
-                  Vendor self-registration
-                </Button>
-              </Link>
-            </div>
           </div>
         </section>
 
