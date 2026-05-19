@@ -9,7 +9,7 @@ return new class extends Migration {
             $t->unsignedBigInteger('tender_id');
             $t->unsignedBigInteger('vendor_id');
             $t->decimal('total_price', 14, 2);
-            $t->string('currency', 8)->default('INR');
+            $t->string('currency', 8)->default('BDT');
             $t->json('item_prices')->nullable();
             $t->text('notes')->nullable();
             $t->string('document_path')->nullable();

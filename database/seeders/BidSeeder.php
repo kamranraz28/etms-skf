@@ -30,7 +30,7 @@ class BidSeeder extends Seeder
             }
             Bid::updateOrCreate(
                 ['tender_id' => $tender->id, 'vendor_id' => $v->id],
-                ['total_price' => $total, 'currency' => 'INR', 'item_prices' => $rows, 'submitted_at' => now()]
+                ['total_price' => $total, 'currency' => 'BDT', 'item_prices' => $rows, 'submitted_at' => now()]
             );
         }
     }

@@ -64,7 +64,7 @@ class BidController extends Controller {
             'tender_id' => $tender->id,
             'vendor_id' => $vendor->id,
             'total_price' => $total,
-            'currency' => 'INR',
+            'currency' => 'BDT',
             'item_prices' => $data['item_prices'],
             'notes' => $data['notes'] ?? null,
             'document_path' => $path,
