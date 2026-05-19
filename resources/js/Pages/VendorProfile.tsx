@@ -15,8 +15,15 @@ export default function VendorProfile({ vendor }: any) {
     phone: vendor?.phone ?? "",
     notes: vendor?.notes ?? "",
   });
+  const [pw, setPw] = useState({ current_password: "", new_password: "", new_password_confirmation: "" });
+  const [pwOpen, setPwOpen] = useState(false);
   const locked = vendor && vendor.status !== "pending";
   const save = () => router.post("/app/profile", form);
+  const changePw = () => {
+    router.post("/app/profile/password", pw, {
+      onSuccess: () => { setPw({ current_password: "", new_password: "", new_password_confirmation: "" }); setPwOpen(false); },
+    });
+  };
 
   return (
     <AppShell>
@@ -46,6 +53,41 @@ export default function VendorProfile({ vendor }: any) {
             </div>
           )}
         </div>
+
+        {vendor && (
+          <div className="panel p-5 mt-6 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="panel-title mb-0">Password</div>
+              <Button variant="outline" size="sm" onClick={() => setPwOpen(!pwOpen)}>
+                {pwOpen ? "Cancel" : "Change password"}
+              </Button>
+            </div>
+            {pwOpen && (
+              <div className="space-y-3 pt-2">
+                <div>
+                  <Label>Current password</Label>
+                  <Input type="password" value={pw.current_password}
+                    onChange={(e) => setPw({...pw, current_password: e.target.value})} />
+                </div>
+                <div>
+                  <Label>New password</Label>
+                  <Input type="password" value={pw.new_password}
+                    onChange={(e) => setPw({...pw, new_password: e.target.value})} />
+                </div>
+                <div>
+                  <Label>Confirm new password</Label>
+                  <Input type="password" value={pw.new_password_confirmation}
+                    onChange={(e) => setPw({...pw, new_password_confirmation: e.target.value})} />
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={changePw} disabled={!pw.current_password || !pw.new_password || !pw.new_password_confirmation}>
+                    Update password
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </AppShell>
   );

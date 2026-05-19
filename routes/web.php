@@ -75,6 +75,7 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
     Route::middleware('role:vendor')->group(function () {
         Route::get('/profile', [VendorProfileController::class, 'show'])->name('profile.show');
         Route::post('/profile', [VendorProfileController::class, 'save'])->name('profile.save');
+        Route::post('/profile/password', [VendorProfileController::class, 'changePassword'])->name('profile.password');
         Route::get('/my-tenders', [BidController::class, 'myTenders'])->name('my-tenders');
         Route::get('/my-tenders/{tender}/bid', [BidController::class, 'create'])->name('bids.create');
         Route::post('/my-tenders/{tender}/bid', [BidController::class, 'store'])->name('bids.store');
