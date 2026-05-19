@@ -32,7 +32,7 @@ export default function Index() {
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white text-[#0a2942] border-white hover:bg-gray-100"
+                className="bg-white text-[#0a2942] border-white hover:bg-[#0a2942] hover:text-white"
               >
                 Sign in
               </Button>
