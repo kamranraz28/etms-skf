@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Events\CsApprovedByApprover;
 use App\Models\Cs;
 use App\Models\CsApproval;
 use App\Models\CsItemSelection;
@@ -76,6 +77,7 @@ class CsController extends Controller {
         $up = ['status' => $next];
         if ($next === 'approved') $up['approved_at'] = now();
         $cs->update($up);
+        if ($next === 'approved') CsApprovedByApprover::dispatch($cs);
         return back()->with('success', "CS {$data['decision']}");
     }
 
