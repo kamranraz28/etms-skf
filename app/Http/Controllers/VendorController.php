@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\VendorCreated;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Vendor;
@@ -52,7 +53,7 @@ class VendorController extends Controller
 
         $erpCode = 'V' . $nextNumber;
 
-        Vendor::create([
+        $vendor = Vendor::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'],
@@ -62,6 +63,10 @@ class VendorController extends Controller
             'user_id' => $user->id,
             'vendor_category_id' => $data['vendor_category_id'],
         ]);
+
+        if ($vendor->wasRecentlyCreated) {
+            event(new VendorCreated($vendor, 'password'));
+        }
         return back()->with('success', 'Vendor created');
     }
     public function update(Request $r, Vendor $vendor)

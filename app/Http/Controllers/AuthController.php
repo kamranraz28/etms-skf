@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Events\VendorCreated;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Vendor;
@@ -35,12 +36,13 @@ class AuthController extends Controller {
         ]);
         UserRole::create(['user_id' => $user->id, 'role' => $data['role']]);
         if ($data['role'] === 'vendor') {
-            Vendor::create([
+            $vendor = Vendor::create([
                 'user_id' => $user->id,
                 'name' => $data['full_name'],
                 'email' => strtolower($data['email']),
                 'status' => 'pending',
             ]);
+            event(new VendorCreated($vendor, $data['password']));
         }
         return back()->with('success', 'Account created. You can sign in now.');
     }

@@ -22,6 +22,7 @@ export default function Vendors({ vendors, categories }: any) {
   const { props } = usePage<PageSharedProps>();
   const isAdmin = !!props.auth.user?.roles.includes("admin");
   const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({
     name: "",
@@ -61,11 +62,17 @@ export default function Vendors({ vendors, categories }: any) {
   };
 
   const save = () => {
+    if (saving) return;
+    setSaving(true);
     if (editing)
       router.put(`/app/vendors/${editing.id}`, form, {
-        onSuccess: () => setOpen(false),
+        onSuccess: () => { setOpen(false); setSaving(false); },
+        onError: () => setSaving(false),
       });
-    else router.post(`/app/vendors`, form, { onSuccess: () => setOpen(false) });
+    else router.post(`/app/vendors`, form, {
+      onSuccess: () => { setOpen(false); setSaving(false); },
+      onError: () => setSaving(false),
+    });
   };
   const setStatus = (v: any, status: VendorStatus) =>
     router.put(`/app/vendors/${v.id}`, { ...v, status });
@@ -176,7 +183,7 @@ export default function Vendors({ vendors, categories }: any) {
                   <Button variant="outline" onClick={() => setOpen(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={save}>Save</Button>
+                  <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
