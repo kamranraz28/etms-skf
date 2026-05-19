@@ -17,5 +17,15 @@ class Tender extends Model
     public function vendors() { return $this->belongsToMany(Vendor::class, 'tender_vendors'); }
     public function bids() { return $this->hasMany(Bid::class); }
     public function cs() { return $this->hasOne(Cs::class); }
+    public function itemCategories() { return $this->hasMany(TenderItemCategory::class); }
+
+    public function itemCategoryIds(): array
+    {
+        $map = [];
+        foreach ($this->itemCategories as $ic) {
+            $map[$ic->item_index][] = $ic->vendor_category_id;
+        }
+        return $map;
+    }
 
 }

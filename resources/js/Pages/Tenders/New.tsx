@@ -6,73 +6,74 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 
-export default function TenderNew({ prs, vendors, categories, preselect_pr }: any) {
+export default function TenderNew({ prs, categories, preselect_pr }: any) {
   const [prId, setPrId] = useState(preselect_pr ?? "");
   const [tenderNumber, setTenderNumber] = useState(`TND-${new Date().getFullYear()}-${Math.floor(100+Math.random()*900)}`);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState(() => { const d = new Date(); d.setDate(d.getDate()+7); return d.toISOString().slice(0,16); });
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
+  // per-item category selections: { [itemIndex]: Set<categoryId> }
+  const [itemCategoryMap, setItemCategoryMap] = useState<Record<number, Set<string>>>({});
   const [saving, setSaving] = useState(false);
+
+  const selectedPr = useMemo(() => prs.find((p: any) => p.id.toString() === prId.toString()), [prId, prs]);
+  const items: any[] = selectedPr?.items ?? [];
 
   useEffect(() => { if (prId && !title) { const pr = prs.find((p: any) => p.id === prId); if (pr) setTitle(pr.title); } }, [prId]);
 
-  // Get vendor IDs from selected categories
-  const categoryVendorIds = useMemo(() => {
-    if (selectedCategories.size === 0) return new Set<string>();
-    const catIds = Array.from(selectedCategories);
-    return new Set(vendors.filter((v: any) => v.vendor_category_id && catIds.includes(v.vendor_category_id.toString())).map((v: any) => v.id));
-  }, [selectedCategories, vendors]);
+  // When PR changes, reset item selections
+  useEffect(() => {
+    setItemCategoryMap({});
+  }, [prId]);
 
-  // All selected vendors (individual + from categories)
-  const allSelected = useMemo(() => {
-    const combined = new Set(selected);
-    categoryVendorIds.forEach((id) => combined.add(id));
-    return combined;
-  }, [selected, categoryVendorIds]);
-
-  // Vendors from categories (not individually selected)
-  const categorySelectedVendors = useMemo(() => {
-    return new Set([...categoryVendorIds].filter(id => !selected.has(id)));
-  }, [categoryVendorIds, selected]);
-
-  const eligible = useMemo(() => vendors.filter((v: any) => v.status === "active"), [vendors]);
-  const others = useMemo(() => vendors.filter((v: any) => v.status !== "active"), [vendors]);
-
-  const toggle = (id: string) => {
-    // Don't allow toggling vendors that are selected via category
-    if (categorySelectedVendors.has(id)) return;
-    const n = new Set(selected);
-    n.has(id) ? n.delete(id) : n.add(id);
-    setSelected(n);
+  const toggleItemCategory = (itemIndex: number, catId: string) => {
+    setItemCategoryMap(prev => {
+      const current = prev[itemIndex] ?? new Set<string>();
+      const next = new Set(current);
+      next.has(catId) ? next.delete(catId) : next.add(catId);
+      return { ...prev, [itemIndex]: next };
+    });
   };
 
-  const toggleCategory = (catId: string) => {
-    const n = new Set(selectedCategories);
-    n.has(catId) ? n.delete(catId) : n.add(catId);
-    setSelectedCategories(n);
-  };
+  // aggregate all selected category IDs across all items
+  const allSelectedCategoryIds = useMemo(() => {
+    const ids = new Set<string>();
+    Object.values(itemCategoryMap).forEach(set => set.forEach(id => ids.add(id)));
+    return ids;
+  }, [itemCategoryMap]);
+
+  // compute eligible vendors count (for info only)
+  const eligibleVendorCount = useMemo(() => {
+    // We don't have the vendors list anymore, but we can just show the category count
+    return allSelectedCategoryIds.size;
+  }, [allSelectedCategoryIds]);
+
+  const hasSelection = Object.values(itemCategoryMap).some(s => s.size > 0);
 
   const submit = () => {
+    if (!hasSelection) { return; }
     setSaving(true);
+    const itemCategories = Object.entries(itemCategoryMap)
+      .filter(([, cats]) => cats.size > 0)
+      .map(([idx, cats]) => ({
+        item_index: Number(idx),
+        category_ids: Array.from(cats).map(Number),
+      }));
     router.post("/app/tenders", {
       tender_number: tenderNumber,
       pr_id: prId,
       title,
       description,
       deadline,
-      vendor_ids: Array.from(allSelected),
-      vendor_category_ids: Array.from(selectedCategories),
+      item_categories: itemCategories,
     }, { onFinish: () => setSaving(false) });
   };
 
   return (
     <AppShell>
       <Head title="Create tender" />
-      <PageHeader title="Create tender" description="Convert a PR into a tender and invite eligible vendors." />
+      <PageHeader title="Create tender" description="Convert a PR into a tender and invite vendor categories per item." />
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 panel p-5 space-y-4">
           <div>
@@ -89,68 +90,88 @@ export default function TenderNew({ prs, vendors, categories, preselect_pr }: an
           </div>
           <div><Label>Title</Label><Input value={title} onChange={(e)=>setTitle(e.target.value)} /></div>
           <div><Label>Description / scope</Label><Textarea rows={4} value={description} onChange={(e)=>setDescription(e.target.value)} /></div>
+
+          {items.length > 0 && (
+            <div>
+              <div className="panel-title mb-3">Item-wise vendor category selection</div>
+              <div className="space-y-4">
+                {items.map((it: any, idx: number) => (
+                  <div key={idx} className="border border-border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-sm font-medium">Item {idx + 1}: {it.name}</div>
+                      <div className="text-xs text-muted-foreground">{it.qty} × {it.unit}</div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((cat: any) => {
+                        const selected = itemCategoryMap[idx]?.has(cat.id.toString());
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => toggleItemCategory(idx, cat.id.toString())}
+                            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                              selected
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-background border-input hover:bg-muted'
+                            }`}
+                          >
+                            {cat.name}
+                          </button>
+                        );
+                      })}
+                      {categories.length === 0 && (
+                        <span className="text-xs text-muted-foreground">No categories defined. Create vendor categories first.</span>
+                      )}
+                    </div>
+                    {itemCategoryMap[idx]?.size > 0 && (
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {itemCategoryMap[idx].size} categor{itemCategoryMap[idx].size === 1 ? 'y' : 'ies'} selected for this item
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={()=>history.back()}>Cancel</Button>
-            <Button onClick={submit} disabled={saving}>{saving?"Creating…":"Create tender"}</Button>
+            <Button onClick={submit} disabled={saving || !hasSelection}>
+              {saving ? "Creating…" : "Create tender"}
+            </Button>
           </div>
         </div>
 
-        <div className="panel">
-          <div className="panel-header"><div className="panel-title">Invite vendors</div><div className="text-xs text-muted-foreground">{allSelected.size} selected</div></div>
-          <div className="max-h-[480px] overflow-y-auto">
-            {/* Category Selection */}
-            {categories && categories.length > 0 && (
-              <div className="px-4 py-3 border-b border-border bg-muted/20">
-                <div className="text-xs font-medium text-muted-foreground mb-2">Select by category</div>
-                <div className="flex flex-wrap gap-2">
-                  {categories.map((cat: any) => (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => toggleCategory(cat.id.toString())}
-                      className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-                        selectedCategories.has(cat.id.toString())
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-background border-input hover:bg-muted'
-                      }`}
-                    >
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {eligible.length === 0 && <div className="p-4 text-sm text-muted-foreground">No active vendors. Activate vendors first.</div>}
-            {eligible.map((v: any) => {
-              const isFromCategory = categorySelectedVendors.has(v.id);
-              return (
-                <label key={v.id} className={`flex items-start gap-3 px-4 py-2.5 border-b border-border hover:bg-muted/50 ${isFromCategory ? 'cursor-default opacity-60' : 'cursor-pointer'}`}>
-                  <Checkbox
-                    checked={allSelected.has(v.id)}
-                    onCheckedChange={()=>toggle(v.id)}
-                    disabled={isFromCategory}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{v.name}</div>
-                    <div className="text-xs text-muted-foreground truncate">{v.email}</div>
-                    <div className="text-[10px] mt-0.5">
-                      {v.erp_code ? <span className="text-success">ERP: {v.erp_code}</span> : <span className="text-warning">No ERP code · cannot be awarded</span>}
-                      {isFromCategory && <span className="ml-2 text-muted-foreground">(from category)</span>}
-                    </div>
+        <div className="panel p-4 h-fit">
+          <div className="panel-title mb-3">Invitation summary</div>
+          {!prId && <p className="text-sm text-muted-foreground">Select a PR to get started.</p>}
+          {prId && items.length === 0 && <p className="text-sm text-muted-foreground">No items in this PR.</p>}
+          {items.length > 0 && (
+            <div className="space-y-3">
+              {items.map((it: any, idx: number) => {
+                const cats = itemCategoryMap[idx];
+                return (
+                  <div key={idx} className="text-sm border-b border-border pb-2">
+                    <div className="font-medium">{it.name}</div>
+                    <div className="text-xs text-muted-foreground">{it.qty} {it.unit}</div>
+                    {cats && cats.size > 0 ? (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {Array.from(cats).map(cid => {
+                          const cat = categories.find((c: any) => c.id.toString() === cid);
+                          return <span key={cid} className="text-[10px] bg-muted px-2 py-0.5 rounded-full">{cat?.name ?? cid}</span>;
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-[10px] text-warning mt-1">No categories selected</div>
+                    )}
                   </div>
-                </label>
-              );
-            })}
-            {others.length > 0 && (
-              <div className="px-4 py-2 text-[10px] uppercase tracking-wider text-muted-foreground bg-muted/40 border-y">Inactive / pending ({others.length})</div>
-            )}
-            {others.map((v: any) => (
-              <div key={v.id} className="flex items-center gap-3 px-4 py-2 text-xs text-muted-foreground border-b border-border">
-                <span className="h-4 w-4" /><span className="flex-1 truncate">{v.name}</span><span className="capitalize">{v.status}</span>
+                );
+              })}
+              <div className="text-xs text-muted-foreground pt-1">
+                {allSelectedCategoryIds.size} categor{allSelectedCategoryIds.size === 1 ? 'y' : 'ies'} selected in total
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </AppShell>

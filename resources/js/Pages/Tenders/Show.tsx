@@ -131,16 +131,33 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
                     <th>Item</th>
                     <th>Qty</th>
                     <th>Unit</th>
+                    <th>Invited categories</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {(tender.pr.items ?? []).map((it: any, i: number) => (
-                    <tr key={i}>
-                      <td>{it.name}</td>
-                      <td>{it.qty}</td>
-                      <td>{it.unit}</td>
-                    </tr>
-                  ))}
+                  {(tender.pr.items ?? []).map((it: any, i: number) => {
+                    const cats = (tender.item_categories ?? []).filter((ic: any) => ic.item_index === i);
+                    return (
+                      <tr key={i}>
+                        <td>{it.name}</td>
+                        <td>{it.qty}</td>
+                        <td>{it.unit}</td>
+                        <td>
+                          {cats.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {cats.map((ic: any) => (
+                                <span key={ic.id} className="text-[10px] bg-muted px-2 py-0.5 rounded-full">
+                                  {ic.vendor_category?.name ?? 'Category #'+ic.vendor_category_id}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -161,6 +178,11 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
                   <div className="text-xs text-muted-foreground">{v.email}</div>
                   <div className="mt-1 flex items-center gap-2">
                     <StatusBadge status={v.status} />
+                    {v.vendor_category_id && (
+                      <span className="text-[10px] bg-muted px-2 py-0.5 rounded-full">
+                        {v.vendor_category?.name ?? ''}
+                      </span>
+                    )}
                     {v.erp_code ? (
                       <span className="text-[10px] font-mono text-muted-foreground">
                         ERP: {v.erp_code}

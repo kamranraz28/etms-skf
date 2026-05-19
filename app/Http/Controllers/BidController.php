@@ -33,8 +33,8 @@ class BidController extends Controller {
     }
 
     public function create(Request $r, Tender $tender) {
-        $vendor = Vendor::where('user_id', $r->user()->id)->first();
-        $tender->load('pr');
+        $vendor = Vendor::with('vendorCategory:id,name')->where('user_id', $r->user()->id)->first();
+        $tender->load('pr', 'itemCategories.vendorCategory');
         return Inertia::render('SubmitBid', compact('tender', 'vendor'));
     }
 
@@ -52,6 +52,27 @@ class BidController extends Controller {
             'notes' => 'nullable|string',
             'document' => 'nullable|file|mimes:pdf|max:10240',
         ]);
+
+        // Validate vendor can only bid on items their category is invited to
+        $tender->load('itemCategories');
+        $prItems = $tender->pr->items ?? [];
+        $itemCatMap = [];
+        foreach ($tender->itemCategories as $ic) {
+            $itemCatMap[$ic->item_index][] = $ic->vendor_category_id;
+        }
+        foreach ($data['item_prices'] as $i => $row) {
+            $prIdx = null;
+            foreach ($prItems as $idx => $prItem) {
+                if ($prItem['name'] === $row['name']) { $prIdx = $idx; break; }
+            }
+            if ($prIdx === null) continue;
+            $allowed = $itemCatMap[$prIdx] ?? null;
+            // If there's no restriction on this item, any vendor can bid
+            if ($allowed !== null && !in_array($vendor->vendor_category_id, $allowed)) {
+                return back()->with('error', "You are not invited to bid on item: {$row['name']}");
+            }
+        }
+
         $total = 0;
         foreach ($data['item_prices'] as $row) $total += (float) $row['unit_price'] * (float) $row['qty'];
         if ($total <= 0) return back()->with('error', 'Enter prices for the items.');

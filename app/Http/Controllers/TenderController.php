@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Events\TenderCreated;
 use App\Models\Pr;
 use App\Models\Tender;
+use App\Models\TenderItemCategory;
 use App\Models\TenderVendor;
 use App\Models\Vendor;
 use App\Models\VendorCategory;
@@ -22,8 +23,7 @@ class TenderController extends Controller {
 
     public function create(Request $r) {
         return Inertia::render('Tenders/New', [
-            'prs' => Pr::orderByDesc('created_at')->get(['id','pr_number','title','status']),
-            'vendors' => Vendor::orderBy('name')->get(['id','name','email','erp_code','status','vendor_category_id']),
+            'prs' => Pr::orderByDesc('created_at')->get(['id','pr_number','title','status','items']),
             'categories' => VendorCategory::orderBy('name')->get(['id','name']),
             'preselect_pr' => $r->query('pr'),
         ]);
@@ -36,21 +36,18 @@ class TenderController extends Controller {
             'title' => 'required|string',
             'description' => 'nullable|string',
             'deadline' => 'required|date',
-            'vendor_ids' => 'nullable|array',
-            'vendor_ids.*' => 'exists:vendors,id',
-            'vendor_category_ids' => 'nullable|array',
-            'vendor_category_ids.*' => 'exists:vendor_categories,id',
+            'item_categories' => 'required|array',
+            'item_categories.*.item_index' => 'required|integer|min:0',
+            'item_categories.*.category_ids' => 'required|array|min:1',
+            'item_categories.*.category_ids.*' => 'exists:vendor_categories,id',
         ]);
 
-        // Merge vendors from individual selection and categories
-        $vendorIds = collect($data['vendor_ids'] ?? [])
-            ->merge(
-                Vendor::whereIn('vendor_category_id', $data['vendor_category_ids'] ?? [])
-                    ->pluck('id')
-            )->unique()->values()->all();
+        // Collect all vendor IDs from per-item category selections
+        $catIds = collect($data['item_categories'])->pluck('category_ids')->flatten()->unique()->values()->all();
+        $vendorIds = Vendor::whereIn('vendor_category_id', $catIds)->pluck('id')->unique()->values()->all();
 
         if (empty($vendorIds)) {
-            return back()->with('error', 'Please select vendors or categories');
+            return back()->with('error', 'Please select vendor categories for at least one item');
         }
 
         $tender = Tender::create([
@@ -62,6 +59,19 @@ class TenderController extends Controller {
             'status' => 'open',
             'created_by' => $r->user()->id,
         ]);
+
+        // Save per-item category assignments
+        foreach ($data['item_categories'] as $ic) {
+            foreach ($ic['category_ids'] as $catId) {
+                TenderItemCategory::create([
+                    'tender_id' => $tender->id,
+                    'item_index' => $ic['item_index'],
+                    'vendor_category_id' => $catId,
+                ]);
+            }
+        }
+
+        // Invite all vendors from all selected categories
         foreach ($vendorIds as $vid) {
             TenderVendor::create(['tender_id' => $tender->id, 'vendor_id' => $vid]);
         }
@@ -71,8 +81,8 @@ class TenderController extends Controller {
     }
 
     public function show(Tender $tender) {
-        $tender->load('pr');
-        $vendors = $tender->vendors()->get(['vendors.id','name','email','erp_code','status']);
+        $tender->load('pr', 'itemCategories.vendorCategory');
+        $vendors = $tender->vendors()->select(['vendors.id','name','email','erp_code','status','vendor_category_id'])->with('vendorCategory:id,name')->get();
         $bids = Bid::with('vendor:id,name,erp_code')
             ->where('tender_id', $tender->id)
             ->orderBy('total_price')->get();
