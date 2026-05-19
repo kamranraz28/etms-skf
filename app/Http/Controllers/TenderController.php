@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Events\TenderCreated;
 use App\Models\Pr;
 use App\Models\Tender;
 use App\Models\TenderVendor;
@@ -65,6 +66,7 @@ class TenderController extends Controller {
             TenderVendor::create(['tender_id' => $tender->id, 'vendor_id' => $vid]);
         }
         Pr::where('id', $data['pr_id'])->update(['status' => 'tendered']);
+        TenderCreated::dispatch($tender);
         return redirect()->route('app.tenders.show', $tender)->with('success', 'Tender created');
     }
 
