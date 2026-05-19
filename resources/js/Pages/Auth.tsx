@@ -10,14 +10,17 @@ export default function Auth() {
     <>
       <Head title="Sign in" />
       <div className="min-h-screen grid lg:grid-cols-2 bg-background">
-        <div className="hidden lg:block bg-cover bg-center" style={{ backgroundImage: "url(/images/skf.png)" }}></div>
+        <div
+          className="hidden lg:block bg-cover bg-center"
+          style={{ backgroundImage: "url(/images/skf.png)" }}
+        ></div>
 
         <div className="flex items-center justify-center p-6">
           <div className="w-full max-w-md panel p-6">
             <div className="mb-4">
               <h2 className="text-lg font-semibold">Welcome back</h2>
               <p className="text-sm text-muted-foreground">
-                Sign in to continue, or create a new account.
+                Sign in to continue.
               </p>
             </div>
 
