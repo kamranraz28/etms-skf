@@ -9,7 +9,7 @@ import { ArrowLeft, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
-export default function NewClaim({ vendor }: any) {
+export default function NewClaim({ vendor, tenders = [] }: any) {
   const sa = useSweetAlert();
   const [tenderNumber, setTenderNumber] = useState("");
   const [title, setTitle] = useState("");
@@ -65,7 +65,7 @@ export default function NewClaim({ vendor }: any) {
           <div className="panel p-5 space-y-4">
             <div className="panel-title mb-2">Claim information</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><Label>Tender number</Label><Input value={tenderNumber} onChange={(e) => setTenderNumber(e.target.value)} placeholder="e.g. TND-2026-001" /></div>
+              <div><Label>Tender</Label><select className="h-10 w-full rounded-sm border border-input bg-background px-3 text-sm" value={tenderNumber} onChange={(e) => setTenderNumber(e.target.value)}><option value="">-- Select tender --</option>{tenders.map((t: any) => (<option key={t.id} value={t.tender_number}>{t.tender_number} — {t.title}</option>))}</select></div>
               <div><Label>Claim amount (BDT)</Label><Input type="number" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
             </div>
             <div><Label>Title</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Brief title for this claim" /></div>

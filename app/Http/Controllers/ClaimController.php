@@ -39,7 +39,8 @@ class ClaimController extends Controller
     public function createClaim(Request $r)
     {
         $vendor = Vendor::where('user_id', $r->user()->id)->firstOrFail();
-        return Inertia::render('NewClaim', ['vendor' => $vendor]);
+        $tenders = $vendor->tenders()->orderByDesc('tenders.created_at')->get(['tenders.id', 'tender_number', 'title']);
+        return Inertia::render('NewClaim', ['vendor' => $vendor, 'tenders' => $tenders]);
     }
 
     public function storeClaim(Request $r)
@@ -49,8 +50,13 @@ class ClaimController extends Controller
             return back()->with('error', 'Your vendor profile is not active.');
         }
 
+        $invitedTenderNumbers = $vendor->tenders()->pluck('tender_number')->toArray();
+        if (empty($invitedTenderNumbers)) {
+            return back()->with('error', 'You have no invited tenders to claim against.');
+        }
+
         $data = $r->validate([
-            'tender_number' => 'required|string|max:255',
+            'tender_number' => 'required|string|in:' . implode(',', $invitedTenderNumbers),
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'amount' => 'required|numeric|min:0.01',

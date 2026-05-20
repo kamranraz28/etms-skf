@@ -9,7 +9,7 @@ import { ArrowLeft, CheckCircle2, XCircle, Download } from "lucide-react";
 import { PageSharedProps } from "@/lib/types";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
-export default function ClaimsShow({ claim }: any) {
+export default function ClaimsShow({ claim = {} as any }: any) {
   const { props } = usePage<PageSharedProps>();
   const primary = props.auth.user?.primary_role;
   const [comment, setComment] = useState("");
