@@ -2,13 +2,14 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: [
-    "./resources/**/*.blade.php",
-    "./resources/**/*.{js,jsx,ts,tsx}",
-  ],
+  content: ["./resources/**/*.blade.php", "./resources/**/*.{js,jsx,ts,tsx}"],
   prefix: "",
   theme: {
-    container: { center: true, padding: "1.5rem", screens: { "2xl": "1440px" } },
+    container: {
+      center: true,
+      padding: "1.5rem",
+      screens: { "2xl": "1440px" },
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
@@ -76,19 +77,69 @@ export default {
       fontFamily: {
         sans: ['"Inter"', "system-ui", "sans-serif"],
       },
+      scale: {
+        "102": "1.02",
+        "103": "1.03",
+        "105": "1.05",
+      },
       keyframes: {
-        "fade-in": { from: { opacity: "0", transform: "translateY(8px)" }, to: { opacity: "1", transform: "translateY(0)" } },
-        "fade-in-left": { from: { opacity: "0", transform: "translateX(-12px)" }, to: { opacity: "1", transform: "translateX(0)" } },
-        "fade-in-right": { from: { opacity: "0", transform: "translateX(12px)" }, to: { opacity: "1", transform: "translateX(0)" } },
-        "fade-in-up": { from: { opacity: "0", transform: "translateY(16px)" }, to: { opacity: "1", transform: "translateY(0)" } },
-        "scale-in": { from: { opacity: "0", transform: "scale(0.95)" }, to: { opacity: "1", transform: "scale(1)" } },
-        "slide-in-left": { from: { transform: "translateX(-100%)" }, to: { transform: "translateX(0)" } },
-        "slide-out-left": { from: { transform: "translateX(0)" }, to: { transform: "translateX(-100%)" } },
-        "glow-pulse": { "0%, 100%": { boxShadow: "0 0 8px hsl(var(--primary) / 0.3)" }, "50%": { boxShadow: "0 0 20px hsl(var(--primary) / 0.5)" } },
-        "shimmer": { "0%": { backgroundPosition: "-200% 0" }, "100%": { backgroundPosition: "200% 0" } },
-        "float": { "0%, 100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-4px)" } },
-        "pulse-soft": { "0%, 100%": { opacity: "1" }, "50%": { opacity: "0.6" } },
-        "spin-slow": { from: { transform: "rotate(0deg)" }, to: { transform: "rotate(360deg)" } },
+        "fade-in": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "fade-in-left": {
+          from: { opacity: "0", transform: "translateX(-12px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        "fade-in-right": {
+          from: { opacity: "0", transform: "translateX(12px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        "fade-in-up": {
+          from: { opacity: "0", transform: "translateY(16px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "scale-in": {
+          from: { opacity: "0", transform: "scale(0.95)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
+        "slide-in-left": {
+          from: { transform: "translateX(-100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        "slide-out-left": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-100%)" },
+        },
+        "glow-pulse": {
+          "0%, 100%": { boxShadow: "0 0 8px hsl(var(--primary) / 0.3)" },
+          "50%": { boxShadow: "0 0 20px hsl(var(--primary) / 0.5)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-4px)" },
+        },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.6" },
+        },
+        "spin-slow": {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" },
+        },
+        "bounce-soft": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-2px)" },
+        },
+        "pulse-ring": {
+          "0%": { boxShadow: "0 0 0 0 currentColor" },
+          "70%": { boxShadow: "0 0 0 10px rgba(255, 255, 255, 0)" },
+          "100%": { boxShadow: "0 0 0 0 rgba(255, 255, 255, 0)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
@@ -99,10 +150,12 @@ export default {
         "slide-in-left": "slide-in-left 0.3s ease-out",
         "slide-out-left": "slide-out-left 0.3s ease-in",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
-        "shimmer": "shimmer 2s linear infinite",
-        "float": "float 3s ease-in-out infinite",
+        shimmer: "shimmer 2s linear infinite",
+        float: "float 3s ease-in-out infinite",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
         "spin-slow": "spin-slow 3s linear infinite",
+        "bounce-soft": "bounce-soft 2s ease-in-out infinite",
+        "pulse-ring": "pulse-ring 2s ease-in-out infinite",
       },
     },
   },
