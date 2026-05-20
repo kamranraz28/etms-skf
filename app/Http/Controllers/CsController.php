@@ -18,6 +18,7 @@ class CsController extends Controller {
     }
 
     public function show(Cs $cs) {
+        session_write_close();
         $cs->load(['tender.pr']);
         $items = $cs->items()->with('vendor:id,name,erp_code,email')->orderBy('rank')->get();
         $selections = $cs->selections()->with('vendor:id,name,erp_code')->get();
