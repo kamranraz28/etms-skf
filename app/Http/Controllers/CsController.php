@@ -8,6 +8,7 @@ use App\Models\CsItemSelection;
 use App\Services\ErpSyncService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CsController extends Controller {
     public function index() {
@@ -79,6 +80,22 @@ class CsController extends Controller {
         $cs->update($up);
         if ($next === 'approved') CsApprovedByApprover::dispatch($cs);
         return back()->with('success', "CS {$data['decision']}");
+    }
+
+    public function downloadPdf(Cs $cs) {
+        if ($cs->status !== 'approved') {
+            return back()->with('error', 'Only approved CS can be downloaded.');
+        }
+
+        $cs->load(['tender.pr', 'approvals']);
+        $items = $cs->items()->with('vendor:id,name,erp_code,email')->orderBy('rank')->get();
+        $selections = $cs->selections()->with('vendor:id,name,erp_code')->where('selected', true)->get();
+        $prItems = $cs->tender->pr->items ?? [];
+
+        $pdf = Pdf::loadView('pdf.cs', compact('cs', 'items', 'selections', 'prItems'));
+        $filename = 'CS-' . $cs->id . '_' . ($cs->tender->tender_number ?? 'tender') . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     public function sendToErp(Cs $cs, ErpSyncService $svc) {

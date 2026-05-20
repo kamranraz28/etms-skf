@@ -4,6 +4,7 @@
   "description": "ETMS \u2014 E-Tender & Vendor Management (Laravel 12 + Inertia React TS)",
   "require": {
     "php": "^8.2",
+    "barryvdh/laravel-dompdf": "*",
     "inertiajs/inertia-laravel": "^2.0",
     "laravel/framework": "^12.0",
     "laravel/sanctum": "^4.0",

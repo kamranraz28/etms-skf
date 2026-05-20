@@ -6,7 +6,7 @@ import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSharedProps } from "@/lib/types";
 import { Head, router, usePage } from "@inertiajs/react";
-import { ArrowLeft, CheckCircle2, Send, Upload, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export default function CSShow({
@@ -398,6 +398,13 @@ export default function CSShow({
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> Pushed to ERP
                 · ref {lastErp?.response_data?.erp_reference}
               </div>
+            )}
+            {cs.status === "approved" && (
+              <a href={`/app/cs/${cs.id}/pdf`} target="_blank" rel="noopener noreferrer" className="block">
+                <Button className="w-full" variant="outline">
+                  <Download className="h-4 w-4 mr-1" /> Download CS (PDF)
+                </Button>
+              </a>
             )}
             {cs.status === "rejected" && (
               <p className="text-xs text-destructive">This CS was rejected.</p>

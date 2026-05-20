@@ -59,6 +59,7 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::post('/cs/{cs}/submit', [CsController::class, 'submit'])->name('cs.submit');
         Route::post('/cs/{cs}/decide', [CsController::class, 'decide'])->name('cs.decide');
         Route::post('/cs/{cs}/erp', [CsController::class, 'sendToErp'])->name('cs.erp');
+        Route::get('/cs/{cs}/pdf', [CsController::class, 'downloadPdf'])->name('cs.pdf');
 
         // Claims (staff) — index only, parameterized routes come later
         Route::get('/claims', [ClaimController::class, 'index'])->name('claims.index');
