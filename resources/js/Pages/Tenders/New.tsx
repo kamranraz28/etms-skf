@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 export default function TenderNew({ prs, categories, preselect_pr }: any) {
+  const sa = useSweetAlert();
   const [prId, setPrId] = useState(preselect_pr ?? "");
   const [tenderNumber, setTenderNumber] = useState(`TND-${new Date().getFullYear()}-${Math.floor(100+Math.random()*900)}`);
   const [title, setTitle] = useState("");
@@ -45,7 +47,10 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
     const itemCategories = Object.entries(itemCategoryMap)
       .filter(([, cats]) => cats.size > 0)
       .map(([idx, cats]) => ({ item_index: Number(idx), category_ids: Array.from(cats).map(Number) }));
-    router.post("/app/tenders", { tender_number: tenderNumber, pr_id: prId, title, description, deadline, item_categories: itemCategories }, { onFinish: () => setSaving(false) });
+    router.post("/app/tenders", { tender_number: tenderNumber, pr_id: prId, title, description, deadline, item_categories: itemCategories }, {
+      onSuccess: () => { sa.alert("Tender created", "Tender has been created successfully.", "success"); setSaving(false); },
+      onError: () => setSaving(false),
+    });
   };
 
   return (
@@ -141,6 +146,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
           )}
         </div>
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

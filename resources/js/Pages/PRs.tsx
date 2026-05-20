@@ -7,22 +7,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, RefreshCw, ChevronRight, Trash2 } from "lucide-react";
 
 export default function PRs({ prs }: any) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ pr_number: "", title: "", department: "", requested_by: "", items: "" });
+  const sa = useSweetAlert();
 
-  const sync = () => router.post("/app/prs/sync");
-  const createManual = () => {
+  const sync = async () => {
+    const ok = await sa.confirmAction("Sync from ERP?", "Fetch latest purchase requisitions from the ERP system.", "Sync");
+    if (!ok) return;
+    router.post("/app/prs/sync", {}, { onSuccess: () => sa.alert("PRs synced", "Latest purchase requisitions have been synced.", "success") });
+  };
+  const createManual = async () => {
+    const ok = await sa.confirmAction("Create PR?", `Create PR "${form.pr_number}"?`, "Create");
+    if (!ok) return;
     const items = form.items.split("\n").map((l) => l.trim()).filter(Boolean).map((line) => {
       const [name, qty, unit] = line.split("|").map((s) => s.trim());
       return { name, qty: Number(qty || 1), unit: unit || "pcs" };
     });
-    router.post("/app/prs", { ...form, items }, { onSuccess: () => { setOpen(false); setForm({ pr_number:"",title:"",department:"",requested_by:"",items:"" }); } });
+    router.post("/app/prs", { ...form, items }, {
+      onSuccess: () => { setOpen(false); setForm({ pr_number:"",title:"",department:"",requested_by:"",items:"" }); sa.alert("PR created", `"${form.pr_number}" has been created.`, "success"); },
+    });
   };
-  const remove = (pr: any) => { if (confirm(`Delete ${pr.pr_number}?`)) router.delete(`/app/prs/${pr.id}`); };
+  const remove = async (pr: any) => {
+    const ok = await sa.confirmDelete(pr.pr_number);
+    if (!ok) return;
+    router.delete(`/app/prs/${pr.id}`, { onSuccess: () => sa.alert("PR deleted", `"${pr.pr_number}" has been removed.`, "success") });
+  };
 
   return (
     <AppShell>
@@ -58,16 +72,11 @@ export default function PRs({ prs }: any) {
           </div>
         }
       />
-
       <div className="panel overflow-x-auto">
         <table className="data-table">
-          <thead>
-            <tr><th>PR Number</th><th>Title</th><th>Department</th><th>Items</th><th>Status</th><th>Synced</th><th className="text-right">Action</th></tr>
-          </thead>
+          <thead><tr><th>PR Number</th><th>Title</th><th>Department</th><th>Items</th><th>Status</th><th>Synced</th><th className="text-right">Action</th></tr></thead>
           <tbody>
-            {prs.length === 0 && (
-              <tr><td colSpan={7} className="text-center text-muted-foreground py-8">No PRs synced. Click "Sync from ERP".</td></tr>
-            )}
+            {prs.length === 0 && <tr><td colSpan={7} className="text-center text-muted-foreground py-8">No PRs synced. Click "Sync from ERP".</td></tr>}
             {prs.map((pr: any) => (
               <tr key={pr.id}>
                 <td className="font-mono text-xs whitespace-nowrap">{pr.pr_number}</td>
@@ -94,6 +103,7 @@ export default function PRs({ prs }: any) {
           </tbody>
         </table>
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

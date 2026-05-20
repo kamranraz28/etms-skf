@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 export default function VendorProfile({ vendor }: any) {
+  const sa = useSweetAlert();
   const [form, setForm] = useState({
     name: vendor?.name ?? "",
     email: vendor?.email ?? "",
@@ -18,7 +20,7 @@ export default function VendorProfile({ vendor }: any) {
   const [pw, setPw] = useState({ current_password: "", new_password: "", new_password_confirmation: "" });
   const [pwOpen, setPwOpen] = useState(false);
   const locked = vendor && vendor.status !== "pending";
-  const save = () => router.post("/app/profile", form);
+  const save = () => router.post("/app/profile", form, { onSuccess: () => sa.alert("Profile updated", "Your vendor profile has been saved.", "success") });
   const changePw = () => {
     router.post("/app/profile/password", pw, {
       onSuccess: () => { setPw({ current_password: "", new_password: "", new_password_confirmation: "" }); setPwOpen(false); },
@@ -89,6 +91,7 @@ export default function VendorProfile({ vendor }: any) {
           </div>
         )}
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

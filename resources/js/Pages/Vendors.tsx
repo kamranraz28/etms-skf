@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { PageSharedProps, VendorStatus } from "@/lib/types";
 import { Head, router, usePage } from "@inertiajs/react";
 import { Pencil, Plus, ShieldCheck, ShieldOff, Trash2 } from "lucide-react";
@@ -18,16 +19,36 @@ export default function Vendors({ vendors, categories }: any) {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "", erp_code: "", notes: "", status: "pending" as VendorStatus, vendor_category_id: "" });
+  const sa = useSweetAlert();
 
   const openNew = () => { setEditing(null); setForm({ name:"",email:"",phone:"",erp_code:"",notes:"",status:"pending",vendor_category_id:"" }); setOpen(true); };
   const openEdit = (v: any) => { setEditing(v); setForm({ name:v.name,email:v.email,phone:v.phone??"",erp_code:v.erp_code??"",notes:v.notes??"",status:v.status,vendor_category_id:v.vendor_category_id??"" }); setOpen(true); };
-  const save = () => {
+  const save = async () => {
     if (saving) return; setSaving(true);
-    if (editing) router.put(`/app/vendors/${editing.id}`, form, { onSuccess: () => { setOpen(false); setSaving(false); }, onError: () => setSaving(false) });
-    else router.post(`/app/vendors`, form, { onSuccess: () => { setOpen(false); setSaving(false); }, onError: () => setSaving(false) });
+    const confirmed = await sa.confirmAction(editing ? "Update vendor?" : "Create vendor?", `Save vendor "${form.name}"?`, "Save");
+    if (!confirmed) { setSaving(false); return; }
+    if (editing) router.put(`/app/vendors/${editing.id}`, form, {
+      onSuccess: () => { setOpen(false); setSaving(false); sa.alert("Vendor updated", `"${form.name}" has been updated.`, "success"); },
+      onError: () => setSaving(false),
+    });
+    else router.post(`/app/vendors`, form, {
+      onSuccess: () => { setOpen(false); setSaving(false); sa.alert("Vendor created", `"${form.name}" has been created.`, "success"); },
+      onError: () => setSaving(false),
+    });
   };
-  const setStatus = (v: any, status: VendorStatus) => router.put(`/app/vendors/${v.id}`, { ...v, status });
-  const remove = (v: any) => { if (confirm(`Delete vendor "${v.name}"?`)) router.delete(`/app/vendors/${v.id}`); };
+  const setStatus = async (v: any, status: VendorStatus) => {
+    const label = status === "active" ? "activate" : "blacklist";
+    const ok = await sa.confirmAction(`${status === "active" ? "Activate" : "Blacklist"} vendor?`, `Are you sure you want to ${label} "${v.name}"?`, status === "active" ? "Activate" : "Blacklist");
+    if (!ok) return;
+    router.put(`/app/vendors/${v.id}`, { ...v, status }, {
+      onSuccess: () => sa.alert("Status updated", `"${v.name}" is now ${status}.`, status === "active" ? "success" : "warning"),
+    });
+  };
+  const remove = async (v: any) => {
+    const ok = await sa.confirmDelete(v.name);
+    if (!ok) return;
+    router.delete(`/app/vendors/${v.id}`, { onSuccess: () => sa.alert("Vendor deleted", `"${v.name}" has been removed.`, "success") });
+  };
 
   return (
     <AppShell>
@@ -70,7 +91,6 @@ export default function Vendors({ vendors, categories }: any) {
           </Dialog>
         ) : null}
       />
-
       <div className="panel overflow-x-auto">
         <table className="data-table">
           <thead>
@@ -101,6 +121,7 @@ export default function Vendors({ vendors, categories }: any) {
           </tbody>
         </table>
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

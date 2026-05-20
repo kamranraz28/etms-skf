@@ -7,19 +7,28 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, CheckCircle2, XCircle, Download } from "lucide-react";
 import { PageSharedProps } from "@/lib/types";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 export default function ClaimsShow({ claim }: any) {
   const { props } = usePage<PageSharedProps>();
   const primary = props.auth.user?.primary_role;
   const [comment, setComment] = useState("");
+  const sa = useSweetAlert();
 
   const canDecide =
     (claim.status === "submitted" && primary === "procurement") ||
     (claim.status === "under_review_approver" && primary === "approver") ||
     ((claim.status === "under_review_admin" || claim.status === "under_review_procurement") && primary === "admin");
 
-  const decide = (decision: "approved" | "rejected") =>
-    router.post(`/app/claims/${claim.id}/decide`, { decision, comment }, { onSuccess: () => setComment("") });
+  const decide = (decision: "approved" | "rejected") => {
+    const title = decision === "approved" ? "Approve claim?" : "Reject claim?";
+    const desc = decision === "approved" ? "This will approve the claim." : "This will reject the claim.";
+    sa.confirmAction(title, desc, decision === "approved" ? "Approve" : "Reject").then(ok => {
+      if (ok) router.post(`/app/claims/${claim.id}/decide`, { decision, comment }, {
+        onSuccess: () => { setComment(""); sa.alert(decision === "approved" ? "Claim approved" : "Claim rejected", "...", decision === "approved" ? "success" : "warning"); },
+      });
+    });
+  };
 
   const docUrl = (doc: any) => `/app/claims/${claim.id}/documents/${doc.id}`;
 
@@ -146,6 +155,7 @@ export default function ClaimsShow({ claim }: any) {
           </div>
         </div>
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

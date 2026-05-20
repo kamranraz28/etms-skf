@@ -5,13 +5,29 @@ import { Button } from "@/components/ui/button";
 import { PageSharedProps } from "@/lib/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { ArrowLeft, ExternalLink, Lock, Scale } from "lucide-react";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 export default function TenderShow({ tender, vendors, bids, cs }: any) {
   const { props } = usePage<PageSharedProps>();
+  const sa = useSweetAlert();
   const primary = props.auth.user?.primary_role;
   const lowest = bids[0];
-  const closeTender = () => router.post(`/app/tenders/${tender.id}/close`);
-  const generateCS = () => router.post(`/app/tenders/${tender.id}/generate-cs`);
+  const closeTender = async () => {
+    const confirmed = await sa.confirmAction("Close tender?", "This will prevent new bids.", "Close tender");
+    if (confirmed) {
+      router.post(`/app/tenders/${tender.id}/close`, {}, {
+        onSuccess: () => sa.alert("Tender closed", "Tender has been closed successfully.", "success"),
+      });
+    }
+  };
+  const generateCS = async () => {
+    const confirmed = await sa.confirmAction("Generate Comparison Statement?", "Create CS from winning bid?", "Generate");
+    if (confirmed) {
+      router.post(`/app/tenders/${tender.id}/generate-cs`, {}, {
+        onSuccess: () => sa.alert("CS generated", "Comparison statement has been generated.", "success"),
+      });
+    }
+  };
 
   return (
     <AppShell>
@@ -117,6 +133,7 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
           )}
         </div>
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

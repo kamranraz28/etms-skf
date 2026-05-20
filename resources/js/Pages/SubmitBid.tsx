@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Head, router } from "@inertiajs/react";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 export default function SubmitBid({ tender, vendor }: any) {
   const allItems = (tender.pr?.items ?? []) as any[];
@@ -35,6 +36,7 @@ export default function SubmitBid({ tender, vendor }: any) {
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const sa = useSweetAlert();
   const [submitting, setSubmitting] = useState(false);
   const total = items.reduce(
     (s, it, i) => s + Number(prices[`${it.name}_${i}`] || 0) * it.qty,
@@ -67,6 +69,7 @@ export default function SubmitBid({ tender, vendor }: any) {
     if (notes) fd.append("notes", notes);
     if (file) fd.append("document", file);
     router.post(`/app/my-tenders/${tender.id}/bid`, fd, {
+      onSuccess: () => sa.alert("Bid submitted", "Your bid has been submitted successfully.", "success"),
       onFinish: () => setSubmitting(false),
       forceFormData: true,
     });
@@ -196,6 +199,7 @@ export default function SubmitBid({ tender, vendor }: any) {
           </div>
         </div>
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

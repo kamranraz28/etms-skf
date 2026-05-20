@@ -3,8 +3,10 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 export default function TenderIndex({ tenders }: any) {
+  const sa = useSweetAlert();
   return (
     <AppShell>
       <Head title="Tenders" />
@@ -41,6 +43,7 @@ export default function TenderIndex({ tenders }: any) {
           </Link>
         ))}
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

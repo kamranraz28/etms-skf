@@ -7,8 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Head, router } from "@inertiajs/react";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import { useState } from "react";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 export default function NewClaim({ vendor }: any) {
+  const sa = useSweetAlert();
   const [tenderNumber, setTenderNumber] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -41,7 +43,7 @@ export default function NewClaim({ vendor }: any) {
     documents.forEach((d, i) => {
       if (d.file) { fd.append(`documents[${i}][type]`, d.type); fd.append(`documents[${i}][file]`, d.file); }
     });
-    router.post("/app/claims", fd, { onFinish: () => setSubmitting(false), forceFormData: true });
+    router.post("/app/claims", fd, { onSuccess: () => sa.alert("Claim created", "Your claim has been submitted successfully.", "success"), onFinish: () => setSubmitting(false), forceFormData: true });
   };
 
   const docTypes = [
@@ -104,6 +106,7 @@ export default function NewClaim({ vendor }: any) {
           </div>
         </div>
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

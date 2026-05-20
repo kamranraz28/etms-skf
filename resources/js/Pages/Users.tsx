@@ -3,11 +3,13 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { AppRole } from "@/lib/types";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 const ALL: AppRole[] = ["admin","procurement","approver","vendor"];
 
 export default function Users({ rows }: any) {
-  const toggle = (uid: string, r: AppRole) => router.post(`/app/users/${uid}/roles/${r}`);
+  const sa = useSweetAlert();
+  const toggle = (uid: string, r: AppRole) => sa.confirmAction("Toggle role?", "Change this user's role?", "Toggle").then(ok => { if (ok) router.post(`/app/users/${uid}/roles/${r}`); });
   return (
     <AppShell>
       <Head title="Users & roles" />
@@ -38,6 +40,7 @@ export default function Users({ rows }: any) {
           </tbody>
         </table>
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

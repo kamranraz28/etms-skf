@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 
-export default function CsIndex({ list }: any) {
+export default function CsIndex({ list = [] }: any) {
   return (
     <AppShell>
       <Head title="Comparative Statements" />
