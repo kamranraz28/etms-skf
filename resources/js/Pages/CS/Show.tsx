@@ -321,7 +321,7 @@ export default function CSShow({
             </ul>
           </div>
 
-          {erpLogs.length > 0 && (
+          {/* {erpLogs.length > 0 && (
             <div className="panel">
               <div className="panel-header">
                 <div className="panel-title">ERP sync log</div>
@@ -342,7 +342,7 @@ export default function CSShow({
                 ))}
               </ul>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="space-y-6">
