@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { PageSharedProps, VendorStatus } from "@/lib/types";
 import { Head, router, usePage } from "@inertiajs/react";
-import { Pencil, Plus, ShieldCheck, ShieldOff, Trash2 } from "lucide-react";
+import { Pencil, Plus, ShieldCheck, ShieldOff, Trash2, Search, Filter } from "lucide-react";
 import { useState } from "react";
 
 export default function Vendors({ vendors, categories }: any) {
@@ -58,30 +58,30 @@ export default function Vendors({ vendors, categories }: any) {
         description="Master list of suppliers. ERP code is required before a vendor can be selected for award."
         actions={isAdmin ? (
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> New vendor</Button></DialogTrigger>
+            <DialogTrigger asChild><Button onClick={openNew}><Plus className="h-4 w-4" /> New vendor</Button></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>{editing ? "Edit vendor" : "Create vendor"}</DialogTitle></DialogHeader>
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div><Label>Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-                  <div><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-                  <div><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-                  <div><Label>ERP code</Label><Input value={form.erp_code} onChange={(e) => setForm({ ...form, erp_code: e.target.value })} /></div>
-                  <div><Label>Status</Label>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5"><Label>Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+                  <div className="space-y-1.5"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+                  <div className="space-y-1.5"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+                  <div className="space-y-1.5"><Label>ERP code</Label><Input value={form.erp_code} onChange={(e) => setForm({ ...form, erp_code: e.target.value })} /></div>
+                  <div className="space-y-1.5"><Label>Status</Label>
                     <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as VendorStatus })}
-                      className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm">
+                      className="w-full h-10 rounded-lg border border-input bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring">
                       <option value="pending">Pending</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="blacklisted">Blacklisted</option>
                     </select>
                   </div>
-                  <div><Label>Category</Label>
+                  <div className="space-y-1.5"><Label>Category</Label>
                     <select value={form.vendor_category_id} onChange={(e) => setForm({ ...form, vendor_category_id: e.target.value })}
-                      className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm">
+                      className="w-full h-10 rounded-lg border border-input bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring">
                       <option value="">No category</option>
                       {categories.map((cat: any) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                     </select>
                   </div>
                 </div>
-                <div><Label>Notes</Label><Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
+                <div className="space-y-1.5"><Label>Notes</Label><Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
@@ -91,35 +91,37 @@ export default function Vendors({ vendors, categories }: any) {
           </Dialog>
         ) : null}
       />
-      <div className="panel overflow-x-auto">
-        <table className="data-table">
-          <thead>
-            <tr><th>Vendor</th><th>Category</th><th>Phone</th><th>ERP code</th><th>Status</th><th>Created</th>{isAdmin && <th className="text-right">Actions</th>}</tr>
-          </thead>
-          <tbody>
-            {vendors.length === 0 && <tr><td colSpan={7} className="text-center text-muted-foreground py-8">No vendors yet.</td></tr>}
-            {vendors.map((v: any) => (
-              <tr key={v.id}>
-                <td><div className="font-medium">{v.name}</div><div className="text-xs text-muted-foreground">{v.email}</div></td>
-                <td className="text-xs whitespace-nowrap">{v.vendor_category?.name ?? "—"}</td>
-                <td className="text-xs whitespace-nowrap">{v.phone ?? "—"}</td>
-                <td className="font-mono text-xs whitespace-nowrap">{v.erp_code ?? <span className="text-warning">Not mapped</span>}</td>
-                <td><StatusBadge status={v.status} /></td>
-                <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(v.created_at).toLocaleDateString()}</td>
-                {isAdmin && (
-                  <td className="text-right whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1">
-                      {v.status !== "active" && <Button size="sm" variant="ghost" onClick={() => setStatus(v, "active")}><ShieldCheck className="h-4 w-4 text-success" /></Button>}
-                      {v.status !== "blacklisted" && <Button size="sm" variant="ghost" onClick={() => setStatus(v, "blacklisted")}><ShieldOff className="h-4 w-4 text-destructive" /></Button>}
-                      <Button size="sm" variant="ghost" onClick={() => openEdit(v)}><Pencil className="h-4 w-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={() => remove(v)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                    </div>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="panel overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="data-table">
+            <thead>
+              <tr><th>Vendor</th><th>Category</th><th>Phone</th><th>ERP code</th><th>Status</th><th>Created</th>{isAdmin && <th className="text-right">Actions</th>}</tr>
+            </thead>
+            <tbody>
+              {vendors.length === 0 && <tr><td colSpan={7} className="text-center text-muted-foreground py-12">No vendors yet.</td></tr>}
+              {vendors.map((v: any) => (
+                <tr key={v.id} className="group">
+                  <td><div className="font-medium">{v.name}</div><div className="text-xs text-muted-foreground">{v.email}</div></td>
+                  <td className="text-xs whitespace-nowrap">{v.vendor_category?.name ?? "—"}</td>
+                  <td className="text-xs whitespace-nowrap">{v.phone ?? "—"}</td>
+                  <td className="font-mono text-xs whitespace-nowrap">{v.erp_code ?? <span className="text-warning font-medium">Not mapped</span>}</td>
+                  <td><StatusBadge status={v.status} /></td>
+                  <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(v.created_at).toLocaleDateString()}</td>
+                  {isAdmin && (
+                    <td className="text-right whitespace-nowrap">
+                      <div className="inline-flex items-center gap-1">
+                        {v.status !== "active" && <Button size="sm" variant="ghost" onClick={() => setStatus(v, "active")} className="hover:bg-success/10"><ShieldCheck className="h-4 w-4 text-success" /></Button>}
+                        {v.status !== "blacklisted" && <Button size="sm" variant="ghost" onClick={() => setStatus(v, "blacklisted")} className="hover:bg-destructive/10"><ShieldOff className="h-4 w-4 text-destructive" /></Button>}
+                        <Button size="sm" variant="ghost" onClick={() => openEdit(v)}><Pencil className="h-4 w-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => remove(v)} className="hover:bg-destructive/10"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
       {sa.SweetAlert}
     </AppShell>

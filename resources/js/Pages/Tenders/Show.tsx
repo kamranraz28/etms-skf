@@ -4,7 +4,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { PageSharedProps } from "@/lib/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { ArrowLeft, ExternalLink, Lock, Scale } from "lucide-react";
+import { ArrowLeft, ExternalLink, Lock, Scale, Gavel, Users, FileText } from "lucide-react";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 export default function TenderShow({ tender, vendors, bids, cs }: any) {
@@ -32,7 +32,7 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
   return (
     <AppShell>
       <Head title={tender.title} />
-      <Button variant="ghost" size="sm" onClick={() => history.back()} className="mb-2">
+      <Button variant="ghost" size="sm" onClick={() => history.back()} className="mb-3">
         <ArrowLeft className="h-4 w-4 mr-1" /> Back
       </Button>
       <PageHeader
@@ -55,80 +55,90 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
       />
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6 min-w-0">
-          <div className="panel overflow-x-auto">
-            <div className="panel-header"><div className="panel-title">Bids received ({bids.length})</div></div>
-            <table className="data-table">
-              <thead><tr><th>Vendor</th><th>ERP</th><th>Submitted</th></tr></thead>
-              <tbody>
-                {bids.length === 0 && <tr><td colSpan={3} className="text-center text-muted-foreground py-6">No bids yet.</td></tr>}
-                {bids.map((b: any) => (
-                  <tr key={b.id} className={lowest?.id === b.id ? "bg-success/5" : ""}>
-                    <td className="font-medium whitespace-nowrap">
-                      {b.vendor?.name}
-                      {lowest?.id === b.id && <span className="ml-2 text-[10px] uppercase tracking-wider text-success">L1</span>}
-                    </td>
-                    <td className="font-mono text-xs whitespace-nowrap">{b.vendor?.erp_code ?? <span className="text-warning">—</span>}</td>
-                    <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(b.submitted_at).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="panel overflow-hidden">
+            <div className="panel-header bg-gradient-to-r from-card to-muted/20">
+              <div className="panel-title"><Gavel className="h-4.5 w-4.5 text-accent" /> Bids received ({bids.length})</div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="data-table">
+                <thead><tr><th>Vendor</th><th>ERP</th><th>Submitted</th></tr></thead>
+                <tbody>
+                  {bids.length === 0 && <tr><td colSpan={3} className="text-center text-muted-foreground py-8">No bids yet.</td></tr>}
+                  {bids.map((b: any) => (
+                    <tr key={b.id} className={`${lowest?.id === b.id ? "bg-success/5" : ""} group`}>
+                      <td className="font-medium whitespace-nowrap">
+                        {b.vendor?.name}
+                        {lowest?.id === b.id && <StatusBadge status="selected" className="ml-2 text-[10px]" />}
+                      </td>
+                      <td className="font-mono text-xs whitespace-nowrap">{b.vendor?.erp_code ?? <span className="text-warning">—</span>}</td>
+                      <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(b.submitted_at).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {tender.pr && (
-            <div className="panel overflow-x-auto">
-              <div className="panel-header"><div className="panel-title">Requisition items · {tender.pr.pr_number}</div></div>
-              <table className="data-table">
-                <thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Invited categories</th></tr></thead>
-                <tbody>
-                  {(tender.pr.items ?? []).map((it: any, i: number) => {
-                    const cats = (tender.item_categories ?? []).filter((ic: any) => ic.item_index === i);
-                    return (
-                      <tr key={i}>
-                        <td className="min-w-0 max-w-[150px] truncate">{it.name}</td>
-                        <td className="whitespace-nowrap">{it.qty}</td>
-                        <td className="whitespace-nowrap">{it.unit}</td>
-                        <td>
-                          {cats.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {cats.map((ic: any) => (
-                                <span key={ic.id} className="text-[10px] bg-muted px-2 py-0.5 rounded-full whitespace-nowrap">
-                                  {ic.vendor_category?.name ?? 'Cat #'+ic.vendor_category_id}
-                                </span>
-                              ))}
-                            </div>
-                          ) : <span className="text-xs text-muted-foreground">—</span>}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="panel overflow-hidden">
+              <div className="panel-header bg-gradient-to-r from-card to-muted/20">
+                <div className="panel-title"><FileText className="h-4.5 w-4.5 text-primary" /> Requisition items · {tender.pr.pr_number}</div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="data-table">
+                  <thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Invited categories</th></tr></thead>
+                  <tbody>
+                    {(tender.pr.items ?? []).map((it: any, i: number) => {
+                      const cats = (tender.item_categories ?? []).filter((ic: any) => ic.item_index === i);
+                      return (
+                        <tr key={i}>
+                          <td className="min-w-0 max-w-[150px] truncate font-medium">{it.name}</td>
+                          <td className="whitespace-nowrap">{it.qty}</td>
+                          <td className="whitespace-nowrap">{it.unit}</td>
+                          <td>
+                            {cats.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {cats.map((ic: any) => (
+                                  <span key={ic.id} className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">
+                                    {ic.vendor_category?.name ?? 'Cat #'+ic.vendor_category_id}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : <span className="text-xs text-muted-foreground">—</span>}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
 
         <div className="space-y-6 min-w-0">
-          <div className="panel">
-            <div className="panel-header"><div className="panel-title">Invited vendors ({vendors.length})</div></div>
-            <ul className="divide-y divide-border max-h-[400px] overflow-y-auto">
+          <div className="panel overflow-hidden">
+            <div className="panel-header bg-gradient-to-r from-card to-muted/20">
+              <div className="panel-title"><Users className="h-4.5 w-4.5 text-accent" /> Invited vendors ({vendors.length})</div>
+            </div>
+            <ul className="divide-y divide-border/40 max-h-[400px] overflow-y-auto">
               {vendors.map((v: any) => (
-                <li key={v.id} className="px-4 py-2.5">
+                <li key={v.id} className="px-5 py-3 hover:bg-muted/20 transition-colors">
                   <div className="text-sm font-medium truncate">{v.name}</div>
                   <div className="text-xs text-muted-foreground truncate">{v.email}</div>
-                  <div className="mt-1 flex items-center gap-2 flex-wrap">
+                  <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                     <StatusBadge status={v.status} />
-                    {v.vendor_category_id && <span className="text-[10px] bg-muted px-2 py-0.5 rounded-full">{v.vendor_category?.name ?? ''}</span>}
-                    {v.erp_code ? <span className="text-[10px] font-mono text-muted-foreground">ERP: {v.erp_code}</span> : <span className="text-[10px] text-warning">No ERP code</span>}
+                    {v.vendor_category_id && <span className="text-[10px] bg-muted/50 text-muted-foreground px-2 py-0.5 rounded-full">{v.vendor_category?.name ?? ''}</span>}
+                    {v.erp_code ? <span className="text-[10px] font-mono text-muted-foreground">ERP: {v.erp_code}</span> : <span className="text-[10px] text-warning font-medium">No ERP code</span>}
                   </div>
                 </li>
               ))}
             </ul>
           </div>
           {tender.description && (
-            <div className="panel p-4">
+            <div className="panel p-5">
               <div className="panel-title mb-2">Scope</div>
-              <p className="text-sm text-muted-foreground whitespace-pre-line">{tender.description}</p>
+              <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">{tender.description}</p>
             </div>
           )}
         </div>

@@ -2,8 +2,14 @@ import { Link, Head } from "@inertiajs/react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, ArrowUpRight, Gavel, Users, FileText } from "lucide-react";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
+
+const statusColors: Record<string, string> = {
+  open: "bg-gradient-to-r from-info/10 to-info/5 text-info border-info/20",
+  closed: "bg-muted/50 text-muted-foreground border-border/30",
+  awarded: "bg-gradient-to-r from-success/10 to-success/5 text-success border-success/20",
+};
 
 export default function TenderIndex({ tenders }: any) {
   const sa = useSweetAlert();
@@ -13,33 +19,32 @@ export default function TenderIndex({ tenders }: any) {
       <PageHeader
         title="Tenders"
         description="All tenders created from Purchase Requisitions."
-        actions={<Link href="/app/tenders/new"><Button><Plus className="h-4 w-4 mr-1" /> New tender</Button></Link>}
+        actions={<Link href="/app/tenders/new"><Button><Plus className="h-4 w-4" /> New tender</Button></Link>}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="card-grid stagger-children">
         {tenders.length === 0 && (
-          <div className="sm:col-span-2 lg:col-span-3 text-center text-muted-foreground py-12">No tenders created yet.</div>
+          <div className="sm:col-span-2 lg:col-span-3 text-center text-muted-foreground py-16 bg-card border border-border/60 rounded-2xl">
+            <Gavel className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+            <p className="font-medium">No tenders created yet.</p>
+            <p className="text-xs mt-1">Create a tender from a Purchase Requisition to get started.</p>
+          </div>
         )}
         {tenders.map((t: any) => (
-          <Link key={t.id} href={`/app/tenders/${t.id}`} className="panel hover:border-accent/50 transition-colors block">
-            <div className="p-4 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-xs text-muted-foreground">{t.tender_number}</span>
-                <span className={`text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full ${
-                  t.status === "open" ? "bg-info/10 text-info" :
-                  t.status === "closed" ? "bg-muted text-muted-foreground" :
-                  "bg-success/10 text-success"
-                }`}>
-                  {t.status === "awarded" ? "Awarded" : t.status}
-                </span>
-              </div>
-              <div className="font-medium text-sm line-clamp-2">{t.title}</div>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span>{t.vendor_count} vendor{t.vendor_count !== 1 ? "s" : ""}</span>
-                <span>·</span>
-                <span>{t.bid_count} bid{t.bid_count !== 1 ? "s" : ""}</span>
-              </div>
-              <div className="text-[10px] text-muted-foreground">{t.pr?.pr_number ?? "—"}</div>
+          <Link key={t.id} href={`/app/tenders/${t.id}`} className="group relative bg-card border border-border/60 rounded-2xl p-5 hover-lift overflow-hidden">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <span className="font-mono text-xs text-muted-foreground">{t.tender_number}</span>
+              <span className={`text-[11px] uppercase tracking-wider font-semibold px-2.5 py-0.5 rounded-full border ${statusColors[t.status] || "bg-muted/50 text-muted-foreground"}`}>
+                {t.status === "awarded" ? "Awarded" : t.status}
+              </span>
             </div>
+            <div className="font-semibold text-sm line-clamp-2 mb-3">{t.title}</div>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{t.vendor_count} vendor{t.vendor_count !== 1 ? "s" : ""}</span>
+              <span className="text-muted-foreground/30">·</span>
+              <span className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{t.bid_count} bid{t.bid_count !== 1 ? "s" : ""}</span>
+            </div>
+            <div className="text-[10px] text-muted-foreground mt-2">{t.pr?.pr_number ?? "—"}</div>
+            <ArrowUpRight className="h-4 w-4 text-muted-foreground absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         ))}
       </div>

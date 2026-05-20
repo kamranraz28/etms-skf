@@ -23,32 +23,32 @@ interface SweetAlertOptions {
 
 const variantConfig = {
   default: {
-    icon: <Info className="h-6 w-6 text-accent" />,
-    bg: "bg-accent/10",
+    icon: <Info className="h-7 w-7 text-accent" />,
+    bg: "bg-gradient-to-br from-accent/10 to-accent/5",
     border: "border-accent/20",
     confirm: "",
   },
   destructive: {
-    icon: <AlertCircle className="h-6 w-6 text-destructive" />,
-    bg: "bg-destructive/10",
+    icon: <AlertCircle className="h-7 w-7 text-destructive" />,
+    bg: "bg-gradient-to-br from-destructive/10 to-destructive/5",
     border: "border-destructive/20",
     confirm: "destructive",
   },
   success: {
-    icon: <CheckCircle2 className="h-6 w-6 text-success" />,
-    bg: "bg-success/10",
+    icon: <CheckCircle2 className="h-7 w-7 text-success" />,
+    bg: "bg-gradient-to-br from-success/10 to-success/5",
     border: "border-success/20",
     confirm: "",
   },
   warning: {
-    icon: <AlertTriangle className="h-6 w-6 text-warning" />,
-    bg: "bg-warning/10",
+    icon: <AlertTriangle className="h-7 w-7 text-warning" />,
+    bg: "bg-gradient-to-br from-warning/10 to-warning/5",
     border: "border-warning/20",
     confirm: "",
   },
   info: {
-    icon: <Info className="h-6 w-6 text-info" />,
-    bg: "bg-info/10",
+    icon: <Info className="h-7 w-7 text-info" />,
+    bg: "bg-gradient-to-br from-info/10 to-info/5",
     border: "border-info/20",
     confirm: "",
   },
@@ -62,19 +62,19 @@ export function SweetAlert({
   const cfg = variantConfig[variant];
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o && !loading) onClose(); }}>
-      <DialogContent className="sm:max-w-md gap-0 p-0">
-        <div className="flex flex-col items-center text-center px-6 pt-8 pb-6">
-          <div className={cn("h-14 w-14 rounded-full flex items-center justify-center mb-4", cfg.bg, cfg.border, "border")}>
+      <DialogContent className="sm:max-w-md gap-0 p-0 overflow-hidden">
+        <div className="flex flex-col items-center text-center px-8 pt-10 pb-8">
+          <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center mb-5 shadow-lg", cfg.bg, cfg.border, "border")}>
             {icon ?? cfg.icon}
           </div>
-          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+          <h2 className="text-xl font-bold text-foreground tracking-tight">{title}</h2>
           {description && (
-            <div className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-sm">
+            <div className="text-sm text-muted-foreground mt-2.5 leading-relaxed max-w-sm">
               {description}
             </div>
           )}
         </div>
-        <DialogFooter className="px-6 pb-6 sm:justify-center gap-2">
+        <DialogFooter className="px-8 pb-8 sm:justify-center gap-3">
           {showCancel && (
             <Button variant="outline" onClick={() => { onCancel?.(); onClose(); }} disabled={loading}>
               {cancelText}
@@ -84,7 +84,7 @@ export function SweetAlert({
             variant={cfg.confirm as any || "default"}
             onClick={() => onConfirm?.()}
             disabled={loading}
-            className={cn(!cfg.confirm && variant === "success" && "bg-success hover:bg-success/90")}
+            className={cn(!cfg.confirm && variant === "success" && "bg-gradient-to-br from-success to-success/90 shadow-md shadow-success/20")}
           >
             {loading ? "Processing..." : confirmText}
           </Button>
@@ -133,7 +133,7 @@ export function useSweetAlert() {
       variant: "destructive",
       confirmText: "Delete",
       showCancel: true,
-      icon: <Trash2 className="h-6 w-6 text-destructive" />,
+      icon: <Trash2 className="h-7 w-7 text-destructive" />,
     });
 
   const confirmAction = (title: string, description?: string, confirmText = "Confirm") =>
