@@ -11,37 +11,54 @@ class ErpSyncService
     {
         if ($cs->status !== 'approved') throw new \RuntimeException('CS not approved.');
 
-        $cs->load('tender.pr', 'selections.vendor');
-        $byVendor = [];
-        foreach ($cs->selections->where('selected', true) as $s) {
-            $vid = $s->vendor_id;
-            $byVendor[$vid] ??= ['vendor_erp_code' => $s->vendor->erp_code, 'vendor_name' => $s->vendor->name, 'lines' => []];
-            $pr = $cs->tender->pr->items[$s->item_index] ?? null;
-            $byVendor[$vid]['lines'][] = [
-                'item' => $pr['name'] ?? null, 'qty' => $s->qty, 'unit' => $pr['unit'] ?? null,
-                'unit_price' => $s->unit_price, 'line_total' => $s->qty * $s->unit_price,
+        $cs->load([
+            'tender.pr',
+            'selections.vendor',
+        ]);
+
+        $pr = $cs->tender->pr;
+        $selectedSelections = $cs->selections->where('selected', true);
+
+        $items = [];
+        foreach ($selectedSelections as $s) {
+            $prItem = $pr->items[$s->item_index] ?? null;
+            $items[] = [
+                'item' => $s->item_index + 1,
+                'name' => $prItem['name'] ?? null,
+                'qty' => (float) $s->qty,
+                'unit' => $prItem['unit'] ?? null,
+                'assigned_vendor_erp' => $s->vendor->erp_code ?? null,
+                'assigned_vendor_name' => $s->vendor->name ?? null,
+                'unit_price' => (float) $s->unit_price,
+                'total_price' => (float) ($s->qty * $s->unit_price),
             ];
         }
 
         $payload = [
-            'cs_id' => $cs->id,
-            'tender_number' => $cs->tender->tender_number,
-            'pr_number' => $cs->tender->pr->pr_number,
-            'purchase_orders' => array_values($byVendor),
-            'erp_reference' => 'ERP-' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 8)),
+            'cs_number' => 'CS-' . $cs->id,
+            'pr_number' => $pr->pr_number ?? null,
+            'approved_at' => $cs->approved_at?->toIso8601String(),
+            'items' => $items,
         ];
 
-        // Mock push (can be wired to real ERP via HTTP)
         $url = config('services.erp.webhook_url');
-        $response = ['ok' => true, 'erp_reference' => $payload['erp_reference'], 'echo' => $payload];
+        $response = ['ok' => true];
+
         if ($url && str_starts_with($url, 'http')) {
-            try { Http::timeout(5)->post($url, $payload); } catch (\Throwable $e) {}
+            try {
+                $httpResponse = Http::timeout(10)->post($url, $payload);
+                $response['http_status'] = $httpResponse->status();
+                $response['http_body'] = $httpResponse->body();
+            } catch (\Throwable $e) {
+                $response['error'] = $e->getMessage();
+            }
         }
 
         ErpSync::create([
             'cs_id' => $cs->id, 'status' => 'success',
             'request_payload' => $payload, 'response_data' => $response, 'synced_at' => now(),
         ]);
+
         return $response;
     }
 }
