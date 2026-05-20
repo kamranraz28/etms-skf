@@ -19,7 +19,7 @@ export default function Auth() {
           <div className="relative z-10 flex flex-col justify-between p-12 text-white">
             <div>
               <div className="flex items-center gap-3 mb-12">
-                <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-xl font-bold">E</div>
+                <img src="/images/logo.png" alt="ETMS" className="h-12 w-12 rounded-2xl object-contain bg-white p-1" />
                 <div>
                   <div className="text-xl font-bold">ETMS</div>
                   <div className="text-xs uppercase tracking-wider text-white/60">E-Tender & Vendor Management</div>
@@ -47,8 +47,8 @@ export default function Auth() {
         <div className="flex items-center justify-center p-6">
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
-              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center text-white font-bold text-xl mx-auto mb-4 shadow-lg shadow-primary/20">
-                E
+              <div className="h-14 w-14 rounded-2xl bg-white flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20 p-1.5">
+                <img src="/images/logo.png" alt="ETMS" className="h-full w-full object-contain" />
               </div>
               <h2 className="text-2xl font-bold text-foreground tracking-tight">Welcome back</h2>
               <p className="text-sm text-muted-foreground mt-1">Sign in to continue to ETMS.</p>

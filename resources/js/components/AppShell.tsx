@@ -145,8 +145,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             collapsed && "justify-center",
           )}
         >
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-sidebar-primary to-sidebar-primary/80 flex items-center justify-center text-sidebar-primary-foreground font-bold text-sm shadow-lg shadow-sidebar-primary/20 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-sidebar-primary/30 group-hover:scale-110">
-            E
+          <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center shadow-lg shadow-sidebar-primary/20 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-sidebar-primary/30 group-hover:scale-110 p-0.5">
+            <img src="/images/logo.png" alt="ETMS" className="h-full w-full object-contain" />
           </div>
           {!collapsed && (
             <div className="transition-opacity duration-300">
