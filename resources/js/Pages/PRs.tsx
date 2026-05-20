@@ -4,12 +4,13 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { DataTable, Column } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, RefreshCw, ChevronRight, Trash2, FileStack } from "lucide-react";
+import { Plus, RefreshCw, ChevronRight, Trash2 } from "lucide-react";
 
 export default function PRs({ prs }: any) {
   const [open, setOpen] = useState(false);
@@ -37,6 +38,35 @@ export default function PRs({ prs }: any) {
     if (!ok) return;
     router.delete(`/app/prs/${pr.id}`, { onSuccess: () => sa.alert("PR deleted", `"${pr.pr_number}" has been removed.`, "success") });
   };
+
+  const columns: Column[] = [
+    { key: "pr_number", label: "PR Number", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.pr_number}</span> },
+    { key: "title", label: "Title", sortable: true, render: (r) => <span className="font-medium min-w-0 max-w-[200px] truncate block">{r.title}</span> },
+    { key: "department", label: "Department", sortable: true, render: (r) => <span className="text-xs whitespace-nowrap">{r.department ?? "—"}</span> },
+    { key: "items", label: "Items", sortable: false, render: (r) => {
+      const raw = r.items ?? [];
+      const preview = raw.slice(0,2).map((i: any) => `${i.name} ×${i.qty}`).join(", ");
+      return <span className="text-xs text-muted-foreground min-w-0 max-w-[200px] truncate block">{preview}{raw.length > 2 && ` +${raw.length - 2} more`}</span>;
+    }},
+    { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.status} /> },
+    { key: "created_at", label: "Synced", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</span> },
+    {
+      key: "actions" as string,
+      label: "Action",
+      className: "text-right",
+      exportable: false,
+      render: (r: any) => (
+        <div className="inline-flex items-center gap-1">
+          {r.status === "new" && (
+            <Link href={`/app/tenders/new?pr=${r.id}`}>
+              <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>Create tender <ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
+            </Link>
+          )}
+          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); remove(r); }} className="hover:bg-destructive/10"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <AppShell>
@@ -72,39 +102,7 @@ export default function PRs({ prs }: any) {
           </div>
         }
       />
-      <div className="panel overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="data-table">
-            <thead><tr><th>PR Number</th><th>Title</th><th>Department</th><th>Items</th><th>Status</th><th>Synced</th><th className="text-right">Action</th></tr></thead>
-            <tbody>
-              {prs.length === 0 && <tr><td colSpan={7} className="text-center text-muted-foreground py-12">No PRs synced. Click "Sync from ERP".</td></tr>}
-              {prs.map((pr: any) => (
-                <tr key={pr.id} className="group">
-                  <td className="font-mono text-xs whitespace-nowrap">{pr.pr_number}</td>
-                  <td className="font-medium min-w-0 max-w-[200px] truncate">{pr.title}</td>
-                  <td className="text-xs whitespace-nowrap">{pr.department ?? "—"}</td>
-                  <td className="text-xs text-muted-foreground min-w-0 max-w-[200px] truncate">
-                    {(pr.items ?? []).slice(0,2).map((i: any) => `${i.name} ×${i.qty}`).join(", ")}
-                    {pr.items && pr.items.length > 2 && ` +${pr.items.length - 2} more`}
-                  </td>
-                  <td><StatusBadge status={pr.status} /></td>
-                  <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(pr.created_at).toLocaleDateString()}</td>
-                  <td className="text-right whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1">
-                      {pr.status === "new" && (
-                        <Link href={`/app/tenders/new?pr=${pr.id}`}>
-                          <Button size="sm" variant="outline">Create tender <ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
-                        </Link>
-                      )}
-                      <Button size="sm" variant="ghost" onClick={()=>remove(pr)} className="hover:bg-destructive/10"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable columns={columns} data={prs} exportFilename="purchase-requisitions" emptyMessage="No PRs synced. Click 'Sync from ERP'." searchPlaceholder="Search PRs..." />
       {sa.SweetAlert}
     </AppShell>
   );

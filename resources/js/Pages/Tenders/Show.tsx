@@ -2,6 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { DataTable, Column } from "@/components/ui/DataTable";
 import { PageSharedProps } from "@/lib/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { ArrowLeft, ExternalLink, Lock, Scale, Gavel, Users, FileText } from "lucide-react";
@@ -28,6 +29,49 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
       });
     }
   };
+
+  const bidColumns: Column[] = [
+    {
+      key: "vendor",
+      label: "Vendor",
+      sortable: false,
+      render: (r: any) => (
+        <span className="font-medium whitespace-nowrap">
+          {r.vendor?.name}
+          {lowest?.id === r.id && <StatusBadge status="selected" className="ml-2 text-[10px]" />}
+        </span>
+      ),
+    },
+    { key: "erp_code", label: "ERP", sortable: false, render: (r: any) => <span className="font-mono text-xs whitespace-nowrap">{r.vendor?.erp_code ?? <span className="text-warning">—</span>}</span> },
+    { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
+  ];
+
+  const itemColumns: Column[] = [
+    { key: "name", label: "Item", sortable: false, render: (r: any, i?: number) => {
+      const idx = (tender.pr.items ?? []).indexOf(r);
+      return <span className="min-w-0 max-w-[150px] truncate font-medium">{r.name}</span>;
+    }},
+    { key: "qty", label: "Qty", sortable: false, render: (r) => <span className="whitespace-nowrap">{r.qty}</span> },
+    { key: "unit", label: "Unit", sortable: false, render: (r) => <span className="whitespace-nowrap">{r.unit}</span> },
+    {
+      key: "categories",
+      label: "Invited categories",
+      sortable: false,
+      render: (r: any, i?: number) => {
+        const idx = (tender.pr.items ?? []).indexOf(r);
+        const cats = (tender.item_categories ?? []).filter((ic: any) => ic.item_index === idx);
+        return cats.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {cats.map((ic: any) => (
+              <span key={ic.id} className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">
+                {ic.vendor_category?.name ?? 'Cat #'+ic.vendor_category_id}
+              </span>
+            ))}
+          </div>
+        ) : <span className="text-xs text-muted-foreground">—</span>;
+      },
+    },
+  ];
 
   return (
     <AppShell>
@@ -59,24 +103,16 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
             <div className="panel-header bg-gradient-to-r from-card to-muted/20">
               <div className="panel-title"><Gavel className="h-4.5 w-4.5 text-accent" /> Bids received ({bids.length})</div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="data-table">
-                <thead><tr><th>Vendor</th><th>ERP</th><th>Submitted</th></tr></thead>
-                <tbody>
-                  {bids.length === 0 && <tr><td colSpan={3} className="text-center text-muted-foreground py-8">No bids yet.</td></tr>}
-                  {bids.map((b: any) => (
-                    <tr key={b.id} className={`${lowest?.id === b.id ? "bg-success/5" : ""} group`}>
-                      <td className="font-medium whitespace-nowrap">
-                        {b.vendor?.name}
-                        {lowest?.id === b.id && <StatusBadge status="selected" className="ml-2 text-[10px]" />}
-                      </td>
-                      <td className="font-mono text-xs whitespace-nowrap">{b.vendor?.erp_code ?? <span className="text-warning">—</span>}</td>
-                      <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(b.submitted_at).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              columns={bidColumns}
+              data={bids}
+              searchable={false}
+              exportable={false}
+              hidePageSize
+              pageSize={50}
+              compact
+              emptyMessage="No bids yet."
+            />
           </div>
 
           {tender.pr && (
@@ -84,34 +120,16 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
               <div className="panel-header bg-gradient-to-r from-card to-muted/20">
                 <div className="panel-title"><FileText className="h-4.5 w-4.5 text-primary" /> Requisition items · {tender.pr.pr_number}</div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="data-table">
-                  <thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Invited categories</th></tr></thead>
-                  <tbody>
-                    {(tender.pr.items ?? []).map((it: any, i: number) => {
-                      const cats = (tender.item_categories ?? []).filter((ic: any) => ic.item_index === i);
-                      return (
-                        <tr key={i}>
-                          <td className="min-w-0 max-w-[150px] truncate font-medium">{it.name}</td>
-                          <td className="whitespace-nowrap">{it.qty}</td>
-                          <td className="whitespace-nowrap">{it.unit}</td>
-                          <td>
-                            {cats.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                {cats.map((ic: any) => (
-                                  <span key={ic.id} className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">
-                                    {ic.vendor_category?.name ?? 'Cat #'+ic.vendor_category_id}
-                                  </span>
-                                ))}
-                              </div>
-                            ) : <span className="text-xs text-muted-foreground">—</span>}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                columns={itemColumns}
+                data={tender.pr.items ?? []}
+                searchable={false}
+                exportable={false}
+                hidePageSize
+                pageSize={50}
+                compact
+                emptyMessage="No items."
+              />
             </div>
           )}
         </div>

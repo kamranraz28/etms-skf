@@ -3,45 +3,45 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Gavel } from "lucide-react";
+import { DataTable, Column } from "@/components/ui/DataTable";
+import { ChevronRight } from "lucide-react";
 
 export default function MyTenders({ rows }: any) {
+  const columns: Column[] = [
+    { key: "tender_number", label: "Tender #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.tender_number}</span> },
+    { key: "title", label: "Title", sortable: true, render: (r) => <span className="font-medium min-w-0 max-w-[200px] truncate block">{r.title}</span> },
+    { key: "deadline", label: "Deadline", sortable: true, render: (r) => <span className="text-xs whitespace-nowrap">{new Date(r.deadline).toLocaleString()}</span> },
+    { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.status} /> },
+    {
+      key: "hasBid",
+      label: "My bid",
+      sortable: false,
+      render: (r) => r.hasBid ? <span className="text-success text-xs font-semibold">Submitted</span> : <span className="text-muted-foreground text-xs">—</span>,
+    },
+    {
+      key: "actions" as string,
+      label: "Action",
+      className: "text-right",
+      exportable: false,
+      render: (r: any) => {
+        const past = new Date(r.deadline) < new Date();
+        const canBid = r.status === "open" && !past && !r.hasBid && r.vendorStatus === "active";
+        return canBid ? (
+          <Link href={`/app/my-tenders/${r.id}/bid`} onClick={(e) => e.stopPropagation()}>
+            <Button size="sm">Submit bid <ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
+          </Link>
+        ) : (
+          <span className="text-xs text-muted-foreground">{past ? "Deadline passed" : r.hasBid ? "Already bid" : r.vendorStatus !== "active" ? "Profile not active" : "Closed"}</span>
+        );
+      },
+    },
+  ];
+
   return (
     <AppShell>
       <Head title="My tenders" />
       <PageHeader title="My tenders" description="Tenders you've been invited to bid on." />
-      <div className="panel overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="data-table">
-            <thead><tr><th>Tender #</th><th>Title</th><th>Deadline</th><th>Status</th><th>My bid</th><th className="text-right">Action</th></tr></thead>
-            <tbody>
-              {rows.length === 0 && <tr><td colSpan={6} className="text-center text-muted-foreground py-12">No tenders assigned yet.</td></tr>}
-              {rows.map((t: any) => {
-                const past = new Date(t.deadline) < new Date();
-                const canBid = t.status === "open" && !past && !t.hasBid && t.vendorStatus === "active";
-                return (
-                  <tr key={t.id} className="group">
-                    <td className="font-mono text-xs whitespace-nowrap">{t.tender_number}</td>
-                    <td className="font-medium min-w-0 max-w-[200px] truncate">{t.title}</td>
-                    <td className="text-xs whitespace-nowrap">{new Date(t.deadline).toLocaleString()}</td>
-                    <td><StatusBadge status={t.status} /></td>
-                    <td className="whitespace-nowrap">{t.hasBid ? <span className="text-success text-xs font-semibold">Submitted</span> : <span className="text-muted-foreground text-xs">—</span>}</td>
-                    <td className="text-right whitespace-nowrap">
-                      {canBid ? (
-                        <Link href={`/app/my-tenders/${t.id}/bid`}><Button size="sm">Submit bid <ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button></Link>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">
-                          {past ? "Deadline passed" : t.hasBid ? "Already bid" : t.vendorStatus !== "active" ? "Profile not active" : "Closed"}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable columns={columns} data={rows} exportFilename="my-tenders" emptyMessage="No tenders assigned yet." searchPlaceholder="Search tenders..." />
     </AppShell>
   );
 }

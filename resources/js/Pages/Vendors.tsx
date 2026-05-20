@@ -2,6 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { DataTable, Column } from "@/components/ui/DataTable";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { PageSharedProps, VendorStatus } from "@/lib/types";
 import { Head, router, usePage } from "@inertiajs/react";
-import { Pencil, Plus, ShieldCheck, ShieldOff, Trash2, Search, Filter } from "lucide-react";
+import { Pencil, Plus, ShieldCheck, ShieldOff, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 export default function Vendors({ vendors, categories }: any) {
@@ -49,6 +50,29 @@ export default function Vendors({ vendors, categories }: any) {
     if (!ok) return;
     router.delete(`/app/vendors/${v.id}`, { onSuccess: () => sa.alert("Vendor deleted", `"${v.name}" has been removed.`, "success") });
   };
+
+  const baseColumns: Column[] = [
+    { key: "name", label: "Vendor", sortable: true, render: (r) => <div><div className="font-medium">{r.name}</div><div className="text-xs text-muted-foreground">{r.email}</div></div> },
+    { key: "vendor_category", label: "Category", sortable: false, render: (r) => <span className="text-xs whitespace-nowrap">{r.vendor_category?.name ?? "—"}</span> },
+    { key: "phone", label: "Phone", sortable: false, render: (r) => <span className="text-xs whitespace-nowrap">{r.phone ?? "—"}</span> },
+    { key: "erp_code", label: "ERP code", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.erp_code ?? <span className="text-warning font-medium">Not mapped</span>}</span> },
+    { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.status} /> },
+    { key: "created_at", label: "Created", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</span> },
+    ...(isAdmin ? [{
+      key: "actions" as string,
+      label: "Actions",
+      className: "text-right",
+      exportable: false,
+      render: (r: any) => (
+        <div className="inline-flex items-center gap-1">
+          {r.status !== "active" && <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setStatus(r, "active"); }} className="hover:bg-success/10"><ShieldCheck className="h-4 w-4 text-success" /></Button>}
+          {r.status !== "blacklisted" && <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setStatus(r, "blacklisted"); }} className="hover:bg-destructive/10"><ShieldOff className="h-4 w-4 text-destructive" /></Button>}
+          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); openEdit(r); }}><Pencil className="h-4 w-4" /></Button>
+          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); remove(r); }} className="hover:bg-destructive/10"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+        </div>
+      ),
+    }] : []),
+  ];
 
   return (
     <AppShell>
@@ -91,38 +115,7 @@ export default function Vendors({ vendors, categories }: any) {
           </Dialog>
         ) : null}
       />
-      <div className="panel overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="data-table">
-            <thead>
-              <tr><th>Vendor</th><th>Category</th><th>Phone</th><th>ERP code</th><th>Status</th><th>Created</th>{isAdmin && <th className="text-right">Actions</th>}</tr>
-            </thead>
-            <tbody>
-              {vendors.length === 0 && <tr><td colSpan={7} className="text-center text-muted-foreground py-12">No vendors yet.</td></tr>}
-              {vendors.map((v: any) => (
-                <tr key={v.id} className="group">
-                  <td><div className="font-medium">{v.name}</div><div className="text-xs text-muted-foreground">{v.email}</div></td>
-                  <td className="text-xs whitespace-nowrap">{v.vendor_category?.name ?? "—"}</td>
-                  <td className="text-xs whitespace-nowrap">{v.phone ?? "—"}</td>
-                  <td className="font-mono text-xs whitespace-nowrap">{v.erp_code ?? <span className="text-warning font-medium">Not mapped</span>}</td>
-                  <td><StatusBadge status={v.status} /></td>
-                  <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(v.created_at).toLocaleDateString()}</td>
-                  {isAdmin && (
-                    <td className="text-right whitespace-nowrap">
-                      <div className="inline-flex items-center gap-1">
-                        {v.status !== "active" && <Button size="sm" variant="ghost" onClick={() => setStatus(v, "active")} className="hover:bg-success/10"><ShieldCheck className="h-4 w-4 text-success" /></Button>}
-                        {v.status !== "blacklisted" && <Button size="sm" variant="ghost" onClick={() => setStatus(v, "blacklisted")} className="hover:bg-destructive/10"><ShieldOff className="h-4 w-4 text-destructive" /></Button>}
-                        <Button size="sm" variant="ghost" onClick={() => openEdit(v)}><Pencil className="h-4 w-4" /></Button>
-                        <Button size="sm" variant="ghost" onClick={() => remove(v)} className="hover:bg-destructive/10"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable columns={baseColumns} data={vendors} exportFilename="vendors" emptyMessage="No vendors yet." searchPlaceholder="Search vendors..." />
       {sa.SweetAlert}
     </AppShell>
   );

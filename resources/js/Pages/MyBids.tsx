@@ -2,42 +2,35 @@ import { Head } from "@inertiajs/react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
-import { FileText } from "lucide-react";
+import { DataTable, Column } from "@/components/ui/DataTable";
 
 export default function MyBids({ bids }: any) {
+  const columns: Column[] = [
+    { key: "tender_number", label: "Tender #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.tender?.tender_number}</span> },
+    { key: "title", label: "Title", sortable: true, render: (r) => <span className="min-w-0 max-w-[200px] truncate block font-medium">{r.tender?.title}</span> },
+    { key: "total_price", label: "Total", sortable: true, className: "text-right", render: (r) => <span className="font-mono whitespace-nowrap">{Number(r.total_price).toLocaleString()}</span> },
+    { key: "currency", label: "Currency", sortable: true, render: (r) => <span className="text-xs whitespace-nowrap">{r.currency}</span> },
+    { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
+    { key: "tender_status", label: "Tender", sortable: false, render: (r) => r.tender?.status ? <StatusBadge status={r.tender.status} /> : null },
+    {
+      key: "cs_result",
+      label: "CS result",
+      sortable: false,
+      render: (r: any) => {
+        const ci = (r.cs_items ?? [])[0];
+        const csApproved = ci?.cs?.status === "approved";
+        if (!ci) return <span className="text-xs text-muted-foreground">—</span>;
+        if (!csApproved) return <span className="text-xs text-muted-foreground">CS {ci.cs?.status}</span>;
+        return ci.selected ? <StatusBadge status="selected" /> : <StatusBadge status="not_selected" />;
+      },
+    },
+  ];
+
   return (
     <AppShell>
       <Head title="My bids" />
       <PageHeader title="My bids" description="Every bid you've submitted." />
-      <div className="panel overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="data-table">
-            <thead><tr><th>Tender #</th><th>Title</th><th className="text-right">Total</th><th>Currency</th><th>Submitted</th><th>Tender</th><th>CS result</th></tr></thead>
-            <tbody>
-              {bids.length === 0 && <tr><td colSpan={7} className="text-center text-muted-foreground py-12">No bids submitted yet.</td></tr>}
-              {bids.map((b: any) => {
-                const ci = (b.cs_items ?? [])[0];
-                const csApproved = ci?.cs?.status === "approved";
-                return (
-                  <tr key={b.id} className="group">
-                    <td className="font-mono text-xs whitespace-nowrap">{b.tender?.tender_number}</td>
-                    <td className="min-w-0 max-w-[200px] truncate font-medium">{b.tender?.title}</td>
-                    <td className="text-right font-mono whitespace-nowrap">{Number(b.total_price).toLocaleString()}</td>
-                    <td className="text-xs whitespace-nowrap">{b.currency}</td>
-                    <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(b.submitted_at).toLocaleString()}</td>
-                    <td>{b.tender?.status && <StatusBadge status={b.tender.status} />}</td>
-                    <td className="whitespace-nowrap">
-                      {!ci ? <span className="text-xs text-muted-foreground">—</span>
-                        : !csApproved ? <span className="text-xs text-muted-foreground">CS {ci.cs?.status}</span>
-                        : ci.selected ? <StatusBadge status="selected" /> : <StatusBadge status="not_selected" />}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable columns={columns} data={bids} exportFilename="my-bids" emptyMessage="No bids submitted yet." searchPlaceholder="Search bids..." />
     </AppShell>
   );
 }

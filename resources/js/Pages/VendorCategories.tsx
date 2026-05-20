@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
+import { DataTable, Column } from "@/components/ui/DataTable";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,23 @@ export default function VendorCategories({ categories }: any) {
     router.delete(`/app/vendor-categories/${c.id}`, { onSuccess: () => sa.alert("Category deleted", `"${c.name}" has been removed.`, "success") });
   };
 
+  const columns: Column[] = [
+    { key: "name", label: "Name", sortable: true },
+    { key: "created_at", label: "Created", sortable: true, render: (r) => <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span> },
+    ...(isAdmin ? [{
+      key: "actions" as string,
+      label: "Actions",
+      className: "text-right",
+      exportable: false,
+      render: (r: any) => (
+        <div className="inline-flex items-center gap-1">
+          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); openEdit(r); }}><Pencil className="h-4 w-4" /></Button>
+          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); remove(r); }} className="hover:bg-destructive/10"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+        </div>
+      ),
+    }] : []),
+  ];
+
   return (
     <AppShell>
       <Head title="Vendor Categories" />
@@ -59,30 +77,7 @@ export default function VendorCategories({ categories }: any) {
           </Dialog>
         ) : null}
       />
-      <div className="panel overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="data-table">
-            <thead><tr><th><Tag className="h-3.5 w-3.5 inline mr-1" /> Name</th><th>Created</th>{isAdmin && <th className="text-right">Actions</th>}</tr></thead>
-            <tbody>
-              {categories.length === 0 && <tr><td colSpan={3} className="text-center text-muted-foreground py-12">No categories yet.</td></tr>}
-              {categories.map((c: any) => (
-                <tr key={c.id} className="group">
-                  <td className="font-medium">{c.name}</td>
-                  <td className="text-xs text-muted-foreground whitespace-nowrap">{new Date(c.created_at).toLocaleDateString()}</td>
-                  {isAdmin && (
-                    <td className="text-right whitespace-nowrap">
-                      <div className="inline-flex items-center gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => openEdit(c)}><Pencil className="h-4 w-4" /></Button>
-                        <Button size="sm" variant="ghost" onClick={() => remove(c)} className="hover:bg-destructive/10"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable columns={columns} data={categories} exportFilename="vendor-categories" emptyMessage="No categories yet." />
       {sa.SweetAlert}
     </AppShell>
   );

@@ -88,30 +88,38 @@ export default function SubmitBid({ tender, vendor }: any) {
           )}
           {items.length > 0 && (
             <>
-              <div className="overflow-x-auto">
-                <table className="data-table">
-                  <thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Unit price (BDT)</th><th className="text-right">Line total</th></tr></thead>
-                  <tbody>
+              <div className="overflow-x-auto rounded-xl border border-border/60">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-muted/40 to-muted/20">
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Item</th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Qty</th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Unit</th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Unit price (BDT)</th>
+                      <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Line total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/30">
                     {items.map((it, i) => (
-                      <tr key={i}>
-                        <td className="font-medium">{it.name}</td>
-                        <td>{it.qty}</td>
-                        <td>{it.unit}</td>
-                        <td>
+                      <tr key={i} className="hover:bg-muted/20 transition-colors">
+                        <td className="px-4 py-3 font-medium">{it.name}</td>
+                        <td className="px-4 py-3">{it.qty}</td>
+                        <td className="px-4 py-3">{it.unit}</td>
+                        <td className="px-4 py-3">
                           <Input type="number" min="0" step="0.01" className="h-9 w-32"
                             value={prices[`${it.name}_${i}`] ?? ""}
                             onChange={(e) => setPrices({ ...prices, [`${it.name}_${i}`]: e.target.value })} />
                         </td>
-                        <td className="text-right font-mono font-medium">
+                        <td className="px-4 py-3 text-right font-mono font-medium">
                           {(Number(prices[`${it.name}_${i}`] || 0) * it.qty).toFixed(2)}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="font-bold bg-muted/30">
-                      <td colSpan={4} className="text-right px-4 py-3">Total bid value</td>
-                      <td className="text-right font-mono px-4 py-3 text-lg">{total.toFixed(2)} BDT</td>
+                    <tr className="font-bold bg-gradient-to-r from-muted/30 to-muted/10">
+                      <td colSpan={4} className="text-right px-4 py-3.5 text-sm text-muted-foreground">Total bid value</td>
+                      <td className="text-right font-mono px-4 py-3.5 text-lg">{total.toFixed(2)} BDT</td>
                     </tr>
                   </tfoot>
                 </table>

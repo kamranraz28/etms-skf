@@ -2,6 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { DataTable, Column } from "@/components/ui/DataTable";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSharedProps } from "@/lib/types";
@@ -10,12 +11,7 @@ import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle, Scale, FileTe
 import { useMemo, useState } from "react";
 
 export default function CSShow({
-  cs,
-  items,
-  selections,
-  approvals,
-  erpLogs,
-  prItems,
+  cs, items, selections, approvals, erpLogs, prItems,
 }: any) {
   const { props } = usePage<PageSharedProps>();
   const primary = props.auth.user?.primary_role;
@@ -27,16 +23,13 @@ export default function CSShow({
 
   const matrix = useMemo(() => {
     const m: Record<number, any[]> = {};
-    selections.forEach((s: any) => {
-      (m[s.item_index] ??= []).push(s);
-    });
+    selections.forEach((s: any) => { (m[s.item_index] ??= []).push(s); });
     return m;
   }, [selections]);
+
   const vendorsInCs: any[] = useMemo(() => {
     const seen = new Map<string, any>();
-    selections.forEach((s: any) => {
-      if (!seen.has(s.vendor_id)) seen.set(s.vendor_id, s.vendor);
-    });
+    selections.forEach((s: any) => { if (!seen.has(s.vendor_id)) seen.set(s.vendor_id, s.vendor); });
     return Array.from(seen.values());
   }, [selections]);
 
@@ -48,8 +41,7 @@ export default function CSShow({
     });
   const decide = (decision: "approved" | "rejected") => {
     const title = decision === "approved" ? "Approve CS?" : "Reject CS?";
-    const desc = decision === "approved" ? "This will mark the CS as approved." : "This will mark the CS as rejected.";
-    sa.confirmAction(title, desc, decision === "approved" ? "Approve" : "Reject").then((ok) => {
+    sa.confirmAction(title, decision === "approved" ? "This will mark the CS as approved." : "This will mark the CS as rejected.", decision === "approved" ? "Approve" : "Reject").then((ok) => {
       if (ok) router.post(`/app/cs/${cs.id}/decide`, { decision, comment }, {
         onSuccess: () => { setComment(""); sa.alert(decision === "approved" ? "CS approved" : "CS rejected", "...", decision === "approved" ? "success" : "warning"); },
       });
@@ -63,6 +55,45 @@ export default function CSShow({
   const lowest = items[0];
   const lastErp = erpLogs[0];
   const erpDone = lastErp?.status === "success";
+
+  const comparisonColumns: Column[] = [
+    {
+      key: "rank",
+      label: "Rank",
+      sortable: true,
+      render: (r: any) => (
+        <span className="font-mono text-xs whitespace-nowrap">
+          L{r.rank}
+          {r.rank === 1 && <span className="ml-1 text-[10px] uppercase text-success font-semibold">low</span>}
+        </span>
+      ),
+    },
+    { key: "vendor_name", label: "Vendor", sortable: false, render: (r: any) => <span className="font-medium whitespace-nowrap">{r.vendor?.name}</span> },
+    { key: "erp_code", label: "ERP", sortable: false, render: (r: any) => <span className="font-mono text-xs whitespace-nowrap">{r.vendor?.erp_code ?? <span className="text-warning">—</span>}</span> },
+    { key: "total_price", label: "Total price", sortable: true, className: "text-right", render: (r) => <span className="font-mono whitespace-nowrap">{Number(r.total_price).toLocaleString()}</span> },
+    { key: "selected", label: "Status", sortable: false, render: (r) => r.selected ? <StatusBadge status="selected" /> : <span className="text-xs text-muted-foreground">—</span> },
+  ];
+
+  const approvalColumns: Column[] = [
+    {
+      key: "step",
+      label: "Step",
+      sortable: false,
+      render: (a: any) => (
+        <div className="flex items-center gap-2">
+          {a.decision === "approved" ? (
+            <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+          ) : (
+            <XCircle className="h-4 w-4 text-destructive shrink-0" />
+          )}
+          <span className="font-bold uppercase text-xs">{a.step}</span>
+        </div>
+      ),
+    },
+    { key: "decision", label: "Decision", sortable: false, render: (a) => <span>{a.decision}</span> },
+    { key: "acted_at", label: "Date", sortable: true, render: (a) => <span className="text-xs text-muted-foreground">{new Date(a.acted_at).toLocaleString()}</span> },
+    { key: "comment", label: "Comment", sortable: false, render: (a) => a.comment ? <span className="text-xs text-muted-foreground italic">"{a.comment}"</span> : <span className="text-xs text-muted-foreground">—</span> },
+  ];
 
   return (
     <AppShell>
@@ -82,26 +113,17 @@ export default function CSShow({
             <div className="panel-header bg-gradient-to-r from-card to-muted/20">
               <div className="panel-title"><Scale className="h-4.5 w-4.5 text-accent" /> Bid comparison (vendor totals)</div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="data-table">
-                <thead><tr><th>Rank</th><th>Vendor</th><th>ERP</th><th className="text-right">Total price</th><th>Status</th></tr></thead>
-                <tbody>
-                  {items.length === 0 && <tr><td colSpan={5} className="text-center text-muted-foreground py-8">No bids.</td></tr>}
-                  {items.map((it: any) => (
-                    <tr key={it.id} className={lowest?.id === it.id ? "bg-success/5" : ""}>
-                      <td className="font-mono text-xs whitespace-nowrap">
-                        L{it.rank}
-                        {it.rank === 1 && <span className="ml-1 text-[10px] uppercase text-success font-semibold">low</span>}
-                      </td>
-                      <td className="font-medium whitespace-nowrap">{it.vendor?.name}</td>
-                      <td className="font-mono text-xs whitespace-nowrap">{it.vendor?.erp_code ?? <span className="text-warning">—</span>}</td>
-                      <td className="text-right font-mono whitespace-nowrap">{Number(it.total_price).toLocaleString()}</td>
-                      <td>{it.selected ? <StatusBadge status="selected" /> : <span className="text-xs text-muted-foreground">—</span>}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              columns={comparisonColumns}
+              data={items}
+              rowClassName={(r: any) => lowest?.id === r.id ? "bg-success/5" : ""}
+              searchable={false}
+              exportable={false}
+              hidePageSize
+              pageSize={50}
+              compact
+              emptyMessage="No bids."
+            />
           </div>
 
           <div className="panel overflow-hidden">
@@ -109,22 +131,30 @@ export default function CSShow({
               <div className="panel-title"><FileText className="h-4.5 w-4.5 text-primary" /> Per-item award matrix</div>
             </div>
             <div className="overflow-x-auto">
-              <table className="data-table">
-                <thead><tr><th>Item</th><th>Qty</th>{vendorsInCs.map((v) => (<th key={v.id} className="text-right whitespace-nowrap">{v.name}</th>))}</tr></thead>
-                <tbody>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gradient-to-r from-muted/40 to-muted/20">
+                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Item</th>
+                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Qty</th>
+                    {vendorsInCs.map((v) => (
+                      <th key={v.id} className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 whitespace-nowrap">{v.name}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/30">
                   {prItems.map((pr: any, idx: number) => {
                     const row = matrix[idx] ?? [];
                     const lowestUnit = Math.min(...row.map((r: any) => Number(r.unit_price)));
                     return (
-                      <tr key={idx}>
-                        <td className="whitespace-nowrap font-medium">{pr.name}</td>
-                        <td className="text-xs whitespace-nowrap">{pr.qty} {pr.unit}</td>
+                      <tr key={idx} className="hover:bg-muted/20 transition-colors">
+                        <td className="px-4 py-3 whitespace-nowrap font-medium">{pr.name}</td>
+                        <td className="px-4 py-3 text-xs whitespace-nowrap">{pr.qty} {pr.unit}</td>
                         {vendorsInCs.map((v) => {
                           const s = row.find((r: any) => r.vendor_id === v.id);
-                          if (!s) return <td key={v.id} className="text-right text-xs text-muted-foreground">—</td>;
+                          if (!s) return <td key={v.id} className="px-4 py-3 text-right text-xs text-muted-foreground">—</td>;
                           const isLow = Number(s.unit_price) === lowestUnit;
                           return (
-                            <td key={v.id} className={`text-right whitespace-nowrap ${isLow ? "bg-success/5" : ""}`}>
+                            <td key={v.id} className={`px-4 py-3 text-right whitespace-nowrap ${isLow ? "bg-success/5" : ""}`}>
                               <div className="font-mono text-xs">
                                 {Number(s.unit_price).toLocaleString()}
                                 {isLow && <span className="ml-1 text-[10px] uppercase text-success font-semibold">low</span>}
@@ -152,25 +182,16 @@ export default function CSShow({
             <div className="panel-header bg-gradient-to-r from-card to-muted/20">
               <div className="panel-title"><UserCheck className="h-4.5 w-4.5 text-accent" /> Approval history</div>
             </div>
-            <ul className="divide-y divide-border/40">
-              {approvals.length === 0 && <li className="px-5 py-4 text-sm text-muted-foreground">No actions yet.</li>}
-              {approvals.map((a: any) => (
-                <li key={a.id} className="px-5 py-4 flex items-start gap-3 hover:bg-muted/10 transition-colors">
-                  {a.decision === "approved" ? (
-                    <CheckCircle2 className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
-                  )}
-                  <div className="text-sm min-w-0">
-                    <div>
-                      <span className="font-bold uppercase text-xs">{a.step}</span> · {a.decision}
-                      <span className="ml-2 text-xs text-muted-foreground">{new Date(a.acted_at).toLocaleString()}</span>
-                    </div>
-                    {a.comment && <div className="text-xs text-muted-foreground mt-0.5 italic">"{a.comment}"</div>}
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <DataTable
+              columns={approvalColumns}
+              data={approvals}
+              searchable={false}
+              exportable={false}
+              hidePageSize
+              pageSize={50}
+              compact
+              emptyMessage="No actions yet."
+            />
           </div>
         </div>
 
