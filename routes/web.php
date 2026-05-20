@@ -11,13 +11,8 @@ use App\Http\Controllers\BidController;
 use App\Http\Controllers\CsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorProfileController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ClaimController;
-
-Route::get('/', [HomeController::class, 'index'])->name('home');
-
-// Auth
 Route::middleware('guest')->group(function () {
+    Route::get('/', [AuthController::class, 'show'])->name('home');
     Route::get('/auth', [AuthController::class, 'show'])->name('auth.show');
     Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
     Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
