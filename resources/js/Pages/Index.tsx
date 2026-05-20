@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Head, Link } from "@inertiajs/react";
-import { ArrowRight, Building2, FileStack, Gavel, ShieldCheck, TrendingUp, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 
 export default function Index() {
   return (
@@ -23,8 +23,11 @@ export default function Index() {
               </div>
             </Link>
             <Link href="/auth">
-              <Button variant="outline" size="sm"
-                className="bg-white/10 text-white border-white/20 hover:bg-white hover:text-[#0a2942] transition-all duration-200 backdrop-blur-sm">
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white/10 text-white border-white/20 hover:bg-white hover:text-[#0a2942] transition-all duration-200 backdrop-blur-sm"
+              >
                 Sign in
               </Button>
             </Link>
@@ -67,66 +70,12 @@ export default function Index() {
           </div>
         </section>
 
-        {/* Features */}
-        <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
-          <div className="container">
-            <div className="text-center mb-14 animate-fade-in">
-              <h2 className="text-3xl font-bold text-[#0a2942] tracking-tight">Key Modules</h2>
-              <p className="text-sm text-gray-500 mt-2 max-w-lg mx-auto">
-                End-to-end procurement digitization for Eskayef
-              </p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
-              {[
-                { icon: Building2, title: "Vendor Management", desc: "Lifecycle from registration to ERP code mapping. Active / Inactive / Blacklisted.", color: "from-blue-500/10 to-blue-500/5", iconColor: "text-blue-600" },
-                { icon: FileStack, title: "PR Sync", desc: "Mock ERP feed; convert requisitions into tenders in one click.", color: "from-purple-500/10 to-purple-500/5", iconColor: "text-purple-600" },
-                { icon: Gavel, title: "Tender & Bidding", desc: "Invite vendors, enforce deadlines, collect priced bids with documents.", color: "from-orange-500/10 to-orange-500/5", iconColor: "text-orange-600" },
-                { icon: ShieldCheck, title: "Role Separation", desc: "Hardened policies — admins, procurement, approvers and vendors see only what they should.", color: "from-green-500/10 to-green-500/5", iconColor: "text-green-600" },
-              ].map((m) => (
-                <div key={m.title}
-                  className="group bg-white rounded-2xl border border-gray-200/60 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-default">
-                  <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${m.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                    <m.icon className={`h-6 w-6 ${m.iconColor}`} />
-                  </div>
-                  <div className="font-bold text-sm text-[#0a2942]">{m.title}</div>
-                  <div className="text-xs text-gray-500 mt-2 leading-relaxed">{m.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Stats */}
-        <section className="py-20 bg-[#0a2942] text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a2942] to-[#051c2e] opacity-50" />
-          <div className="container text-center relative z-10">
-            <h2 className="text-2xl font-bold text-white tracking-tight">
-              Excellence Through Quality
-            </h2>
-            <p className="text-white/60 mt-2 max-w-xl mx-auto text-sm">
-              Ethical practices in every step of operation following the vision of our Founder Chairman.
-            </p>
-            <div className="grid md:grid-cols-3 gap-8 mt-12 stagger-children">
-              {[
-                { num: "500+", label: "Active Vendors", icon: TrendingUp },
-                { num: "1,200+", label: "Tenders Processed", icon: Gavel },
-                { num: "99.9%", label: "Uptime", icon: ShieldCheck },
-              ].map((s) => (
-                <div key={s.label}
-                  className="text-center border border-white/10 rounded-2xl p-8 hover:border-white/20 hover:shadow-2xl hover:shadow-black/20 transition-all duration-300 hover:-translate-y-1">
-                  <s.icon className="h-8 w-8 text-[#e31e24] mx-auto mb-4" />
-                  <div className="text-3xl font-bold text-[#e31e24]">{s.num}</div>
-                  <div className="text-sm text-white/60 mt-1">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* CTA */}
         <section className="py-20 bg-gradient-to-b from-white to-gray-50">
           <div className="container text-center">
-            <h2 className="text-2xl font-bold text-[#0a2942] tracking-tight">Ready to get started?</h2>
+            <h2 className="text-2xl font-bold text-[#0a2942] tracking-tight">
+              Ready to get started?
+            </h2>
             <p className="text-sm text-gray-500 mt-2 max-w-md mx-auto">
               Sign in to access the full procurement management suite.
             </p>
@@ -152,7 +101,8 @@ export default function Index() {
             </div>
             <p>Excellence through Quality — ETMS Procurement Suite</p>
             <p className="mt-1">
-              &copy; {new Date().getFullYear()} Eskayef Pharmaceuticals Limited. All rights reserved.
+              &copy; {new Date().getFullYear()} Eskayef Pharmaceuticals Limited.
+              All rights reserved.
             </p>
           </div>
         </footer>
