@@ -134,130 +134,155 @@ export function AppShell({ children }: { children: ReactNode }) {
   const sidebar = (
     <aside
       className={cn(
-        "h-full bg-sidebar text-sidebar-foreground flex flex-col border-r border-sidebar-border shrink-0 smooth-transition-fast",
+        "relative h-full bg-sidebar text-sidebar-foreground flex flex-col border-r border-sidebar-border shrink-0",
+        "transition-[width] duration-300 ease-in-out",
         collapsed ? "w-16" : "w-60",
       )}
     >
-      <div
-        className={cn(
-          "px-4 py-4 border-b border-sidebar-border/50 flex items-center",
-          collapsed ? "justify-center" : "justify-between",
-        )}
-      >
-        <Link
-          href="/app"
+      <div className="flex flex-col h-full overflow-hidden">
+        <div
           className={cn(
-            "flex items-center gap-2.5 hover-scale group",
-            collapsed && "justify-center",
+            "px-4 py-4 border-b border-sidebar-border/50 flex items-center shrink-0 overflow-hidden",
+            collapsed ? "justify-center" : "justify-between",
           )}
         >
-          <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center shadow-lg shadow-sidebar-primary/20 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-sidebar-primary/30 group-hover:scale-110 p-0.5">
-            <img src="/images/logo.png" alt="ETMS" className="h-full w-full object-contain" />
-          </div>
-          {!collapsed && (
-            <div className="transition-opacity duration-300">
+          <Link
+            href="/app"
+            className="flex items-center gap-2.5 hover-scale group overflow-hidden"
+          >
+            <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center shadow-lg shadow-sidebar-primary/20 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-sidebar-primary/30 group-hover:scale-110 p-0.5 shrink-0">
+              <img src="/images/logo.png" alt="ETMS" className="h-full w-full object-contain" />
+            </div>
+            <div className={cn(
+              "transition-all duration-300 overflow-hidden whitespace-nowrap",
+              collapsed ? "max-w-0 opacity-0" : "max-w-[160px] opacity-100",
+            )}>
               <div className="text-sm font-bold leading-tight">ETMS</div>
               <div className="text-[10px] uppercase tracking-wider text-sidebar-foreground/50">
                 Procurement Suite
               </div>
             </div>
-          )}
-        </Link>
-        <button
-          onClick={() => setSidebarOpen(false)}
-          className="lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground transition-all duration-200 hover:scale-110"
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
+          </Link>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground transition-all duration-200 hover:scale-110"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
-      <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden no-scrollbar">
-        {!collapsed && (
-          <div className="px-5 pb-2 text-[10px] uppercase tracking-wider text-sidebar-foreground/40 font-semibold">
+        <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden no-scrollbar">
+          <div className={cn(
+            "px-5 pb-2 text-[10px] uppercase tracking-wider text-sidebar-foreground/40 font-semibold transition-all duration-300 overflow-hidden whitespace-nowrap",
+            collapsed ? "max-h-0 opacity-0 py-0" : "max-h-8 opacity-100",
+          )}>
             Workspace
           </div>
-        )}
-        <div className="space-y-0.5 px-2">
-          {items.map((it, idx) => {
-            const isActive =
-              it.href === "/app" ? url === "/app" : url.startsWith(it.href);
-            return (
-              <Link
-                key={it.href}
-                href={it.href}
-                onClick={() => setSidebarOpen(false)}
-                className={cn(
-                  "nav-item sidebar-item relative",
-                  collapsed && "justify-center px-2",
-                  isActive
-                    ? "bg-gradient-to-r from-sidebar-accent to-sidebar-accent/80 text-sidebar-accent-foreground font-medium shadow-md hover:shadow-lg"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
-                )}
-                style={{
-                  animationDelay: `${idx * 0.05}s`,
-                }}
-              >
-                <span
+          <div className="space-y-0.5 px-2">
+            {items.map((it, idx) => {
+              const isActive =
+                it.href === "/app" ? url === "/app" : url.startsWith(it.href);
+              return (
+                <Link
+                  key={it.href}
+                  href={it.href}
+                  onClick={() => setSidebarOpen(false)}
                   className={cn(
-                    "shrink-0 transition-transform duration-300",
-                    isActive && "drop-shadow-sm scale-110",
+                    "nav-item sidebar-item relative group/item",
+                    collapsed ? "justify-center px-2" : "px-3",
+                    isActive
+                      ? "bg-gradient-to-r from-sidebar-accent to-sidebar-accent/80 text-sidebar-accent-foreground font-medium shadow-md"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
                   )}
+                  style={{
+                    animationDelay: `${idx * 0.05}s`,
+                  }}
                 >
-                  {it.icon}
-                </span>
-                {!collapsed && (
-                  <span className="truncate transition-all duration-200">
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-sidebar-primary shadow-md shadow-sidebar-primary/50" />
+                  )}
+                  <span
+                    className={cn(
+                      "shrink-0 transition-all duration-300 z-10",
+                      isActive && "drop-shadow-sm scale-110",
+                    )}
+                  >
+                    {it.icon}
+                  </span>
+                  <span className={cn(
+                    "truncate transition-all duration-300 overflow-hidden whitespace-nowrap z-10",
+                    collapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100 ml-2",
+                  )}>
                     {it.label}
                   </span>
-                )}
-                {isActive && !collapsed && (
-                  <span className="ml-auto h-2 w-2 rounded-full bg-sidebar-primary animate-pulse-soft shadow-lg shadow-sidebar-primary/50" />
-                )}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+                  {isActive && (
+                    <span className={cn(
+                      "ml-auto h-2 w-2 rounded-full bg-sidebar-primary animate-pulse-soft shadow-lg shadow-sidebar-primary/50 shrink-0 z-10 transition-all duration-300",
+                      collapsed ? "absolute -top-0.5 -right-0.5" : "",
+                    )} />
+                  )}
+                  <div className={cn(
+                    "absolute left-full ml-2 px-2.5 py-1.5 rounded-md shadow-lg whitespace-nowrap z-50 pointer-events-none border border-sidebar-border/50",
+                    "bg-sidebar text-sidebar-foreground text-xs font-medium",
+                    "transition-all duration-200",
+                    "opacity-0 invisible -translate-x-1",
+                    "group-hover/item:opacity-100 group-hover/item:visible group-hover/item:translate-x-0",
+                    collapsed ? "block" : "hidden",
+                  )}>
+                    {it.label}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
 
-      <div
-        className={cn(
-          "border-t border-sidebar-border/50 p-3 space-y-2",
-          collapsed && "text-center",
-        )}
-      >
-        {!collapsed && (
-          <>
+        <div
+          className={cn(
+            "border-t border-sidebar-border/50 p-3 space-y-2 shrink-0 overflow-hidden",
+            collapsed && "text-center",
+          )}
+        >
+          <div className={cn(
+            "transition-all duration-300 overflow-hidden whitespace-nowrap",
+            collapsed ? "max-h-0 opacity-0" : "max-h-12 opacity-100",
+          )}>
             <div className="text-xs text-sidebar-foreground/60 truncate font-medium">
               {user?.full_name || user?.email}
             </div>
             <div className="text-[10px] uppercase tracking-wider text-sidebar-foreground/40">
               {primary}
             </div>
-          </>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={signOut}
-          className={cn(
-            "text-sidebar-foreground/60 hover:bg-gradient-to-r hover:from-sidebar-accent/50 hover:to-sidebar-accent/30 hover:text-sidebar-accent-foreground transition-all duration-200 group",
-            collapsed ? "w-9 h-9 p-0 justify-center" : "w-full justify-start",
-          )}
-        >
-          <LogOut className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
-          {!collapsed && <span>Sign out</span>}
-        </Button>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={signOut}
+            className={cn(
+              "text-sidebar-foreground/60 hover:bg-gradient-to-r hover:from-sidebar-accent/50 hover:to-sidebar-accent/30 hover:text-sidebar-accent-foreground transition-all duration-200 group",
+              collapsed ? "w-9 h-9 p-0 justify-center mx-auto" : "w-full justify-start",
+            )}
+          >
+            <LogOut className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
+            <span className={cn(
+              "transition-all duration-300 overflow-hidden whitespace-nowrap",
+              collapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[100px] opacity-100 ml-2",
+            )}>
+              Sign out
+            </span>
+          </Button>
+        </div>
       </div>
 
-      {/* Collapse toggle with smooth animation */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="hidden lg:flex items-center justify-center h-8 border-t border-sidebar-border/30 text-sidebar-foreground/40 hover:text-sidebar-foreground/80 transition-all duration-300 hover:bg-sidebar-accent/20 group"
+        className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 z-40 h-6 w-6 items-center justify-center rounded-full bg-sidebar border border-sidebar-border text-sidebar-foreground/60 shadow-md hover:shadow-lg hover:text-sidebar-foreground hover:border-sidebar-primary/30 transition-all duration-200 hover:scale-110"
+        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         {collapsed ? (
-          <ChevronRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+          <ChevronRight className="h-3 w-3" />
         ) : (
-          <ChevronLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" />
+          <ChevronLeft className="h-3 w-3" />
         )}
       </button>
     </aside>
@@ -265,10 +290,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-background via-background to-muted/30">
-      {/* Desktop sidebar */}
       <div className="hidden lg:flex">{sidebar}</div>
 
-      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
@@ -281,7 +304,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
         <header className="h-14 border-b border-border/60 bg-card/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-6 justify-between gap-2 shadow-sm smooth-transition hover:shadow-md">
           <div className="flex items-center gap-3 min-w-0">
             <button

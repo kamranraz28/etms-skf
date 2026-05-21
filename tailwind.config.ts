@@ -140,6 +140,10 @@ export default {
           "70%": { boxShadow: "0 0 0 10px rgba(255, 255, 255, 0)" },
           "100%": { boxShadow: "0 0 0 0 rgba(255, 255, 255, 0)" },
         },
+        "tooltip-in": {
+          from: { opacity: "0", transform: "translateX(-4px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
@@ -156,6 +160,7 @@ export default {
         "spin-slow": "spin-slow 3s linear infinite",
         "bounce-soft": "bounce-soft 2s ease-in-out infinite",
         "pulse-ring": "pulse-ring 2s ease-in-out infinite",
+        "tooltip-in": "tooltip-in 0.2s ease-out",
       },
     },
   },
