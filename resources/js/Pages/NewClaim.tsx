@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Head, router } from "@inertiajs/react";
-import { ArrowLeft, Plus, X, Receipt, FileText } from "lucide-react";
+import { ArrowLeft, Plus, X, Receipt, FileText, Building2 } from "lucide-react";
 import { useState } from "react";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
