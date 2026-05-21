@@ -77,7 +77,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
               </div>
             ) : (
               <div className="space-y-1.5">
-                <Label>From Purchase Requisition</Label>
+                <Label>From Purchase Requisition <span className="text-destructive">*</span></Label>
                 <select value={prId} onChange={(e)=>setPrId(e.target.value)}
                   className={cn("w-full h-10 rounded-lg border bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring", errors.pr_id && "border-destructive")}>
                   <option value="">— Select PR —</option>
@@ -88,18 +88,18 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Tender number</Label>
+                <Label>Tender number <span className="text-destructive">*</span></Label>
                 <Input className={errors.tender_number && "border-destructive focus-visible:ring-destructive"} value={tenderNumber} onChange={(e)=>setTenderNumber(e.target.value)} />
                 {errors.tender_number && <p className="text-xs text-destructive">{errors.tender_number}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Submission deadline</Label>
+                <Label>Submission deadline <span className="text-destructive">*</span></Label>
                 <Input type="datetime-local" className={errors.deadline && "border-destructive focus-visible:ring-destructive"} value={deadline} onChange={(e)=>setDeadline(e.target.value)} />
                 {errors.deadline && <p className="text-xs text-destructive">{errors.deadline}</p>}
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Title</Label>
+              <Label>Title <span className="text-destructive">*</span></Label>
               <Input className={errors.title && "border-destructive focus-visible:ring-destructive"} value={title} onChange={(e)=>setTitle(e.target.value)} />
               {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
             </div>

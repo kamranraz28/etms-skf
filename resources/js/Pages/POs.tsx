@@ -86,22 +86,22 @@ export default function POs({ pos }: any) {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label>PO number</Label>
+                      <Label>PO number <span className="text-destructive">*</span></Label>
                       <Input className={errors.po_number && "border-destructive focus-visible:ring-destructive"} value={form.po_number} onChange={(e)=>setForm({...form, po_number:e.target.value})} placeholder="PO-2026-001" />
                       {errors.po_number && <p className="text-xs text-destructive">{errors.po_number}</p>}
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Vendor ERP code</Label>
+                      <Label>Vendor ERP code <span className="text-destructive">*</span></Label>
                       <Input className={errors.vendor_erp_code && "border-destructive focus-visible:ring-destructive"} value={form.vendor_erp_code} onChange={(e)=>setForm({...form, vendor_erp_code:e.target.value})} />
                       {errors.vendor_erp_code && <p className="text-xs text-destructive">{errors.vendor_erp_code}</p>}
                     </div>
                     <div className="space-y-1.5">
-                      <Label>PO date</Label>
+                      <Label>PO date <span className="text-destructive">*</span></Label>
                       <Input type="date" className={errors.po_date && "border-destructive focus-visible:ring-destructive"} value={form.po_date} onChange={(e)=>setForm({...form, po_date:e.target.value})} />
                       {errors.po_date && <p className="text-xs text-destructive">{errors.po_date}</p>}
                     </div>
                     <div className="sm:col-span-2 space-y-1.5">
-                      <Label>Items <span className="text-xs text-muted-foreground">(one per line · Name | Qty | Unit Price)</span></Label>
+                      <Label>Items <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground">(one per line · Name | Qty | Unit Price)</span></Label>
                       <Textarea rows={4} className={errors.items && "border-destructive focus-visible:ring-destructive"} value={form.items} onChange={(e)=>setForm({...form, items:e.target.value})} placeholder="Cisco Switch | 6 | 25000" />
                       {errors.items && <p className="text-xs text-destructive">{errors.items}</p>}
                     </div>

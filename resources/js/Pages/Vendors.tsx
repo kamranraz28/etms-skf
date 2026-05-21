@@ -90,22 +90,22 @@ export default function Vendors({ vendors, categories }: any) {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>Name</Label>
+                    <Label>Name <span className="text-destructive">*</span></Label>
                     <Input className={errors.name && "border-destructive focus-visible:ring-destructive"} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
                     {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Email</Label>
+                    <Label>Email <span className="text-destructive">*</span></Label>
                     <Input type="email" className={errors.email && "border-destructive focus-visible:ring-destructive"} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
                     {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Phone</Label>
+                    <Label>Phone <span className="text-destructive">*</span></Label>
                     <Input className={errors.phone && "border-destructive focus-visible:ring-destructive"} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
                     {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Status</Label>
+                    <Label>Status <span className="text-destructive">*</span></Label>
                     <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as VendorStatus })}
                       className={cn("w-full h-10 rounded-lg border bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring", errors.status && "border-destructive")}>
                       <option value="pending">Pending</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="blacklisted">Blacklisted</option>
@@ -113,7 +113,7 @@ export default function Vendors({ vendors, categories }: any) {
                     {errors.status && <p className="text-xs text-destructive">{errors.status}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Category</Label>
+                    <Label>Category <span className="text-destructive">*</span></Label>
                     <select value={form.vendor_category_id} onChange={(e) => setForm({ ...form, vendor_category_id: e.target.value })}
                       className={cn("w-full h-10 rounded-lg border bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring", errors.vendor_category_id && "border-destructive")}>
                       <option value="">Select a category</option>

@@ -88,7 +88,7 @@ export default function PRs({ prs }: any) {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label>PR number</Label>
+                      <Label>PR number <span className="text-destructive">*</span></Label>
                       <Input className={errors.pr_number && "border-destructive focus-visible:ring-destructive"} value={form.pr_number} onChange={(e)=>setForm({...form, pr_number:e.target.value})} placeholder="PR-2025-010" />
                       {errors.pr_number && <p className="text-xs text-destructive">{errors.pr_number}</p>}
                     </div>
@@ -98,12 +98,12 @@ export default function PRs({ prs }: any) {
                       {errors.department && <p className="text-xs text-destructive">{errors.department}</p>}
                     </div>
                     <div className="sm:col-span-2 space-y-1.5">
-                      <Label>Title</Label>
+                      <Label>Title <span className="text-destructive">*</span></Label>
                       <Input className={errors.title && "border-destructive focus-visible:ring-destructive"} value={form.title} onChange={(e)=>setForm({...form, title:e.target.value})} />
                       {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
                     </div>
                     <div className="sm:col-span-2 space-y-1.5">
-                      <Label>Items <span className="text-xs text-muted-foreground">(one per line · Name | Qty | Unit)</span></Label>
+                      <Label>Items <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground">(one per line · Name | Qty | Unit)</span></Label>
                       <Textarea rows={4} className={errors.items && "border-destructive focus-visible:ring-destructive"} value={form.items} onChange={(e)=>setForm({...form, items:e.target.value})} placeholder="Dell Latitude 5440 | 15 | pcs" />
                       {errors.items && <p className="text-xs text-destructive">{errors.items}</p>}
                     </div>
