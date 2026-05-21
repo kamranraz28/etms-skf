@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { LogIn, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 export default function Auth() {
@@ -57,17 +58,19 @@ export default function Auth() {
             <div className="bg-card border border-border/60 rounded-2xl p-8 shadow-elevated">
               <form onSubmit={(e) => { e.preventDefault(); signIn.post("/auth/login"); }} className="space-y-5">
                 <div className="space-y-1.5">
-                  <Label htmlFor="si-email">Email</Label>
-                  <Input id="si-email" type="email" required value={signIn.data.email} onChange={(e) => signIn.setData("email", e.target.value)} placeholder="you@eskayef.com" />
+                  <Label htmlFor="si-email">Email <span className="text-destructive">*</span></Label>
+                  <Input id="si-email" type="email" required value={signIn.data.email} onChange={(e) => signIn.setData("email", e.target.value)} placeholder="you@eskayef.com" className={signIn.errors.email && "border-destructive focus-visible:ring-destructive"} />
+                  {signIn.errors.email && <p className="text-xs text-destructive">{signIn.errors.email}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="si-pwd">Password</Label>
+                  <Label htmlFor="si-pwd">Password <span className="text-destructive">*</span></Label>
                   <div className="relative">
-                    <Input id="si-pwd" type={showPassword ? "text" : "password"} required value={signIn.data.password} onChange={(e) => signIn.setData("password", e.target.value)} placeholder="••••••••" className="pr-10" />
+                    <Input id="si-pwd" type={showPassword ? "text" : "password"} required value={signIn.data.password} onChange={(e) => signIn.setData("password", e.target.value)} placeholder="••••••••" className={cn("pr-10", signIn.errors.password && "border-destructive focus-visible:ring-destructive")} />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                  {signIn.errors.password && <p className="text-xs text-destructive">{signIn.errors.password}</p>}
                 </div>
                 <Button type="submit" disabled={signIn.processing} className="w-full h-11 text-base">
                   {signIn.processing ? (
