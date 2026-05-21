@@ -12,4 +12,5 @@ return [
     'key' => env('APP_KEY'),
     'previous_keys' => [],
     'maintenance' => ['driver' => 'file'],
+    'login_alert_email' => env('LOGIN_ALERT_EMAIL'),
 ];

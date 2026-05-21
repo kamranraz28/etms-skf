@@ -17,6 +17,7 @@ import {
     Menu,
     Receipt,
     Scale,
+    Settings,
     ShieldCheck,
     Tag,
     Users,
@@ -114,6 +115,12 @@ const NAV: NavItem[] = [
     href: "/app/users",
     label: "Users & Roles",
     icon: <ShieldCheck className="h-4.5 w-4.5" />,
+    roles: ["admin"],
+  },
+  {
+    href: "/app/settings",
+    label: "Settings",
+    icon: <Settings className="h-4.5 w-4.5" />,
     roles: ["admin"],
   },
 ];

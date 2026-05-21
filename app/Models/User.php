@@ -10,9 +10,9 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['email', 'full_name', 'password'];
+    protected $fillable = ['email', 'full_name', 'password', 'login_attempts', 'locked_until'];
     protected $hidden = ['password', 'remember_token'];
-    protected $casts = ['email_verified_at' => 'datetime', 'password' => 'hashed'];
+    protected $casts = ['email_verified_at' => 'datetime', 'password' => 'hashed', 'locked_until' => 'datetime'];
 
     public function roles() { return $this->hasMany(UserRole::class); }
     public function vendor() { return $this->hasOne(Vendor::class); }

@@ -13,6 +13,7 @@ use App\Http\Controllers\CsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorProfileController;
 use App\Http\Controllers\ClaimController;
+use App\Http\Controllers\SettingsController;
 
 // Auth
 Route::get('/', [AuthController::class, 'show'])->name('auth.show');
@@ -22,6 +23,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
 });
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout')->middleware('auth');
+Route::get('/auth/unlock/{email}', [AuthController::class, 'unlock'])->name('auth.unlock')->middleware('signed');
 
 // App
 Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
@@ -74,6 +76,8 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users/{user}/roles/{role}', [UserController::class, 'toggleRole'])->name('users.roles.toggle');
         Route::get('/claims/history', [ClaimController::class, 'history'])->name('claims.history');
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
     });
 
     // Vendor only — define fixed claim paths BEFORE parameterised staff routes
