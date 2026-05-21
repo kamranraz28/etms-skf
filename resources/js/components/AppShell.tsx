@@ -1,10 +1,11 @@
-import { Button } from "@/components/ui/button";
+
 import { AppRole, PageSharedProps } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Link, router, usePage } from "@inertiajs/react";
 import {
     Boxes,
     Building2,
+    ChevronDown,
     ChevronLeft,
     ChevronRight,
     ClipboardList,
@@ -21,7 +22,7 @@ import {
     Users,
     X,
 } from "lucide-react";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 interface NavItem {
   href: string;
@@ -123,6 +124,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   const primary = user?.primary_role ?? null;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    if (userMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [userMenuOpen]);
 
   const items = useMemo(() => {
     if (!primary) return [];
@@ -239,7 +254,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <div
           className={cn(
-            "border-t border-sidebar-border/50 p-3 space-y-2 shrink-0 overflow-hidden",
+            "border-t border-sidebar-border/50 p-3 shrink-0 overflow-hidden",
             collapsed && "text-center",
           )}
         >
@@ -254,23 +269,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               {primary}
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={signOut}
-            className={cn(
-              "text-sidebar-foreground/60 hover:bg-gradient-to-r hover:from-sidebar-accent/50 hover:to-sidebar-accent/30 hover:text-sidebar-accent-foreground transition-all duration-200 group",
-              collapsed ? "w-9 h-9 p-0 justify-center mx-auto" : "w-full justify-start",
-            )}
-          >
-            <LogOut className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
-            <span className={cn(
-              "transition-all duration-300 overflow-hidden whitespace-nowrap",
-              collapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[100px] opacity-100 ml-2",
-            )}>
-              Sign out
-            </span>
-          </Button>
         </div>
       </div>
 
@@ -322,20 +320,54 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground bg-gradient-to-r from-muted/50 to-muted/30 px-3 py-1.5 rounded-full border border-border/40 smooth-transition hover:border-primary/30 hover:bg-muted/60">
+          <div className="relative flex items-center gap-3" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground bg-gradient-to-r from-muted/50 to-muted/30 px-3 py-1.5 rounded-full border border-border/40 smooth-transition hover:border-primary/30 hover:bg-muted/60 group cursor-pointer"
+            >
               <Users className="h-3.5 w-3.5 animate-pulse-soft" />
               <span className="text-muted-foreground/70">Logged in as</span>
               <span className="text-foreground font-semibold">
                 {user?.full_name || user?.email}
               </span>
-            </div>
-            <div className="sm:hidden flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2.5 py-1.5 rounded-full border border-border/30">
+              <ChevronDown className={cn(
+                "h-3 w-3 text-muted-foreground/50 transition-transform duration-200",
+                userMenuOpen && "rotate-180",
+              )} />
+            </button>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="sm:hidden flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2.5 py-1.5 rounded-full border border-border/30 cursor-pointer"
+            >
               <Users className="h-3 w-3" />
               <span className="font-medium text-foreground truncate max-w-[80px]">
                 {user?.full_name || user?.email}
               </span>
-            </div>
+              <ChevronDown className={cn(
+                "h-2.5 w-2.5 text-muted-foreground/50 transition-transform duration-200",
+                userMenuOpen && "rotate-180",
+              )} />
+            </button>
+
+            {userMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 z-50 min-w-[200px] bg-card border border-border/60 rounded-xl shadow-lg overflow-hidden animate-scale-in origin-top-right">
+                <div className="px-4 py-3 border-b border-border/40">
+                  <div className="text-sm font-medium text-foreground">
+                    {user?.full_name || user?.email}
+                  </div>
+                  <div className="text-xs text-muted-foreground/70 capitalize">
+                    {primary}
+                  </div>
+                </div>
+                <button
+                  onClick={signOut}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 group"
+                >
+                  <LogOut className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            )}
           </div>
         </header>
         <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 animate-fade-in">
