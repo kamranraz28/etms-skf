@@ -6,12 +6,14 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
+import { cn } from "@/lib/utils";
 import { Head, router, usePage } from "@inertiajs/react";
 import { Pencil, Plus, Trash2, Tag } from "lucide-react";
 import { useState } from "react";
 
 export default function VendorCategories({ categories }: any) {
   const { props } = usePage<any>();
+  const errors = props.errors || {};
   const isAdmin = !!props.auth.user?.roles.includes("admin");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -25,9 +27,11 @@ export default function VendorCategories({ categories }: any) {
     if (!ok) return;
     if (editing) router.put(`/app/vendor-categories/${editing.id}`, form, {
       onSuccess: () => { setOpen(false); sa.alert("Category updated", `"${form.name}" has been updated.`, "success"); },
+      onError: () => {},
     });
     else router.post(`/app/vendor-categories`, form, {
       onSuccess: () => { setOpen(false); sa.alert("Category created", `"${form.name}" has been created.`, "success"); },
+      onError: () => {},
     });
   };
   const remove = async (c: any) => {
@@ -67,7 +71,11 @@ export default function VendorCategories({ categories }: any) {
             <DialogContent>
               <DialogHeader><DialogTitle>{editing ? "Edit category" : "Create category"}</DialogTitle></DialogHeader>
               <div className="space-y-4">
-                <div className="space-y-1.5"><Label>Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Enter category name" /></div>
+                <div className="space-y-1.5">
+                  <Label>Name <span className="text-destructive">*</span></Label>
+                  <Input className={errors.name && "border-destructive focus-visible:ring-destructive"} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Enter category name" />
+                  {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
