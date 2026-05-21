@@ -36,8 +36,8 @@ class PoController extends Controller {
     public function store(Request $r) {
         $data = $r->validate([
             'po_number' => 'required|string|unique:pos,po_number',
-            'vendor_erp_code' => 'nullable|string',
-            'po_date' => 'nullable|date',
+            'vendor_erp_code' => 'required|string',
+            'po_date' => 'required|date',
             'items' => 'required|array|min:1',
             'items.*.name' => 'required|string',
             'items.*.qty' => 'required|numeric|min:1',

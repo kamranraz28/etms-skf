@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link, router, Head } from "@inertiajs/react";
+import { Link, router, Head, usePage } from "@inertiajs/react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Plus, RefreshCw, Trash2 } from "lucide-react";
 
 export default function POs({ pos }: any) {
+  const { props } = usePage();
+  const errors = (props as any).errors || {};
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ po_number: "", vendor_erp_code: "", po_date: "", items: "" });
   const sa = useSweetAlert();
@@ -33,6 +36,7 @@ export default function POs({ pos }: any) {
     });
     router.post("/app/pos", { ...form, items }, {
       onSuccess: () => { setOpen(false); setForm({ po_number:"",vendor_erp_code:"",po_date:"",items:"" }); sa.alert("PO created", `"${form.po_number}" has been created.`, "success"); },
+      onError: () => {},
     });
   };
   const remove = async (po: any) => {
@@ -81,12 +85,25 @@ export default function POs({ pos }: any) {
                 <DialogHeader><DialogTitle>Create Purchase Order</DialogTitle></DialogHeader>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5"><Label>PO number</Label><Input value={form.po_number} onChange={(e)=>setForm({...form, po_number:e.target.value})} placeholder="PO-2026-001" /></div>
-                    <div className="space-y-1.5"><Label>Vendor ERP code</Label><Input value={form.vendor_erp_code} onChange={(e)=>setForm({...form, vendor_erp_code:e.target.value})} /></div>
-                    <div className="space-y-1.5"><Label>PO date</Label><Input type="date" value={form.po_date} onChange={(e)=>setForm({...form, po_date:e.target.value})} /></div>
+                    <div className="space-y-1.5">
+                      <Label>PO number</Label>
+                      <Input className={errors.po_number && "border-destructive focus-visible:ring-destructive"} value={form.po_number} onChange={(e)=>setForm({...form, po_number:e.target.value})} placeholder="PO-2026-001" />
+                      {errors.po_number && <p className="text-xs text-destructive">{errors.po_number}</p>}
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Vendor ERP code</Label>
+                      <Input className={errors.vendor_erp_code && "border-destructive focus-visible:ring-destructive"} value={form.vendor_erp_code} onChange={(e)=>setForm({...form, vendor_erp_code:e.target.value})} />
+                      {errors.vendor_erp_code && <p className="text-xs text-destructive">{errors.vendor_erp_code}</p>}
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>PO date</Label>
+                      <Input type="date" className={errors.po_date && "border-destructive focus-visible:ring-destructive"} value={form.po_date} onChange={(e)=>setForm({...form, po_date:e.target.value})} />
+                      {errors.po_date && <p className="text-xs text-destructive">{errors.po_date}</p>}
+                    </div>
                     <div className="sm:col-span-2 space-y-1.5">
                       <Label>Items <span className="text-xs text-muted-foreground">(one per line · Name | Qty | Unit Price)</span></Label>
-                      <Textarea rows={4} value={form.items} onChange={(e)=>setForm({...form, items:e.target.value})} placeholder="Cisco Switch | 6 | 25000" />
+                      <Textarea rows={4} className={errors.items && "border-destructive focus-visible:ring-destructive"} value={form.items} onChange={(e)=>setForm({...form, items:e.target.value})} placeholder="Cisco Switch | 6 | 25000" />
+                      {errors.items && <p className="text-xs text-destructive">{errors.items}</p>}
                     </div>
                   </div>
                 </div>

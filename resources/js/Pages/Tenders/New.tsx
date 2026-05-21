@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { router, Head } from "@inertiajs/react";
+import { router, Head, usePage } from "@inertiajs/react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +11,8 @@ import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { ArrowLeft, Gavel, FileText } from "lucide-react";
 
 export default function TenderNew({ prs, categories, preselect_pr }: any) {
+  const { props } = usePage();
+  const errors = (props as any).errors || {};
   const sa = useSweetAlert();
   const [prId, setPrId] = useState(preselect_pr ?? "");
   const [tenderNumber, setTenderNumber] = useState(`TND-${new Date().getFullYear()}-${Math.floor(100+Math.random()*900)}`);
@@ -76,18 +79,35 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
               <div className="space-y-1.5">
                 <Label>From Purchase Requisition</Label>
                 <select value={prId} onChange={(e)=>setPrId(e.target.value)}
-                  className="w-full h-10 rounded-lg border border-input bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring">
+                  className={cn("w-full h-10 rounded-lg border bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring", errors.pr_id && "border-destructive")}>
                   <option value="">— Select PR —</option>
-                  {prs.map((p: any) => <option key={p.id} value={p.id}>{p.pr_number} · {p.title}{p.status==="tendered"?" (already tendered)":""}</option>)}
+                  {prs.filter((p: any) => p.status !== "tendered").map((p: any) => <option key={p.id} value={p.id}>{p.pr_number} · {p.title}</option>)}
                 </select>
+                {errors.pr_id && <p className="text-xs text-destructive">{errors.pr_id}</p>}
               </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5"><Label>Tender number</Label><Input value={tenderNumber} onChange={(e)=>setTenderNumber(e.target.value)} /></div>
-              <div className="space-y-1.5"><Label>Submission deadline</Label><Input type="datetime-local" value={deadline} onChange={(e)=>setDeadline(e.target.value)} /></div>
+              <div className="space-y-1.5">
+                <Label>Tender number</Label>
+                <Input className={errors.tender_number && "border-destructive focus-visible:ring-destructive"} value={tenderNumber} onChange={(e)=>setTenderNumber(e.target.value)} />
+                {errors.tender_number && <p className="text-xs text-destructive">{errors.tender_number}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Submission deadline</Label>
+                <Input type="datetime-local" className={errors.deadline && "border-destructive focus-visible:ring-destructive"} value={deadline} onChange={(e)=>setDeadline(e.target.value)} />
+                {errors.deadline && <p className="text-xs text-destructive">{errors.deadline}</p>}
+              </div>
             </div>
-            <div className="space-y-1.5"><Label>Title</Label><Input value={title} onChange={(e)=>setTitle(e.target.value)} /></div>
-            <div className="space-y-1.5"><Label>Description / scope</Label><Textarea rows={4} value={description} onChange={(e)=>setDescription(e.target.value)} /></div>
+            <div className="space-y-1.5">
+              <Label>Title</Label>
+              <Input className={errors.title && "border-destructive focus-visible:ring-destructive"} value={title} onChange={(e)=>setTitle(e.target.value)} />
+              {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Description / scope</Label>
+              <Textarea rows={4} className={errors.description && "border-destructive focus-visible:ring-destructive"} value={description} onChange={(e)=>setDescription(e.target.value)} />
+              {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
+            </div>
 
             {items.length > 0 && (
               <div>

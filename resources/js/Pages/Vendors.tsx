@@ -9,21 +9,23 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { PageSharedProps, VendorStatus } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { Head, router, usePage } from "@inertiajs/react";
 import { Pencil, Plus, ShieldCheck, ShieldOff, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 export default function Vendors({ vendors, categories }: any) {
   const { props } = usePage<PageSharedProps>();
+  const errors = (props as any).errors || {};
   const isAdmin = !!props.auth.user?.roles.includes("admin");
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", erp_code: "", notes: "", status: "pending" as VendorStatus, vendor_category_id: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", notes: "", status: "pending" as VendorStatus, vendor_category_id: "" });
   const sa = useSweetAlert();
 
-  const openNew = () => { setEditing(null); setForm({ name:"",email:"",phone:"",erp_code:"",notes:"",status:"pending",vendor_category_id:"" }); setOpen(true); };
-  const openEdit = (v: any) => { setEditing(v); setForm({ name:v.name,email:v.email,phone:v.phone??"",erp_code:v.erp_code??"",notes:v.notes??"",status:v.status,vendor_category_id:v.vendor_category_id??"" }); setOpen(true); };
+  const openNew = () => { setEditing(null); setForm({ name:"",email:"",phone:"",notes:"",status:"pending",vendor_category_id:"" }); setOpen(true); };
+  const openEdit = (v: any) => { setEditing(v); setForm({ name:v.name,email:v.email,phone:v.phone??"",notes:v.notes??"",status:v.status,vendor_category_id:v.vendor_category_id??"" }); setOpen(true); };
   const save = async () => {
     if (saving) return; setSaving(true);
     const confirmed = await sa.confirmAction(editing ? "Update vendor?" : "Create vendor?", `Save vendor "${form.name}"?`, "Save");
@@ -87,25 +89,44 @@ export default function Vendors({ vendors, categories }: any) {
               <DialogHeader><DialogTitle>{editing ? "Edit vendor" : "Create vendor"}</DialogTitle></DialogHeader>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5"><Label>Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-                  <div className="space-y-1.5"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-                  <div className="space-y-1.5"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-                  <div className="space-y-1.5"><Label>ERP code</Label><Input value={form.erp_code} onChange={(e) => setForm({ ...form, erp_code: e.target.value })} /></div>
-                  <div className="space-y-1.5"><Label>Status</Label>
+                  <div className="space-y-1.5">
+                    <Label>Name</Label>
+                    <Input className={errors.name && "border-destructive focus-visible:ring-destructive"} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                    {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Email</Label>
+                    <Input type="email" className={errors.email && "border-destructive focus-visible:ring-destructive"} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                    {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Phone</Label>
+                    <Input className={errors.phone && "border-destructive focus-visible:ring-destructive"} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                    {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Status</Label>
                     <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as VendorStatus })}
-                      className="w-full h-10 rounded-lg border border-input bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring">
+                      className={cn("w-full h-10 rounded-lg border bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring", errors.status && "border-destructive")}>
                       <option value="pending">Pending</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="blacklisted">Blacklisted</option>
                     </select>
+                    {errors.status && <p className="text-xs text-destructive">{errors.status}</p>}
                   </div>
-                  <div className="space-y-1.5"><Label>Category</Label>
+                  <div className="space-y-1.5">
+                    <Label>Category</Label>
                     <select value={form.vendor_category_id} onChange={(e) => setForm({ ...form, vendor_category_id: e.target.value })}
-                      className="w-full h-10 rounded-lg border border-input bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring">
-                      <option value="">No category</option>
+                      className={cn("w-full h-10 rounded-lg border bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring", errors.vendor_category_id && "border-destructive")}>
+                      <option value="">Select a category</option>
                       {categories.map((cat: any) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                     </select>
+                    {errors.vendor_category_id && <p className="text-xs text-destructive">{errors.vendor_category_id}</p>}
                   </div>
                 </div>
-                <div className="space-y-1.5"><Label>Notes</Label><Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
+                <div className="space-y-1.5">
+                  <Label>Notes</Label>
+                  <Textarea rows={3} className={errors.notes && "border-destructive focus-visible:ring-destructive"} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+                  {errors.notes && <p className="text-xs text-destructive">{errors.notes}</p>}
+                </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>

@@ -23,11 +23,11 @@ class VendorController extends Controller
         $data = $r->validate([
             'name' => 'required|string',
             'email' => 'required|email',
-            'phone' => 'nullable|string',
+            'phone' => 'required|string',
             'erp_code' => 'nullable|string',
             'status' => 'required|in:pending,active,inactive,blacklisted',
             'notes' => 'nullable|string',
-            'vendor_category_id' => 'nullable|exists:vendor_categories,id',
+            'vendor_category_id' => 'required|exists:vendor_categories,id',
         ]);
         $data['email'] = strtolower($data['email']);
 
@@ -74,11 +74,11 @@ class VendorController extends Controller
         $data = $r->validate([
             'name' => 'required|string',
             'email' => 'required|email',
-            'phone' => 'nullable|string',
+            'phone' => 'required|string',
             'erp_code' => 'nullable|string',
             'status' => 'required|in:pending,active,inactive,blacklisted',
             'notes' => 'nullable|string',
-            'vendor_category_id' => 'nullable|exists:vendor_categories,id',
+            'vendor_category_id' => 'required|exists:vendor_categories,id',
         ]);
         $data['email'] = strtolower($data['email']);
         $vendor->update($data);

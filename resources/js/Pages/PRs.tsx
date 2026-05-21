@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link, router, Head } from "@inertiajs/react";
+import { Link, router, Head, usePage } from "@inertiajs/react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Plus, RefreshCw, ChevronRight, Trash2 } from "lucide-react";
 
 export default function PRs({ prs }: any) {
+  const { props } = usePage();
+  const errors = (props as any).errors || {};
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ pr_number: "", title: "", department: "", items: "" });
   const sa = useSweetAlert();
@@ -31,6 +34,7 @@ export default function PRs({ prs }: any) {
     });
     router.post("/app/prs", { ...form, items }, {
       onSuccess: () => { setOpen(false); setForm({ pr_number:"",title:"",department:"",items:"" }); sa.alert("PR created", `"${form.pr_number}" has been created.`, "success"); },
+      onError: () => {},
     });
   };
   const remove = async (pr: any) => {
@@ -83,12 +87,25 @@ export default function PRs({ prs }: any) {
                 <DialogHeader><DialogTitle>Create Purchase Requisition</DialogTitle></DialogHeader>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5"><Label>PR number</Label><Input value={form.pr_number} onChange={(e)=>setForm({...form, pr_number:e.target.value})} placeholder="PR-2025-010" /></div>
-                    <div className="space-y-1.5"><Label>Department</Label><Input value={form.department} onChange={(e)=>setForm({...form, department:e.target.value})} /></div>
-                    <div className="sm:col-span-2 space-y-1.5"><Label>Title</Label><Input value={form.title} onChange={(e)=>setForm({...form, title:e.target.value})} /></div>
+                    <div className="space-y-1.5">
+                      <Label>PR number</Label>
+                      <Input className={errors.pr_number && "border-destructive focus-visible:ring-destructive"} value={form.pr_number} onChange={(e)=>setForm({...form, pr_number:e.target.value})} placeholder="PR-2025-010" />
+                      {errors.pr_number && <p className="text-xs text-destructive">{errors.pr_number}</p>}
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Department</Label>
+                      <Input className={errors.department && "border-destructive focus-visible:ring-destructive"} value={form.department} onChange={(e)=>setForm({...form, department:e.target.value})} />
+                      {errors.department && <p className="text-xs text-destructive">{errors.department}</p>}
+                    </div>
+                    <div className="sm:col-span-2 space-y-1.5">
+                      <Label>Title</Label>
+                      <Input className={errors.title && "border-destructive focus-visible:ring-destructive"} value={form.title} onChange={(e)=>setForm({...form, title:e.target.value})} />
+                      {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
+                    </div>
                     <div className="sm:col-span-2 space-y-1.5">
                       <Label>Items <span className="text-xs text-muted-foreground">(one per line · Name | Qty | Unit)</span></Label>
-                      <Textarea rows={4} value={form.items} onChange={(e)=>setForm({...form, items:e.target.value})} placeholder="Dell Latitude 5440 | 15 | pcs" />
+                      <Textarea rows={4} className={errors.items && "border-destructive focus-visible:ring-destructive"} value={form.items} onChange={(e)=>setForm({...form, items:e.target.value})} placeholder="Dell Latitude 5440 | 15 | pcs" />
+                      {errors.items && <p className="text-xs text-destructive">{errors.items}</p>}
                     </div>
                   </div>
                 </div>
