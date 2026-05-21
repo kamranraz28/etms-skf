@@ -11,7 +11,7 @@ class Claim extends Model
 
     protected $table = 'claims';
     protected $fillable = [
-        'claim_number', 'vendor_id', 'tender_number', 'title', 'description',
+        'claim_number', 'vendor_id', 'po_number', 'title', 'description',
         'amount', 'status', 'submitted_at', 'approved_at', 'rejected_at',
         'rejection_reason', 'created_by',
     ];

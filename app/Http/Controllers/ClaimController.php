@@ -39,8 +39,10 @@ class ClaimController extends Controller
     public function createClaim(Request $r)
     {
         $vendor = Vendor::where('user_id', $r->user()->id)->firstOrFail();
-        $tenders = $vendor->tenders()->orderByDesc('tenders.created_at')->get(['tenders.id', 'tender_number', 'title']);
-        return Inertia::render('NewClaim', ['vendor' => $vendor, 'tenders' => $tenders]);
+        $pos = \App\Models\Po::where('vendor_erp_code', $vendor->erp_code)
+            ->orderByDesc('created_at')
+            ->get(['id', 'po_number', 'po_date', 'items']);
+        return Inertia::render('NewClaim', ['vendor' => $vendor, 'pos' => $pos]);
     }
 
     public function storeClaim(Request $r)
@@ -50,13 +52,15 @@ class ClaimController extends Controller
             return back()->with('error', 'Your vendor profile is not active.');
         }
 
-        $invitedTenderNumbers = $vendor->tenders()->pluck('tender_number')->toArray();
-        if (empty($invitedTenderNumbers)) {
-            return back()->with('error', 'You have no invited tenders to claim against.');
+        $vendorPoNumbers = \App\Models\Po::where('vendor_erp_code', $vendor->erp_code)
+            ->pluck('po_number')
+            ->toArray();
+        if (empty($vendorPoNumbers)) {
+            return back()->with('error', 'No purchase orders found for your vendor profile.');
         }
 
         $data = $r->validate([
-            'tender_number' => 'required|string|in:' . implode(',', $invitedTenderNumbers),
+            'po_number' => 'required|string|in:' . implode(',', $vendorPoNumbers),
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'amount' => 'required|numeric|min:0.01',
@@ -72,7 +76,7 @@ class ClaimController extends Controller
         $claim = Claim::create([
             'claim_number' => $claimNumber,
             'vendor_id' => $vendor->id,
-            'tender_number' => $data['tender_number'],
+            'po_number' => $data['po_number'],
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'amount' => $data['amount'],

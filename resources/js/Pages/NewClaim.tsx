@@ -9,9 +9,9 @@ import { ArrowLeft, Plus, X, Receipt, FileText, Building2 } from "lucide-react";
 import { useState } from "react";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
-export default function NewClaim({ vendor, tenders = [] }: any) {
+export default function NewClaim({ vendor, pos = [] }: any) {
   const sa = useSweetAlert();
-  const [tenderNumber, setTenderNumber] = useState("");
+  const [poNumber, setPoNumber] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -33,10 +33,10 @@ export default function NewClaim({ vendor, tenders = [] }: any) {
   const setDocFile = (i: number, file: File | null) => { const copy = [...documents]; copy[i].file = file; setDocuments(copy); };
 
   const submit = () => {
-    if (!tenderNumber || !title || !amount || documents.every((d) => !d.file)) return;
+    if (!poNumber || !title || !amount || documents.every((d) => !d.file)) return;
     setSubmitting(true);
     const fd = new FormData();
-    fd.append("tender_number", tenderNumber);
+    fd.append("po_number", poNumber);
     fd.append("title", title);
     if (description) fd.append("description", description);
     fd.append("amount", amount);
@@ -67,10 +67,14 @@ export default function NewClaim({ vendor, tenders = [] }: any) {
               <Receipt className="h-4.5 w-4.5 text-accent" /> Claim information
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5"><Label>Tender</Label>
-                <select className="h-10 w-full rounded-lg border border-input bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring" value={tenderNumber} onChange={(e) => setTenderNumber(e.target.value)}>
-                  <option value="">-- Select tender --</option>
-                  {tenders.map((t: any) => (<option key={t.id} value={t.tender_number}>{t.tender_number} — {t.title}</option>))}
+              <div className="space-y-1.5"><Label>Purchase Order</Label>
+                <select className="h-10 w-full rounded-lg border border-input bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring" value={poNumber} onChange={(e) => setPoNumber(e.target.value)}>
+                  <option value="">-- Select PO --</option>
+                  {pos.map((p: any) => (
+                    <option key={p.id} value={p.po_number}>
+                      {p.po_number}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-1.5"><Label>Claim amount (BDT)</Label><Input type="number" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>

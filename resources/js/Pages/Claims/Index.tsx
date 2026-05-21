@@ -10,7 +10,7 @@ export default function ClaimsIndex({ rows }: any) {
   const columns: Column[] = [
     { key: "claim_number", label: "Claim #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.claim_number}</span> },
     { key: "vendor", label: "Vendor", sortable: false, render: (r) => <span className="text-sm whitespace-nowrap font-medium">{r.vendor?.name}</span> },
-    { key: "tender_number", label: "Tender #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.tender_number}</span> },
+    { key: "po_number", label: "PO #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.po_number}</span> },
     { key: "title", label: "Title", sortable: true, render: (r) => <span className="font-medium max-w-32 md:max-w-48 truncate block">{r.title}</span> },
     { key: "amount", label: "Amount", sortable: true, className: "text-right", render: (r) => <span className="font-mono whitespace-nowrap">{Number(r.amount).toLocaleString()}</span> },
     { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },

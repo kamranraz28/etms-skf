@@ -54,7 +54,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
               <div><span className="text-muted-foreground text-xs">Vendor</span><div className="font-medium mt-0.5">{claim.vendor?.name}</div></div>
               <div><span className="text-muted-foreground text-xs">ERP code</span><div className="font-mono mt-0.5">{claim.vendor?.erp_code ?? "—"}</div></div>
-              <div><span className="text-muted-foreground text-xs">Tender #</span><div className="font-mono mt-0.5">{claim.tender_number}</div></div>
+              <div><span className="text-muted-foreground text-xs">PO #</span><div className="font-mono mt-0.5">{claim.po_number}</div></div>
               <div><span className="text-muted-foreground text-xs">Amount</span><div className="font-mono font-bold text-lg mt-0.5">{Number(claim.amount).toLocaleString()} BDT</div></div>
               <div><span className="text-muted-foreground text-xs">Submitted</span><div className="mt-0.5">{new Date(claim.submitted_at).toLocaleString()}</div></div>
               <div className="sm:col-span-2"><span className="text-muted-foreground text-xs">Description</span><div className="text-sm mt-0.5">{claim.description ?? "—"}</div></div>
