@@ -56,6 +56,12 @@ const NAV: NavItem[] = [
     roles: ["admin", "procurement", "approver"],
   },
   {
+    href: "/app/pos",
+    label: "Purchase Orders",
+    icon: <ClipboardList className="h-4.5 w-4.5" />,
+    roles: ["admin", "procurement", "approver"],
+  },
+  {
     href: "/app/tenders",
     label: "Tenders",
     icon: <Gavel className="h-4.5 w-4.5" />,

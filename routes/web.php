@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\VendorCategoryController;
 use App\Http\Controllers\PrController;
+use App\Http\Controllers\PoController;
 use App\Http\Controllers\TenderController;
 use App\Http\Controllers\BidController;
 use App\Http\Controllers\CsController;
@@ -42,6 +43,11 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::post('/prs/sync', [PrController::class, 'sync'])->name('prs.sync');
         Route::post('/prs', [PrController::class, 'store'])->name('prs.store');
         Route::delete('/prs/{pr}', [PrController::class, 'destroy'])->name('prs.destroy');
+
+        Route::get('/pos', [PoController::class, 'index'])->name('pos.index');
+        Route::post('/pos/sync', [PoController::class, 'sync'])->name('pos.sync');
+        Route::post('/pos', [PoController::class, 'store'])->name('pos.store');
+        Route::delete('/pos/{po}', [PoController::class, 'destroy'])->name('pos.destroy');
 
         Route::get('/tenders', [TenderController::class, 'index'])->name('tenders.index');
         Route::get('/tenders/new', [TenderController::class, 'create'])->name('tenders.create');
