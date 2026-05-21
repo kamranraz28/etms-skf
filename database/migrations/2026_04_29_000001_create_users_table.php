@@ -11,6 +11,8 @@ return new class extends Migration {
             $t->timestamp('email_verified_at')->nullable();
             $t->string('password');
             $t->rememberToken();
+            $t->tinyInteger('login_attempts')->default(0);
+            $t->timestamp('locked_until')->nullable();
             $t->timestamps();
         });
         Schema::create('password_reset_tokens', function (Blueprint $t) {

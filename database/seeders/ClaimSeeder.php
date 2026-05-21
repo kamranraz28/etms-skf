@@ -26,7 +26,7 @@ class ClaimSeeder extends Seeder
         $c1 = Claim::create([
             'claim_number' => 'CLM-' . date('Y') . '-001',
             'vendor_id' => $vendors[0]->id,
-            'tender_number' => 'TND-2026-001',
+            'po_number' => 'TND-2026-001',
             'title' => 'Payment for network switch supply',
             'description' => 'Full payment for 15 network switches delivered as per PO.',
             'amount' => 450000.00,
@@ -44,7 +44,7 @@ class ClaimSeeder extends Seeder
         $c2 = Claim::create([
             'claim_number' => 'CLM-' . date('Y') . '-002',
             'vendor_id' => $vendors[1]->id,
-            'tender_number' => 'TND-2026-001',
+            'po_number' => 'TND-2026-001',
             'title' => 'Installation service billing',
             'description' => 'Charges for on-site installation of network equipment.',
             'amount' => 125000.00,
@@ -59,7 +59,7 @@ class ClaimSeeder extends Seeder
         $c3 = Claim::create([
             'claim_number' => 'CLM-' . date('Y') . '-003',
             'vendor_id' => $vendors[0]->id,
-            'tender_number' => 'TND-2026-001',
+            'po_number' => 'TND-2026-001',
             'title' => 'Additional cabling charges',
             'description' => 'Extra cabling work done beyond original scope.',
             'amount' => 35000.00,

@@ -9,7 +9,6 @@ return new class extends Migration {
             $t->string('pr_number')->unique();
             $t->string('title');
             $t->string('department')->nullable();
-            $t->string('requested_by')->nullable();
             $t->json('items');
             $t->enum('status', ['new','tendered'])->default('new');
             $t->unsignedBigInteger('created_by')->nullable();

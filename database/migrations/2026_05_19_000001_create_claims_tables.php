@@ -12,7 +12,7 @@ return new class extends Migration
             $t->id();
             $t->string('claim_number')->unique();
             $t->unsignedBigInteger('vendor_id');
-            $t->string('tender_number');
+            $t->string('po_number');
             $t->string('title');
             $t->text('description')->nullable();
             $t->decimal('amount', 14, 2);
