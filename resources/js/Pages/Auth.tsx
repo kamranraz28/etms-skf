@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Head, Link, useForm } from "@inertiajs/react";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { LogIn, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Head, useForm } from "@inertiajs/react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
+import { useState } from "react";
 
 export default function Auth() {
   const signIn = useForm({ email: "", password: "" });
@@ -20,10 +20,16 @@ export default function Auth() {
           <div className="relative z-10 flex flex-col justify-between p-12 text-white">
             <div>
               <div className="flex items-center gap-3 mb-12">
-                <img src="/images/logo.png" alt="ETMS" className="h-12 w-12 rounded-2xl object-contain bg-white p-1" />
+                <img
+                  src="/images/logo.png"
+                  alt="ETMS"
+                  className="h-12 w-12 rounded-2xl object-contain bg-white p-1"
+                />
                 <div>
                   <div className="text-xl font-bold">ETMS</div>
-                  <div className="text-xs uppercase tracking-wider text-white/60">E-Tender & Vendor Management</div>
+                  <div className="text-xs uppercase tracking-wider text-white/60">
+                    E-Tender & Vendor Management
+                  </div>
                 </div>
               </div>
               <div className="max-w-md">
@@ -32,15 +38,27 @@ export default function Auth() {
                   Eskayef Pharmaceuticals Ltd.
                 </div>
                 <h1 className="text-4xl font-bold leading-tight text-white">
-                  Enterprise Procurement<br />Management System
+                  Enterprise Procurement
+                  <br />
+                  Management System
                 </h1>
                 <p className="mt-4 text-lg text-white/70">
-                  Manage vendors, run tenders, evaluate bids, and push approved purchases back into your ERP.
+                  Manage vendors, run tenders, evaluate bids, and push approved
+                  purchases back into your ERP.
                 </p>
               </div>
             </div>
             <div className="text-sm text-white/40">
-              &copy; {new Date().getFullYear()} Designed & Developed by <a href="https://synergyinterface.com/web/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/70 transition-colors">Synergy Interface Ltd</a>. All rights reserved.
+              &copy; {new Date().getFullYear()} Designed & Developed by{" "}
+              <a
+                href="https://synergyinterface.com/web/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white/70 transition-colors"
+              >
+                Synergy Interface Ltd
+              </a>
+              . All rights reserved.
             </div>
           </div>
         </div>
@@ -49,42 +67,110 @@ export default function Auth() {
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
               <div className="h-14 w-14 rounded-2xl bg-white flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20 p-1.5">
-                <img src="/images/logo.png" alt="ETMS" className="h-full w-full object-contain" />
+                <img
+                  src="/images/logo.png"
+                  alt="ETMS"
+                  className="h-full w-full object-contain"
+                />
               </div>
-              <h2 className="text-2xl font-bold text-foreground tracking-tight">Welcome back</h2>
-              <p className="text-sm text-muted-foreground mt-1">Sign in to continue to ETMS.</p>
+              <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                Welcome back
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Sign in to continue to ETMS.
+              </p>
             </div>
 
             <div className="bg-card border border-border/60 rounded-2xl p-8 shadow-elevated">
-              <form onSubmit={(e) => { e.preventDefault(); signIn.post("/auth/login"); }} className="space-y-5">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  signIn.post("/auth/login");
+                }}
+                className="space-y-5"
+              >
                 <div className="space-y-1.5">
-                  <Label htmlFor="si-email">Email <span className="text-destructive">*</span></Label>
-                  <Input id="si-email" type="email" required value={signIn.data.email} onChange={(e) => signIn.setData("email", e.target.value)} placeholder="you@eskayef.com" className={signIn.errors.email && "border-destructive focus-visible:ring-destructive"} />
-                  {signIn.errors.email && <p className="text-xs text-destructive">{signIn.errors.email}</p>}
+                  <Label htmlFor="si-email">
+                    Email <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="si-email"
+                    type="email"
+                    required
+                    value={signIn.data.email}
+                    onChange={(e) => signIn.setData("email", e.target.value)}
+                    placeholder="you@eskayef.com"
+                    className={
+                      signIn.errors.email &&
+                      "border-destructive focus-visible:ring-destructive"
+                    }
+                  />
+                  {signIn.errors.email && (
+                    <p className="text-xs text-destructive">
+                      {signIn.errors.email}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="si-pwd">Password <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="si-pwd">
+                    Password <span className="text-destructive">*</span>
+                  </Label>
                   <div className="relative">
-                    <Input id="si-pwd" type={showPassword ? "text" : "password"} required value={signIn.data.password} onChange={(e) => signIn.setData("password", e.target.value)} placeholder="••••••••" className={cn("pr-10", signIn.errors.password && "border-destructive focus-visible:ring-destructive")} />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    <Input
+                      id="si-pwd"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={signIn.data.password}
+                      onChange={(e) =>
+                        signIn.setData("password", e.target.value)
+                      }
+                      placeholder="••••••••"
+                      className={cn(
+                        "pr-10",
+                        signIn.errors.password &&
+                          "border-destructive focus-visible:ring-destructive",
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                  {signIn.errors.password && <p className="text-xs text-destructive">{signIn.errors.password}</p>}
+                  {signIn.errors.password && (
+                    <p className="text-xs text-destructive">
+                      {signIn.errors.password}
+                    </p>
+                  )}
                 </div>
-                <Button type="submit" disabled={signIn.processing} className="w-full h-11 text-base">
+                <Button
+                  type="submit"
+                  disabled={signIn.processing}
+                  className="w-full h-11 text-base"
+                >
                   {signIn.processing ? (
-                    <span className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Signing in…</span>
+                    <span className="flex items-center gap-2">
+                      <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />{" "}
+                      Signing in…
+                    </span>
                   ) : (
-                    <span className="flex items-center gap-2"><LogIn className="h-4 w-4" /> Sign in</span>
+                    <span className="flex items-center gap-2">
+                      <LogIn className="h-4 w-4" /> Sign in
+                    </span>
                   )}
                 </Button>
               </form>
-              <div className="mt-6 text-center">
+              {/* <div className="mt-6 text-center">
                 <Link href="/" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
                   <ArrowLeft className="h-3 w-3" /> Back to home
                 </Link>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
