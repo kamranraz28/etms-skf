@@ -14,7 +14,7 @@ import { Plus, RefreshCw, ChevronRight, Trash2 } from "lucide-react";
 
 export default function PRs({ prs }: any) {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ pr_number: "", title: "", department: "", requested_by: "", items: "" });
+  const [form, setForm] = useState({ pr_number: "", title: "", department: "", items: "" });
   const sa = useSweetAlert();
 
   const sync = async () => {
@@ -30,7 +30,7 @@ export default function PRs({ prs }: any) {
       return { name, qty: Number(qty || 1), unit: unit || "pcs" };
     });
     router.post("/app/prs", { ...form, items }, {
-      onSuccess: () => { setOpen(false); setForm({ pr_number:"",title:"",department:"",requested_by:"",items:"" }); sa.alert("PR created", `"${form.pr_number}" has been created.`, "success"); },
+      onSuccess: () => { setOpen(false); setForm({ pr_number:"",title:"",department:"",items:"" }); sa.alert("PR created", `"${form.pr_number}" has been created.`, "success"); },
     });
   };
   const remove = async (pr: any) => {
@@ -86,7 +86,6 @@ export default function PRs({ prs }: any) {
                     <div className="space-y-1.5"><Label>PR number</Label><Input value={form.pr_number} onChange={(e)=>setForm({...form, pr_number:e.target.value})} placeholder="PR-2025-010" /></div>
                     <div className="space-y-1.5"><Label>Department</Label><Input value={form.department} onChange={(e)=>setForm({...form, department:e.target.value})} /></div>
                     <div className="sm:col-span-2 space-y-1.5"><Label>Title</Label><Input value={form.title} onChange={(e)=>setForm({...form, title:e.target.value})} /></div>
-                    <div className="sm:col-span-2 space-y-1.5"><Label>Requested by</Label><Input value={form.requested_by} onChange={(e)=>setForm({...form, requested_by:e.target.value})} /></div>
                     <div className="sm:col-span-2 space-y-1.5">
                       <Label>Items <span className="text-xs text-muted-foreground">(one per line · Name | Qty | Unit)</span></Label>
                       <Textarea rows={4} value={form.items} onChange={(e)=>setForm({...form, items:e.target.value})} placeholder="Dell Latitude 5440 | 15 | pcs" />
