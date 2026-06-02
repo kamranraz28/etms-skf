@@ -31,7 +31,7 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Staff
-    Route::middleware('role:admin,procurement,approver,department_head,executive_director,counter_ed,scm_head,finance_head,line_manager')->group(function () {
+    Route::middleware('role:admin,procurement,approver,department_head,executive_director,counter_ed,scm_head,finance_head,line_manager,user,unit_head,scm_user')->group(function () {
         Route::get('/vendors', [VendorController::class, 'index'])->name('vendors.index');
         Route::post('/vendors', [VendorController::class, 'store'])->name('vendors.store')->middleware('role:admin');
         Route::put('/vendors/{vendor}', [VendorController::class, 'update'])->name('vendors.update')->middleware('role:admin');
@@ -102,7 +102,7 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
     });
 
     // Parameterised claim routes (must be after fixed paths like /claims/new, /claims/history)
-    Route::middleware('role:admin,procurement,approver')->group(function () {
+    Route::middleware('role:admin,procurement,approver,user,line_manager,unit_head,executive_director,scm_user,scm_head,finance_head')->group(function () {
         Route::get('/claims/{claim}', [ClaimController::class, 'show'])->name('claims.show');
         Route::post('/claims/{claim}/decide', [ClaimController::class, 'decide'])->name('claims.decide');
         Route::get('/claims/{claim}/documents/{docId}', [ClaimController::class, 'document'])->name('claims.document');

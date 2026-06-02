@@ -33,7 +33,7 @@ interface NavItem {
   roles: AppRole[];
 }
 
-const APPROVER_ROLES = ["admin", "procurement", "approver", "department_head", "executive_director", "counter_ed", "scm_head", "finance_head", "line_manager"];
+const APPROVER_ROLES = ["admin", "procurement", "approver", "department_head", "executive_director", "counter_ed", "scm_head", "finance_head", "line_manager", "user", "unit_head", "scm_user"];
 
 const NAV: NavItem[] = [
   {
@@ -83,12 +83,6 @@ const NAV: NavItem[] = [
     label: "Claims",
     icon: <Receipt className="h-4.5 w-4.5" />,
     roles: APPROVER_ROLES,
-  },
-  {
-    href: "/app/claims/history",
-    label: "Claim History",
-    icon: <ClipboardList className="h-4.5 w-4.5" />,
-    roles: ["admin"],
   },
   {
     href: "/app/my-tenders",

@@ -10,10 +10,13 @@ import { ArrowLeft, Plus, X, Receipt, FileText, Building2 } from "lucide-react";
 import { useState } from "react";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
-export default function NewClaim({ vendor, pos = [] }: any) {
+export default function NewClaim({ vendor, pos = [], billTypes = [] }: any) {
   const { props } = usePage();
   const errors = (props as any).errors || {};
   const sa = useSweetAlert();
+  const [billNumber, setBillNumber] = useState("");
+  const [billDate, setBillDate] = useState("");
+  const [billType, setBillType] = useState("");
   const [poNumber, setPoNumber] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -36,9 +39,12 @@ export default function NewClaim({ vendor, pos = [] }: any) {
   const setDocFile = (i: number, file: File | null) => { const copy = [...documents]; copy[i].file = file; setDocuments(copy); };
 
   const submit = () => {
-    if (!poNumber || !title || !amount || documents.every((d) => !d.file)) return;
+    if (!billNumber || !billDate || !billType || !poNumber || !title || !amount || documents.every((d) => !d.file)) return;
     setSubmitting(true);
     const fd = new FormData();
+    fd.append("bill_number", billNumber);
+    fd.append("bill_date", billDate);
+    fd.append("bill_type", billType);
     fd.append("po_number", poNumber);
     fd.append("title", title);
     if (description) fd.append("description", description);
@@ -67,9 +73,29 @@ export default function NewClaim({ vendor, pos = [] }: any) {
         <div className="lg:col-span-2 space-y-6">
           <div className="panel p-6 space-y-5">
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Receipt className="h-4.5 w-4.5 text-accent" /> Claim information
+              <Receipt className="h-4.5 w-4.5 text-accent" /> Bill information
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label>Bill Number <span className="text-destructive">*</span></Label>
+                <Input className={errors.bill_number && "border-destructive focus-visible:ring-destructive"} value={billNumber} onChange={(e) => setBillNumber(e.target.value)} placeholder="e.g. INV-001" />
+                {errors.bill_number && <p className="text-xs text-destructive">{errors.bill_number}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Bill Date <span className="text-destructive">*</span></Label>
+                <Input type="date" className={errors.bill_date && "border-destructive focus-visible:ring-destructive"} value={billDate} onChange={(e) => setBillDate(e.target.value)} />
+                {errors.bill_date && <p className="text-xs text-destructive">{errors.bill_date}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Bill Type <span className="text-destructive">*</span></Label>
+                <select className={cn("h-10 w-full rounded-lg border bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring", errors.bill_type && "border-destructive")} value={billType} onChange={(e) => setBillType(e.target.value)}>
+                  <option value="">-- Select Bill Type --</option>
+                  {billTypes.map((bt: any) => (
+                    <option key={bt.value} value={bt.value}>{bt.label}</option>
+                  ))}
+                </select>
+                {errors.bill_type && <p className="text-xs text-destructive">{errors.bill_type}</p>}
+              </div>
               <div className="space-y-1.5">
                 <Label>Purchase Order <span className="text-destructive">*</span></Label>
                 <select className={cn("h-10 w-full rounded-lg border bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring", errors.po_number && "border-destructive")} value={poNumber} onChange={(e) => setPoNumber(e.target.value)}>
@@ -138,7 +164,7 @@ export default function NewClaim({ vendor, pos = [] }: any) {
           <div className="text-xs text-muted-foreground">{vendor.email}</div>
           <div className="text-xs">ERP: <span className="font-mono">{vendor.erp_code ?? "—"}</span></div>
           <div className="text-xs text-muted-foreground leading-relaxed pt-3 border-t border-border/40">
-            Your claim will be reviewed by the procurement panel, then approver panel, then admin for final approval.
+            Select bill type to determine the approval workflow. Your claim will be reviewed through the configured approval steps.
           </div>
         </div>
       </div>

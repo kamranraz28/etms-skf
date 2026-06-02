@@ -7,11 +7,19 @@ import { DataTable, Column } from "@/components/ui/DataTable";
 import { Plus, ChevronRight } from "lucide-react";
 
 export default function MyClaims({ claims }: any) {
+  const billTypeLabel: Record<string, string> = {
+    plant_other: "Plant / Other",
+    ohq_packing: "OHQ Packing",
+  };
+
   const columns: Column[] = [
     { key: "claim_number", label: "Claim #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.claim_number}</span> },
+    { key: "bill_number", label: "Bill #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.bill_number ?? "—"}</span> },
     { key: "po_number", label: "PO #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.po_number}</span> },
+    { key: "bill_type", label: "Type", sortable: true, render: (r) => <span className="text-xs whitespace-nowrap">{billTypeLabel[r.bill_type] ?? r.bill_type ?? "—"}</span> },
     { key: "title", label: "Title", sortable: true, render: (r) => <span className="font-medium max-w-32 md:max-w-48 truncate block">{r.title}</span> },
     { key: "amount", label: "Amount", sortable: true, className: "text-right", render: (r) => <span className="font-mono whitespace-nowrap">{Number(r.amount).toLocaleString()}</span> },
+    { key: "current_step", label: "Current Step", sortable: false, render: (r) => <span className="text-xs whitespace-nowrap">{r.current_step?.label ?? "—"}</span> },
     { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
     { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.status} /> },
     {
@@ -32,7 +40,7 @@ export default function MyClaims({ claims }: any) {
       <Head title="My Claims" />
       <PageHeader
         title="My Claims"
-        description="Track your billing claims and their lifecycle status."
+        description="Track your billing claims and live approval progress."
         actions={<Link href="/app/claims/new"><Button size="sm"><Plus className="h-4 w-4 mr-1" /> New Claim</Button></Link>}
       />
       <DataTable columns={columns} data={claims} exportFilename="my-claims" emptyMessage="No claims submitted yet." searchPlaceholder="Search claims..." />

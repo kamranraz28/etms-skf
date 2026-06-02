@@ -18,12 +18,13 @@ export default function ClaimHistory({ claims, vendors, filters }: any) {
     router.get(`/app/claims/history?${params.toString()}`);
   };
 
-  const statuses = ["", "submitted", "under_review_procurement", "under_review_approver", "under_review_admin", "approved", "rejected"];
+  const statuses = ["", "submitted", "forwarded_to_finance", "rejected"];
 
   const columns: Column[] = [
     { key: "claim_number", label: "Claim #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.claim_number}</span> },
     { key: "vendor", label: "Vendor", sortable: false, render: (r) => <span className="whitespace-nowrap font-medium">{r.vendor?.name}</span> },
     { key: "erp_code", label: "ERP", sortable: false, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.vendor?.erp_code ?? "—"}</span> },
+    { key: "bill_number", label: "Bill #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.bill_number ?? "—"}</span> },
     { key: "po_number", label: "PO #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.po_number}</span> },
     { key: "title", label: "Title", sortable: true, render: (r) => <span className="max-w-32 md:max-w-40 truncate block">{r.title}</span> },
     { key: "amount", label: "Amount", sortable: true, className: "text-right", render: (r) => <span className="font-mono whitespace-nowrap">{Number(r.amount).toLocaleString()}</span> },
