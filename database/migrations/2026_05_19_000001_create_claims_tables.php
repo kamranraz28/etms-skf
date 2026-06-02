@@ -11,27 +11,35 @@ return new class extends Migration
         Schema::create('claims', function (Blueprint $t) {
             $t->id();
             $t->string('claim_number')->unique();
+            $t->string('bill_number')->nullable();
+            $t->date('bill_date')->nullable();
+            $t->string('bill_type')->nullable();
             $t->unsignedBigInteger('vendor_id');
             $t->string('po_number');
             $t->string('title');
             $t->text('description')->nullable();
             $t->decimal('amount', 14, 2);
-            $t->enum('status', ['submitted', 'under_review_procurement', 'under_review_approver', 'under_review_admin', 'approved', 'rejected'])->default('submitted');
+            $t->string('status', 50)->default('submitted');
+            $t->unsignedBigInteger('workflow_type_id')->nullable();
+            $t->unsignedBigInteger('current_step_id')->nullable();
             $t->timestamp('submitted_at')->useCurrent();
             $t->timestamp('approved_at')->nullable();
             $t->timestamp('rejected_at')->nullable();
+            $t->timestamp('forwarded_to_finance_at')->nullable();
             $t->text('rejection_reason')->nullable();
             $t->unsignedBigInteger('created_by')->nullable();
             $t->timestamps();
 
             $t->foreign('vendor_id')->references('id')->on('vendors')->cascadeOnDelete();
+            $t->foreign('workflow_type_id')->references('id')->on('workflow_types')->nullOnDelete();
+            $t->foreign('current_step_id')->references('id')->on('workflow_steps')->nullOnDelete();
             $t->foreign('created_by')->references('id')->on('users')->nullOnDelete();
         });
 
         Schema::create('claim_documents', function (Blueprint $t) {
             $t->id();
             $t->unsignedBigInteger('claim_id');
-            $t->enum('document_type', ['invoice', 'delivery_challan', 'payment_receipt', 'other'])->default('other');
+            $t->string('document_type', 50)->default('other');
             $t->string('original_name');
             $t->string('stored_path');
             $t->string('mime_type')->nullable();
@@ -44,14 +52,16 @@ return new class extends Migration
         Schema::create('claim_approvals', function (Blueprint $t) {
             $t->id();
             $t->unsignedBigInteger('claim_id');
-            $t->enum('panel', ['procurement', 'approver', 'admin']);
-            $t->enum('decision', ['approved', 'rejected']);
+            $t->string('panel', 50);
+            $t->unsignedBigInteger('workflow_step_id')->nullable();
+            $t->string('decision', 50);
             $t->text('comment')->nullable();
             $t->unsignedBigInteger('acted_by');
             $t->timestamp('acted_at');
             $t->timestamps();
 
             $t->foreign('claim_id')->references('id')->on('claims')->cascadeOnDelete();
+            $t->foreign('workflow_step_id')->references('id')->on('workflow_steps')->nullOnDelete();
             $t->foreign('acted_by')->references('id')->on('users')->cascadeOnDelete();
         });
     }

@@ -14,8 +14,8 @@ class DatabaseSeeder extends Seeder
             PrSeeder::class,
             TenderSeeder::class,
             BidSeeder::class,
-            ClaimSeeder::class,
             WorkflowTypeSeeder::class,
+            ClaimSeeder::class,
         ]);
     }
 }

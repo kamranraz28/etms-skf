@@ -7,7 +7,7 @@ return new class extends Migration {
         Schema::create('user_roles', function (Blueprint $t) {
             $t->id();
             $t->unsignedBigInteger('user_id');
-            $t->enum('role', ['admin','procurement','approver','vendor']);
+            $t->string('role', 50);
             $t->timestamps();
             $t->unique(['user_id','role']);
             $t->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
