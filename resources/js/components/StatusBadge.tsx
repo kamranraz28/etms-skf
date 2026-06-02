@@ -26,6 +26,10 @@ const STYLES: Record<string, string> = {
     "bg-success/10 text-success border-success/30 shadow-lg shadow-success/20 hover:shadow-xl hover:shadow-success/30",
   rejected:
     "bg-destructive/10 text-destructive border-destructive/30 shadow-lg shadow-destructive/20 hover:shadow-xl hover:shadow-destructive/30",
+  pending_approval:
+    "bg-warning/10 text-warning border-warning/30 shadow-lg shadow-warning/20 hover:shadow-xl hover:shadow-warning/30",
+  re_tendered:
+    "bg-info/10 text-info border-info/30 shadow-lg shadow-info/20 hover:shadow-xl hover:shadow-info/30",
   success:
     "bg-success/10 text-success border-success/30 shadow-lg shadow-success/20 hover:shadow-xl hover:shadow-success/30",
   failed:

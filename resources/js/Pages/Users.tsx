@@ -7,7 +7,7 @@ import { AppRole } from "@/lib/types";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { ShieldCheck, Users as UsersIcon } from "lucide-react";
 
-const ALL: AppRole[] = ["admin","procurement","approver","vendor"];
+const ALL: AppRole[] = ["admin","procurement","approver","vendor","department_head","executive_director","counter_ed","scm_head","finance_head","line_manager"];
 
 export default function Users({ rows }: any) {
   const sa = useSweetAlert();
@@ -41,7 +41,7 @@ export default function Users({ rows }: any) {
   return (
     <AppShell>
       <Head title="Users & roles" />
-      <PageHeader title="Users & roles" description="Promote users between Admin, Procurement, Approver, and Vendor roles." />
+      <PageHeader title="Users & roles" description="Manage user roles for the system." />
       <DataTable columns={columns} data={rows} exportFilename="users" emptyMessage="No users found." searchPlaceholder="Search users..." />
       {sa.SweetAlert}
     </AppShell>

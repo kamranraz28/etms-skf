@@ -1,4 +1,4 @@
-export type AppRole = "admin" | "procurement" | "approver" | "vendor";
+export type AppRole = "admin" | "procurement" | "approver" | "department_head" | "executive_director" | "counter_ed" | "scm_head" | "finance_head" | "line_manager" | "vendor";
 export type VendorStatus = "pending" | "active" | "inactive" | "blacklisted";
 export type TenderStatus = "open" | "closed" | "awarded";
 export type PRStatus = "new" | "tendered";

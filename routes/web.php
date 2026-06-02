@@ -14,6 +14,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorProfileController;
 use App\Http\Controllers\ClaimController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\WorkflowTypeController;
 
 // Auth
 Route::get('/', [AuthController::class, 'show'])->name('auth.show');
@@ -30,7 +31,7 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Staff
-    Route::middleware('role:admin,procurement,approver')->group(function () {
+    Route::middleware('role:admin,procurement,approver,department_head,executive_director,counter_ed,scm_head,finance_head,line_manager')->group(function () {
         Route::get('/vendors', [VendorController::class, 'index'])->name('vendors.index');
         Route::post('/vendors', [VendorController::class, 'store'])->name('vendors.store')->middleware('role:admin');
         Route::put('/vendors/{vendor}', [VendorController::class, 'update'])->name('vendors.update')->middleware('role:admin');
@@ -78,6 +79,10 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::get('/claims/history', [ClaimController::class, 'history'])->name('claims.history');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::get('/workflow-types', [WorkflowTypeController::class, 'index'])->name('workflow-types.index');
+        Route::post('/workflow-types', [WorkflowTypeController::class, 'store'])->name('workflow-types.store');
+        Route::put('/workflow-types/{workflowType}', [WorkflowTypeController::class, 'update'])->name('workflow-types.update');
+        Route::delete('/workflow-types/{workflowType}', [WorkflowTypeController::class, 'destroy'])->name('workflow-types.destroy');
     });
 
     // Vendor only — define fixed claim paths BEFORE parameterised staff routes

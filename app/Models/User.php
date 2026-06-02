@@ -21,7 +21,7 @@ class User extends Authenticatable
 
     public function primaryRole(): ?string
     {
-        $priority = ['admin', 'procurement', 'approver', 'vendor'];
+        $priority = ['admin', 'procurement', 'approver', 'department_head', 'executive_director', 'counter_ed', 'scm_head', 'finance_head', 'line_manager', 'vendor'];
         $mine = $this->roles()->pluck('role')->all();
         foreach ($priority as $r) if (in_array($r, $mine, true)) return $r;
         return null;

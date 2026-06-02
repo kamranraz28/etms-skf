@@ -16,7 +16,7 @@ class UserController extends Controller {
     }
 
     public function toggleRole(User $user, string $role) {
-        $allowed = ['admin','procurement','approver','vendor'];
+        $allowed = ['admin','procurement','approver','vendor','department_head','executive_director','counter_ed','scm_head','finance_head','line_manager'];
         abort_unless(in_array($role, $allowed, true), 422);
         $existing = UserRole::where('user_id', $user->id)->where('role', $role)->first();
         if ($existing) $existing->delete();

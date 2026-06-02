@@ -21,6 +21,7 @@ import {
     ShieldCheck,
     Tag,
     Users,
+    Workflow,
     X,
 } from "lucide-react";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
@@ -32,54 +33,56 @@ interface NavItem {
   roles: AppRole[];
 }
 
+const APPROVER_ROLES = ["admin", "procurement", "approver", "department_head", "executive_director", "counter_ed", "scm_head", "finance_head", "line_manager"];
+
 const NAV: NavItem[] = [
   {
     href: "/app",
     label: "Dashboard",
     icon: <LayoutDashboard className="h-4.5 w-4.5" />,
-    roles: ["admin", "procurement", "approver", "vendor"],
+    roles: [...APPROVER_ROLES, "vendor"],
   },
   {
     href: "/app/vendor-categories",
     label: "Vendor Categories",
     icon: <Tag className="h-4.5 w-4.5" />,
-    roles: ["admin", "procurement", "approver"],
+    roles: APPROVER_ROLES,
   },
   {
     href: "/app/vendors",
     label: "Vendors",
     icon: <Building2 className="h-4.5 w-4.5" />,
-    roles: ["admin", "procurement", "approver"],
+    roles: APPROVER_ROLES,
   },
   {
     href: "/app/prs",
     label: "Purchase Requisitions",
     icon: <FileStack className="h-4.5 w-4.5" />,
-    roles: ["admin", "procurement", "approver"],
+    roles: APPROVER_ROLES,
   },
   {
     href: "/app/pos",
     label: "Purchase Orders",
     icon: <ClipboardList className="h-4.5 w-4.5" />,
-    roles: ["admin", "procurement", "approver"],
+    roles: APPROVER_ROLES,
   },
   {
     href: "/app/tenders",
     label: "Tenders",
     icon: <Gavel className="h-4.5 w-4.5" />,
-    roles: ["admin", "procurement", "approver"],
+    roles: APPROVER_ROLES,
   },
   {
     href: "/app/cs",
     label: "Comparative Statements",
     icon: <Scale className="h-4.5 w-4.5" />,
-    roles: ["admin", "procurement", "approver"],
+    roles: APPROVER_ROLES,
   },
   {
     href: "/app/claims",
     label: "Claims",
     icon: <Receipt className="h-4.5 w-4.5" />,
-    roles: ["procurement", "approver"],
+    roles: APPROVER_ROLES,
   },
   {
     href: "/app/claims/history",
@@ -121,6 +124,12 @@ const NAV: NavItem[] = [
     href: "/app/settings",
     label: "Settings",
     icon: <Settings className="h-4.5 w-4.5" />,
+    roles: ["admin"],
+  },
+  {
+    href: "/app/workflow-types",
+    label: "Workflow Types",
+    icon: <Workflow className="h-4.5 w-4.5" />,
     roles: ["admin"],
   },
 ];

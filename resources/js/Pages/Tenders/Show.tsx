@@ -38,7 +38,7 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
       render: (r: any) => (
         <span className="font-medium whitespace-nowrap">
           {r.vendor?.name}
-          {lowest?.id === r.id && <StatusBadge status="selected" className="ml-2 text-[10px]" />}
+          {tender.status !== "open" && lowest?.id === r.id && <StatusBadge status="selected" className="ml-2 text-[10px]" />}
         </span>
       ),
     },

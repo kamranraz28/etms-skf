@@ -7,18 +7,19 @@ import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSharedProps } from "@/lib/types";
 import { Head, router, usePage } from "@inertiajs/react";
-import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle, Scale, FileText, UserCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle, Scale, FileText, UserCheck, Workflow, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export default function CSShow({
-  cs, items, selections, approvals, erpLogs, prItems,
+  cs, items, selections, approvals, erpLogs, prItems, workflowTypes,
 }: any) {
   const { props } = usePage<PageSharedProps>();
   const primary = props.auth.user?.primary_role;
+  const userRoles = props.auth.user?.roles ?? [];
   const isProc = primary === "procurement" || primary === "admin";
-  const isApprover = primary === "approver";
   const isAdmin = primary === "admin";
   const [comment, setComment] = useState("");
+  const [selectedWf, setSelectedWf] = useState("");
   const sa = useSweetAlert();
 
   const matrix = useMemo(() => {
@@ -33,20 +34,38 @@ export default function CSShow({
     return Array.from(seen.values());
   }, [selections]);
 
+  const currentStep = cs.current_step;
+  const canActOnCurrentStep = currentStep && (userRoles.includes(currentStep.role_name));
+
   const setSelected = (item_index: number, vendor_id: string) =>
     router.post(`/app/cs/${cs.id}/select`, { item_index, vendor_id }, { preserveScroll: true });
-  const submitForApproval = () =>
+
+  const submitForApproval = () => {
+    if (!selectedWf) { sa.alert("Select workflow", "Please select a workflow type before submitting.", "warning"); return; }
     sa.confirmAction("Submit for approval?", "Send this CS for review?", "Submit").then((ok) => {
-      if (ok) router.post(`/app/cs/${cs.id}/submit`, {}, { onSuccess: () => sa.alert("CS submitted", "The CS has been sent for review.", "success") });
-    });
-  const decide = (decision: "approved" | "rejected") => {
-    const title = decision === "approved" ? "Approve CS?" : "Reject CS?";
-    sa.confirmAction(title, decision === "approved" ? "This will mark the CS as approved." : "This will mark the CS as rejected.", decision === "approved" ? "Approve" : "Reject").then((ok) => {
-      if (ok) router.post(`/app/cs/${cs.id}/decide`, { decision, comment }, {
-        onSuccess: () => { setComment(""); sa.alert(decision === "approved" ? "CS approved" : "CS rejected", "...", decision === "approved" ? "success" : "warning"); },
+      if (ok) router.post(`/app/cs/${cs.id}/submit`, { workflow_type_id: selectedWf }, {
+        onSuccess: () => sa.alert("CS submitted", "The CS has been sent for review.", "success"),
+        onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
       });
     });
   };
+
+  const decide = (decision: "approved" | "declined" | "re_tendered") => {
+    const labels: Record<string, string> = { approved: "Approve", declined: "Decline", re_tendered: "Re-tender" };
+    const titles: Record<string, string> = { approved: "Approve CS?", declined: "Decline CS?", re_tendered: "Re-tender CS?" };
+    const descs: Record<string, string> = {
+      approved: "This will advance the CS to the next approval step.",
+      declined: "This will return the CS to draft for revision.",
+      re_tendered: "This will create a new tender for the same PR. Old logs are kept.",
+    };
+    sa.confirmAction(titles[decision], descs[decision], labels[decision]).then((ok) => {
+      if (ok) router.post(`/app/cs/${cs.id}/decide`, { decision, comment }, {
+        onSuccess: () => { setComment(""); sa.alert("Done", "CS " + labels[decision].toLowerCase() + "d", "success"); },
+        onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+      });
+    });
+  };
+
   const sendToErp = () =>
     sa.confirmAction("Send to ERP?", "This will push the award to the ERP system.", "Send").then((ok) => {
       if (ok) router.post(`/app/cs/${cs.id}/erp`, {}, { onSuccess: () => sa.alert("Sent to ERP", "The award has been pushed to the ERP system.", "success") });
@@ -74,26 +93,17 @@ export default function CSShow({
     { key: "selected", label: "Status", sortable: false, render: (r) => r.selected ? <StatusBadge status="selected" /> : <span className="text-xs text-muted-foreground">—</span> },
   ];
 
-  const approvalColumns: Column[] = [
-    {
-      key: "step",
-      label: "Step",
-      sortable: false,
-      render: (a: any) => (
-        <div className="flex items-center gap-2">
-          {a.decision === "approved" ? (
-            <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
-          ) : (
-            <XCircle className="h-4 w-4 text-destructive shrink-0" />
-          )}
-          <span className="font-bold uppercase text-xs">{a.step}</span>
-        </div>
-      ),
-    },
-    { key: "decision", label: "Decision", sortable: false, render: (a) => <span>{a.decision}</span> },
-    { key: "acted_at", label: "Date", sortable: true, render: (a) => <span className="text-xs text-muted-foreground">{new Date(a.acted_at).toLocaleString()}</span> },
-    { key: "comment", label: "Comment", sortable: false, render: (a) => a.comment ? <span className="text-xs text-muted-foreground italic">"{a.comment}"</span> : <span className="text-xs text-muted-foreground">—</span> },
-  ];
+
+
+  const workflowSteps = cs.workflow_type?.steps ?? [];
+
+  const approvalMap = useMemo(() => {
+    const m: Record<number, any> = {};
+    approvals.forEach((a: any) => {
+      if (a.workflow_step_id) m[a.workflow_step_id] = a;
+    });
+    return m;
+  }, [approvals]);
 
   return (
     <AppShell>
@@ -182,37 +192,151 @@ export default function CSShow({
             <div className="panel-header bg-gradient-to-r from-card to-muted/20">
               <div className="panel-title"><UserCheck className="h-4.5 w-4.5 text-accent" /> Approval history</div>
             </div>
-            <DataTable
-              columns={approvalColumns}
-              data={approvals}
-              searchable={false}
-              exportable={false}
-              hidePageSize
-              pageSize={50}
-              compact
-              emptyMessage="No actions yet."
-            />
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gradient-to-r from-muted/40 to-muted/20">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Step</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Decision</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">By</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Comment</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/30">
+                  {workflowSteps.map((step: any) => {
+                    const approval = approvalMap[step.id];
+                    const isCurrent = cs.current_step_id === step.id;
+                    return (
+                      <tr key={step.id} className={`hover:bg-muted/20 transition-colors ${isCurrent ? "bg-accent/5" : ""}`}>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            {approval?.decision === "approved" ? (
+                              <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+                            ) : approval?.decision === "rejected" ? (
+                              <XCircle className="h-4 w-4 text-destructive shrink-0" />
+                            ) : approval?.decision === "re_tendered" ? (
+                              <RefreshCw className="h-4 w-4 text-info shrink-0" />
+                            ) : isCurrent ? (
+                              <span className="h-2 w-2 rounded-full bg-accent animate-pulse shrink-0" />
+                            ) : (
+                              <span className="h-2 w-2 rounded-full bg-muted-foreground/30 shrink-0" />
+                            )}
+                            <span className={`font-semibold text-xs ${isCurrent ? "text-accent" : ""}`}>{step.label}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          {approval ? (
+                            <span className={`text-xs font-medium ${approval.decision === "approved" ? "text-success" : approval.decision === "rejected" ? "text-destructive" : "text-info"}`}>
+                              {approval.decision === "rejected" ? "Declined" : approval.decision}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Pending</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground">{approval?.actor?.full_name || "—"}</td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{approval?.acted_at ? new Date(approval.acted_at).toLocaleString() : "—"}</td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground italic max-w-[200px] truncate">{approval?.comment ? `"${approval.comment}"` : "—"}</td>
+                      </tr>
+                    );
+                  })}
+                  {workflowSteps.length === 0 && approvals.length === 0 && (
+                    <tr><td colSpan={5} className="px-4 py-8 text-center text-xs text-muted-foreground">No approval actions yet.</td></tr>
+                  )}
+                  {workflowSteps.length === 0 && approvals.length > 0 && approvals.map((a: any) => (
+                    <tr key={a.id} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          {a.decision === "approved" ? (
+                            <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+                          ) : a.decision === "rejected" ? (
+                            <XCircle className="h-4 w-4 text-destructive shrink-0" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4 text-info shrink-0" />
+                          )}
+                          <span className="font-semibold text-xs uppercase">{a.step}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs font-medium ${a.decision === "approved" ? "text-success" : "text-destructive"}`}>{a.decision}</span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">{a.actor?.full_name || "—"}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{a.acted_at ? new Date(a.acted_at).toLocaleString() : "—"}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground italic max-w-[200px] truncate">{a.comment ? `"${a.comment}"` : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {cs.tender_logs?.length > 0 && (
+            <div className="panel overflow-hidden">
+              <div className="panel-header bg-gradient-to-r from-card to-muted/20">
+                <div className="panel-title"><RefreshCw className="h-4.5 w-4.5 text-info" /> Re-tender history</div>
+              </div>
+              <div className="divide-y divide-border/40">
+                {cs.tender_logs.map((log: any) => (
+                  <div key={log.id} className="px-5 py-3 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-medium">{log.actor?.full_name}</span>
+                      <span className="text-xs text-muted-foreground ml-2">— {log.reason}</span>
+                    </div>
+                    <a href={`/app/tenders/${log.new_tender_id}`} className="text-xs text-accent underline">View new tender</a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-6">
           <div className="panel p-5 space-y-4">
             <div className="panel-title">Actions</div>
             {cs.status === "draft" && isProc && (
-              <Button className="w-full" onClick={submitForApproval}><Send className="h-4 w-4 mr-1" /> Submit for approval</Button>
+              <div className="space-y-3">
+                <select
+                  value={selectedWf}
+                  onChange={(e) => setSelectedWf(e.target.value)}
+                  className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
+                >
+                  <option value="">Select workflow...</option>
+                  {workflowTypes.map((wt: any) => (
+                    <option key={wt.id} value={wt.id}>{wt.name}</option>
+                  ))}
+                </select>
+                <Button className="w-full" onClick={submitForApproval} disabled={!selectedWf}>
+                  <Send className="h-4 w-4 mr-1" /> Submit for approval
+                </Button>
+              </div>
             )}
-            {(cs.status === "pending_approver" || cs.status === "pending_admin") && (
-              <>
+            {cs.status === "pending_approval" && (
+              <div className="space-y-3">
+                {currentStep && (
+                  <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded-lg border border-border/40">
+                    <span className="font-semibold text-foreground">Awaiting: {currentStep.label}</span>
+                    <span className="block text-[10px] mt-0.5">Role: {currentStep.role_name}</span>
+                  </div>
+                )}
                 <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Optional comment" rows={3} />
-                {(cs.status === "pending_approver" && isApprover) || (cs.status === "pending_admin" && isAdmin) ? (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button className="flex-1" onClick={() => decide("approved")}><CheckCircle2 className="h-4 w-4 mr-1" /> Approve</Button>
-                    <Button className="flex-1" variant="destructive" onClick={() => decide("rejected")}><XCircle className="h-4 w-4 mr-1" /> Reject</Button>
+                {canActOnCurrentStep ? (
+                  <div className="flex flex-col gap-2">
+                    <Button className="w-full" onClick={() => decide("approved")}>
+                      <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
+                    </Button>
+                    <Button className="w-full" variant="destructive" onClick={() => decide("declined")}>
+                      <XCircle className="h-4 w-4 mr-1" /> Decline
+                    </Button>
+                    <Button className="w-full" variant="outline" onClick={() => decide("re_tendered")}>
+                      <RefreshCw className="h-4 w-4 mr-1" /> Re-tender
+                    </Button>
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground">Awaiting {cs.status === "pending_approver" ? "approver" : "admin"} action.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Awaiting {currentStep?.label || "approver"} action. Your role does not match the current step.
+                  </p>
                 )}
-              </>
+              </div>
             )}
             {cs.status === "approved" && isAdmin && !erpDone && (
               <Button className="w-full" onClick={sendToErp}><Upload className="h-4 w-4 mr-1" /> Send to ERP</Button>
@@ -230,16 +354,58 @@ export default function CSShow({
             {cs.status === "rejected" && (
               <div className="text-xs text-destructive bg-destructive/5 p-3 rounded-lg border border-destructive/20 font-medium">This CS was rejected.</div>
             )}
+            {cs.status === "re_tendered" && (
+              <div className="text-xs text-info bg-info/5 p-3 rounded-lg border border-info/20 font-medium">This CS was sent for re-tender.</div>
+            )}
           </div>
+
           <div className="panel p-5 text-xs text-muted-foreground space-y-1.5">
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
               <Scale className="h-4 w-4 text-accent" /> Workflow
             </div>
-            <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-accent/50" /> 1. Procurement picks vendor per item (draft)</div>
-            <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-accent/50" /> 2. Submit → pending approver</div>
-            <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-accent/50" /> 3. Approver decides → pending admin</div>
-            <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-accent/50" /> 4. Admin decides → approved</div>
-            <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-accent/50" /> 5. Admin pushes to ERP</div>
+            {cs.workflow_type ? (
+              <>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Workflow className="h-3.5 w-3.5 text-accent" />
+                  <span className="font-semibold text-foreground text-xs">{cs.workflow_type.name}</span>
+                </div>
+                <ol className="space-y-1.5 ml-1">
+                  <li className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-accent/50 shrink-0" />
+                    0. Procurement picks vendor per item (draft)
+                  </li>
+                  {workflowSteps.map((step: any, i: number) => {
+                    const isCurrent = cs.current_step_id === step.id;
+                    const done = approvals.some((a: any) => a.workflow_step_id === step.id && a.decision === "approved");
+                    return (
+                      <li key={step.id} className={`flex items-center gap-2 ${isCurrent ? "text-accent font-semibold" : done ? "text-success" : ""}`}>
+                        {done ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
+                        ) : isCurrent ? (
+                          <span className="h-2 w-2 rounded-full bg-accent animate-pulse shrink-0" />
+                        ) : (
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 shrink-0" />
+                        )}
+                        {i + 1}. {step.label}
+                      </li>
+                    );
+                  })}
+                  <li className="flex items-center gap-2">
+                    {cs.status === "approved" ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
+                    ) : (
+                      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 shrink-0" />
+                    )}
+                    {workflowSteps.length + 1}. Admin pushes to ERP
+                  </li>
+                </ol>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-accent/50" /> 1. Procurement picks vendor per item (draft)</div>
+                <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-accent/50" /> 2. Select workflow type and submit</div>
+              </>
+            )}
           </div>
         </div>
       </div>
