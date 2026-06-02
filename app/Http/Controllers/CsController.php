@@ -130,6 +130,7 @@ class CsController extends Controller {
         }
 
         if ($data['decision'] === 're_tendered') {
+            $extra = $r->validate(['deadline' => 'required|date|after:now']);
             CsApproval::create([
                 'cs_id' => $cs->id,
                 'step' => $currentStep->step_name,
@@ -148,7 +149,7 @@ class CsController extends Controller {
                 'pr_id' => $pr->id,
                 'title' => $oldTender->title . ' (Re-tender)',
                 'description' => $oldTender->description,
-                'deadline' => now()->addDays(30),
+                'deadline' => $extra['deadline'],
                 'status' => 'open',
                 'created_by' => $user->id,
             ]);

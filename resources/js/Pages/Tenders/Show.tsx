@@ -5,14 +5,38 @@ import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { PageSharedProps } from "@/lib/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { ArrowLeft, ExternalLink, Lock, Scale, Gavel, Users, FileText } from "lucide-react";
+import { ArrowLeft, ExternalLink, Lock, Scale, Gavel, Users, FileText, UserPlus, X } from "lucide-react";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
+import { useState } from "react";
 
-export default function TenderShow({ tender, vendors, bids, cs }: any) {
+export default function TenderShow({ tender, vendors, bids, cs, categories }: any) {
   const { props } = usePage<PageSharedProps>();
   const sa = useSweetAlert();
   const primary = props.auth.user?.primary_role;
   const lowest = bids[0];
+  const [inviteModal, setInviteModal] = useState(false);
+  const [selectedVendors, setSelectedVendors] = useState<Record<string, boolean>>({});
+
+  const existingVendorIds = new Set(vendors.map((v: any) => v.id));
+
+  const openInvite = () => {
+    setSelectedVendors({});
+    setInviteModal(true);
+  };
+
+  const toggleVendor = (id: string) => {
+    setSelectedVendors((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const sendInvites = () => {
+    const ids = Object.entries(selectedVendors).filter(([, v]) => v).map(([id]) => id);
+    if (ids.length === 0) { sa.alert("Select vendors", "Choose at least one vendor.", "warning"); return; }
+    sa.confirmAction("Invite vendors?", `${ids.length} vendor(s) will be added.`, "Invite").then((ok) => {
+      if (ok) router.post(`/app/tenders/${tender.id}/invite`, { vendor_ids: ids }, {
+        onSuccess: () => { setInviteModal(false); sa.alert("Invited", "Vendors added to tender.", "success"); },
+      });
+    });
+  };
   const closeTender = async () => {
     const confirmed = await sa.confirmAction("Close tender?", "This will prevent new bids.", "Close tender");
     if (confirmed) {
@@ -138,6 +162,9 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
           <div className="panel overflow-hidden">
             <div className="panel-header bg-gradient-to-r from-card to-muted/20">
               <div className="panel-title"><Users className="h-4.5 w-4.5 text-accent" /> Invited vendors ({vendors.length})</div>
+              {tender.status === "open" && (
+                <Button size="sm" variant="outline" onClick={openInvite}><UserPlus className="h-3.5 w-3.5 mr-1" /> Invite</Button>
+              )}
             </div>
             <ul className="divide-y divide-border/40 max-h-[400px] overflow-y-auto">
               {vendors.map((v: any) => (
@@ -161,6 +188,46 @@ export default function TenderShow({ tender, vendors, bids, cs }: any) {
           )}
         </div>
       </div>
+
+      {inviteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setInviteModal(false)}>
+          <div className="bg-card border border-border/60 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden m-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
+              <div className="flex items-center gap-2 font-semibold text-sm"><UserPlus className="h-4 w-4 text-accent" /> Invite vendors</div>
+              <button onClick={() => setInviteModal(false)} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="overflow-y-auto max-h-[50vh] p-4 space-y-2">
+              {categories.map((cat: any) => {
+                const available = (cat.vendors || []).filter((v: any) => !existingVendorIds.has(v.id) && v.status === "active");
+                if (available.length === 0) return null;
+                return (
+                  <div key={cat.id}>
+                    <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">{cat.name}</div>
+                    {available.map((v: any) => (
+                      <label key={v.id} className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors">
+                        <input type="checkbox" checked={!!selectedVendors[v.id]} onChange={() => toggleVendor(v.id)} className="h-4 w-4 accent-primary rounded" />
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium truncate">{v.name}</div>
+                          <div className="text-[11px] text-muted-foreground truncate">{v.email}</div>
+                        </div>
+                        {v.erp_code && <span className="ml-auto text-[10px] font-mono text-muted-foreground shrink-0">{v.erp_code}</span>}
+                      </label>
+                    ))}
+                  </div>
+                );
+              })}
+              {categories.every((cat: any) => (cat.vendors || []).filter((v: any) => !existingVendorIds.has(v.id) && v.status === "active").length === 0) && (
+                <p className="text-xs text-muted-foreground text-center py-6">No additional vendors available.</p>
+              )}
+            </div>
+            <div className="flex gap-2 justify-end px-5 py-3 border-t border-border/40 bg-muted/10">
+              <Button variant="outline" size="sm" onClick={() => setInviteModal(false)}>Cancel</Button>
+              <Button size="sm" onClick={sendInvites}>Invite selected</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {sa.SweetAlert}
     </AppShell>
   );

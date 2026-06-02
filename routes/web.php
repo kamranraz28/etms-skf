@@ -57,6 +57,7 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::post('/tenders', [TenderController::class, 'store'])->name('tenders.store');
         Route::get('/tenders/{tender}', [TenderController::class, 'show'])->name('tenders.show');
         Route::post('/tenders/{tender}/close', [TenderController::class, 'close'])->name('tenders.close');
+        Route::post('/tenders/{tender}/invite', [TenderController::class, 'inviteVendors'])->name('tenders.invite');
         Route::post('/tenders/{tender}/generate-cs', [TenderController::class, 'generateCs'])->name('tenders.generate-cs');
         Route::get('/bids/{bid}/document', [BidController::class, 'document'])->name('bids.document');
 

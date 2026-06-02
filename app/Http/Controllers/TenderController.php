@@ -87,7 +87,27 @@ class TenderController extends Controller {
             ->where('tender_id', $tender->id)
             ->orderBy('total_price')->get();
         $cs = $tender->cs;
-        return Inertia::render('Tenders/Show', compact('tender', 'vendors', 'bids', 'cs'));
+        $categories = VendorCategory::with('vendors:id,name,email,erp_code,status,vendor_category_id')
+            ->orderBy('name')->get();
+        return Inertia::render('Tenders/Show', compact('tender', 'vendors', 'bids', 'cs', 'categories'));
+    }
+
+    public function inviteVendors(Request $r, Tender $tender) {
+        if ($tender->status !== 'open')
+            return back()->with('error', 'Can only invite vendors to open tenders.');
+
+        $data = $r->validate([
+            'vendor_ids' => 'required|array|min:1',
+            'vendor_ids.*' => 'required|exists:vendors,id',
+        ]);
+
+        $added = 0;
+        foreach ($data['vendor_ids'] as $vid) {
+            TenderVendor::firstOrCreate(['tender_id' => $tender->id, 'vendor_id' => $vid]);
+            $added++;
+        }
+
+        return back()->with('success', "$added vendor(s) invited.");
     }
 
     public function close(Tender $tender) {
