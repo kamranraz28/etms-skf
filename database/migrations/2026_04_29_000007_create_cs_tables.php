@@ -7,12 +7,15 @@ return new class extends Migration {
         Schema::create('cs', function (Blueprint $t) {
             $t->id();
             $t->unsignedBigInteger('tender_id');
-            $t->enum('status', ['draft','pending_approver','pending_admin','approved','rejected'])->default('draft');
+            $t->unsignedBigInteger('workflow_type_id')->nullable();
+            $t->string('status', 50)->default('draft');
+            $t->unsignedBigInteger('current_step_id')->nullable();
             $t->timestamp('submitted_at')->nullable();
             $t->timestamp('approved_at')->nullable();
             $t->unsignedBigInteger('created_by')->nullable();
             $t->timestamps();
             $t->foreign('tender_id')->references('id')->on('tenders')->cascadeOnDelete();
+            $t->foreign('workflow_type_id')->references('id')->on('workflow_types')->nullOnDelete();
         });
         Schema::create('cs_items', function (Blueprint $t) {
             $t->id();
@@ -45,18 +48,20 @@ return new class extends Migration {
         Schema::create('cs_approvals', function (Blueprint $t) {
             $t->id();
             $t->unsignedBigInteger('cs_id');
-            $t->enum('step', ['approver','admin']);
-            $t->enum('decision', ['approved','rejected']);
+            $t->string('step', 50);
+            $t->unsignedBigInteger('workflow_step_id')->nullable();
+            $t->string('decision', 50);
             $t->text('comment')->nullable();
             $t->unsignedBigInteger('acted_by');
             $t->timestamp('acted_at')->useCurrent();
             $t->timestamps();
             $t->foreign('cs_id')->references('id')->on('cs')->cascadeOnDelete();
+            $t->foreign('workflow_step_id')->references('id')->on('workflow_steps')->nullOnDelete();
         });
         Schema::create('erp_sync', function (Blueprint $t) {
             $t->id();
             $t->unsignedBigInteger('cs_id');
-            $t->enum('status', ['success','failed']);
+            $t->string('status', 50);
             $t->json('request_payload')->nullable();
             $t->json('response_data')->nullable();
             $t->timestamp('synced_at')->useCurrent();
