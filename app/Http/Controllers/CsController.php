@@ -130,7 +130,6 @@ class CsController extends Controller {
         }
 
         if ($data['decision'] === 're_tendered') {
-            $extra = $r->validate(['deadline' => 'required|date|after:now']);
             CsApproval::create([
                 'cs_id' => $cs->id,
                 'step' => $currentStep->step_name,
@@ -141,7 +140,7 @@ class CsController extends Controller {
                 'acted_at' => now(),
             ]);
 
-            // Create a new tender from the same PR
+            // Create a new tender from the same PR with deadline 7 days from now
             $oldTender = $cs->tender;
             $pr = $oldTender->pr;
             $newTender = Tender::create([
@@ -149,7 +148,7 @@ class CsController extends Controller {
                 'pr_id' => $pr->id,
                 'title' => $oldTender->title . ' (Re-tender)',
                 'description' => $oldTender->description,
-                'deadline' => $extra['deadline'],
+                'deadline' => now()->addDays(7),
                 'status' => 'open',
                 'created_by' => $user->id,
             ]);

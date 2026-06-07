@@ -98,17 +98,46 @@ class TenderController extends Controller {
             return back()->with('error', 'Can only invite vendors to open tenders.');
 
         $data = $r->validate([
-            'vendor_ids' => 'required|array|min:1',
-            'vendor_ids.*' => 'required|exists:vendors,id',
+            'item_categories' => 'required|array',
+            'item_categories.*.item_index' => 'required|integer|min:0',
+            'item_categories.*.category_ids' => 'required|array|min:1',
+            'item_categories.*.category_ids.*' => 'exists:vendor_categories,id',
         ]);
 
+        // Replace existing item-category assignments
+        $tender->itemCategories()->delete();
+        foreach ($data['item_categories'] as $ic) {
+            foreach ($ic['category_ids'] as $catId) {
+                TenderItemCategory::create([
+                    'tender_id' => $tender->id,
+                    'item_index' => $ic['item_index'],
+                    'vendor_category_id' => $catId,
+                ]);
+            }
+        }
+
+        // Find vendors matching selected categories and add them
+        $catIds = collect($data['item_categories'])->pluck('category_ids')->flatten()->unique()->values()->all();
+        $vendorIds = Vendor::whereHas('categories', fn($q) => $q->whereIn('vendor_categories.id', $catIds))
+            ->pluck('id')->unique()->values()->all();
+
         $added = 0;
-        foreach ($data['vendor_ids'] as $vid) {
-            TenderVendor::firstOrCreate(['tender_id' => $tender->id, 'vendor_id' => $vid]);
-            $added++;
+        foreach ($vendorIds as $vid) {
+            if (TenderVendor::firstOrCreate(['tender_id' => $tender->id, 'vendor_id' => $vid])->wasRecentlyCreated) {
+                $added++;
+            }
         }
 
         return back()->with('success', "$added vendor(s) invited.");
+    }
+
+    public function updateDeadline(Request $r, Tender $tender) {
+        if ($tender->status !== 'open')
+            return back()->with('error', 'Can only update deadline for open tenders.');
+
+        $data = $r->validate(['deadline' => 'required|date|after:now']);
+        $tender->update(['deadline' => $data['deadline']]);
+        return back()->with('success', 'Deadline updated');
     }
 
     public function close(Tender $tender) {

@@ -50,34 +50,17 @@ export default function CSShow({
     });
   };
 
-  const [retenderModal, setRetenderModal] = useState(false);
-  const [retenderDeadline, setRetenderDeadline] = useState("");
-
   const decide = (decision: "approved" | "declined" | "re_tendered") => {
-    if (decision === "re_tendered") {
-      setRetenderDeadline("");
-      setRetenderModal(true);
-      return;
-    }
-    const labels: Record<string, string> = { approved: "Approve", declined: "Decline" };
-    const titles: Record<string, string> = { approved: "Approve CS?", declined: "Decline CS?" };
+    const labels: Record<string, string> = { approved: "Approve", declined: "Decline", re_tendered: "Re-tender" };
+    const titles: Record<string, string> = { approved: "Approve CS?", declined: "Decline CS?", re_tendered: "Re-tender CS?" };
     const descs: Record<string, string> = {
       approved: "This will advance the CS to the next approval step.",
       declined: "This will return the CS to draft for revision.",
+      re_tendered: "A new tender will be created from the same PR with a 7-day deadline. Old logs are kept.",
     };
     sa.confirmAction(titles[decision], descs[decision], labels[decision]).then((ok) => {
       if (ok) router.post(`/app/cs/${cs.id}/decide`, { decision, comment }, {
-        onSuccess: () => { setComment(""); sa.alert("Done", "CS " + labels[decision].toLowerCase() + "d", "success"); },
-        onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
-      });
-    });
-  };
-
-  const submitRetender = () => {
-    if (!retenderDeadline) { sa.alert("Required", "Please set a deadline for the new tender.", "warning"); return; }
-    sa.confirmAction("Re-tender CS?", "A new tender will be created from the same PR. Old logs are kept.", "Re-tender").then((ok) => {
-      if (ok) router.post(`/app/cs/${cs.id}/decide`, { decision: "re_tendered", comment, deadline: retenderDeadline }, {
-        onSuccess: () => { setComment(""); setRetenderModal(false); sa.alert("Done", "CS re-tendered", "success"); },
+        onSuccess: () => { setComment(""); sa.alert("Done", "CS " + (decision === "re_tendered" ? "re-tendered" : labels[decision].toLowerCase() + "d"), "success"); },
         onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
       });
     });
@@ -426,32 +409,6 @@ export default function CSShow({
           </div>
         </div>
       </div>
-      {retenderModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setRetenderModal(false)}>
-          <div className="bg-card border border-border/60 rounded-2xl shadow-2xl w-full max-w-md p-6 m-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-2 text-lg font-semibold mb-4">
-              <RefreshCw className="h-5 w-5 text-info" /> Re-tender CS
-            </div>
-            <p className="text-xs text-muted-foreground mb-4">Set the deadline for the new tender. Old vendors, items, and logs will be preserved.</p>
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">New tender deadline</label>
-                <input type="datetime-local" value={retenderDeadline} onChange={(e) => setRetenderDeadline(e.target.value)}
-                  className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30" />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Comment (optional)</label>
-                <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={2}
-                  className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30" placeholder="Reason for re-tender" />
-              </div>
-            </div>
-            <div className="flex gap-2 justify-end mt-6">
-              <Button variant="outline" onClick={() => setRetenderModal(false)}>Cancel</Button>
-              <Button onClick={submitRetender}><RefreshCw className="h-4 w-4 mr-1" /> Create re-tender</Button>
-            </div>
-          </div>
-        </div>
-      )}
       {sa.SweetAlert}
     </AppShell>
   );

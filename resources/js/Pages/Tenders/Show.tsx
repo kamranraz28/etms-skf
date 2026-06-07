@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { PageSharedProps } from "@/lib/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { ArrowLeft, ExternalLink, Lock, Scale, Gavel, Users, FileText, UserPlus, X } from "lucide-react";
+import { ArrowLeft, ExternalLink, Lock, Scale, Gavel, Users, FileText, UserPlus, X, Edit3, Check } from "lucide-react";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export default function TenderShow({ tender, vendors, bids, cs, categories }: any) {
   const { props } = usePage<PageSharedProps>();
@@ -15,27 +15,59 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
   const primary = props.auth.user?.primary_role;
   const lowest = bids[0];
   const [inviteModal, setInviteModal] = useState(false);
-  const [selectedVendors, setSelectedVendors] = useState<Record<string, boolean>>({});
   const [viewBidItems, setViewBidItems] = useState<any>(null);
+  const [editingDeadline, setEditingDeadline] = useState(false);
+  const [deadlineVal, setDeadlineVal] = useState("");
 
-  const existingVendorIds = new Set(vendors.map((v: any) => v.id));
+  // Build item-category map from existing item_categories
+  const initialItemCats = useMemo(() => {
+    const map: Record<number, number[]> = {};
+    (tender.item_categories ?? []).forEach((ic: any) => {
+      (map[ic.item_index] ??= []).push(ic.vendor_category_id);
+    });
+    return map;
+  }, [tender.item_categories]);
+
+  const [inviteItemCats, setInviteItemCats] = useState<Record<number, number[]>>({});
 
   const openInvite = () => {
-    setSelectedVendors({});
+    setInviteItemCats({ ...initialItemCats });
     setInviteModal(true);
   };
 
-  const toggleVendor = (id: string) => {
-    setSelectedVendors((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleInviteCat = (itemIdx: number, catId: number) => {
+    setInviteItemCats((prev) => {
+      const current = prev[itemIdx] ?? [];
+      const next = current.includes(catId)
+        ? current.filter((id) => id !== catId)
+        : [...current, catId];
+      if (next.length > 0) return { ...prev, [itemIdx]: next };
+      const copy = { ...prev };
+      delete copy[itemIdx];
+      return copy;
+    });
   };
 
   const sendInvites = () => {
-    const ids = Object.entries(selectedVendors).filter(([, v]) => v).map(([id]) => id);
-    if (ids.length === 0) { sa.alert("Select vendors", "Choose at least one vendor.", "warning"); return; }
-    sa.confirmAction("Invite vendors?", `${ids.length} vendor(s) will be added.`, "Invite").then((ok) => {
-      if (ok) router.post(`/app/tenders/${tender.id}/invite`, { vendor_ids: ids }, {
+    const itemCategories = Object.entries(inviteItemCats)
+      .filter(([, ids]) => ids.length > 0)
+      .map(([idx, ids]) => ({ item_index: parseInt(idx), category_ids: ids }));
+    if (itemCategories.length === 0) { sa.alert("Select categories", "Choose at least one category for an item.", "warning"); return; }
+    sa.confirmAction("Invite vendors?", "Vendors matching selected categories will be added.", "Invite").then((ok) => {
+      if (ok) router.post(`/app/tenders/${tender.id}/invite`, { item_categories: itemCategories }, {
         onSuccess: () => { setInviteModal(false); sa.alert("Invited", "Vendors added to tender.", "success"); },
       });
+    });
+  };
+
+  const startEditDeadline = () => {
+    setDeadlineVal(new Date(tender.deadline).toISOString().slice(0, 16));
+    setEditingDeadline(true);
+  };
+  const saveDeadline = () => {
+    if (!deadlineVal) return;
+    router.post(`/app/tenders/${tender.id}/deadline`, { deadline: deadlineVal }, {
+      onSuccess: () => setEditingDeadline(false),
     });
   };
   const closeTender = async () => {
@@ -117,7 +149,25 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
       </Button>
       <PageHeader
         title={tender.title}
-        description={`${tender.tender_number} · Deadline ${new Date(tender.deadline).toLocaleString()}`}
+        description={
+          <span className="flex items-center gap-2 flex-wrap">
+            <span>{tender.tender_number}</span>
+            <span className="text-muted-foreground">·</span>
+            {editingDeadline ? (
+              <span className="flex items-center gap-1">
+                <input type="datetime-local" value={deadlineVal} onChange={(e) => setDeadlineVal(e.target.value)}
+                  className="h-7 rounded-md border border-border/60 bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                <button onClick={saveDeadline} className="text-success hover:text-success/80"><Check className="h-3.5 w-3.5" /></button>
+                <button onClick={() => setEditingDeadline(false)} className="text-muted-foreground hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">
+                Deadline {new Date(tender.deadline).toLocaleString()}
+                {tender.status === "open" && <button onClick={startEditDeadline} className="text-muted-foreground hover:text-accent ml-1"><Edit3 className="h-3 w-3" /></button>}
+              </span>
+            )}
+          </span>
+        }
         actions={
           <div className="flex gap-2 items-center flex-wrap">
             <StatusBadge status={tender.status} />
@@ -249,38 +299,38 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
 
       {inviteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setInviteModal(false)}>
-          <div className="bg-card border border-border/60 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden m-4" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-card border border-border/60 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden m-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
-              <div className="flex items-center gap-2 font-semibold text-sm"><UserPlus className="h-4 w-4 text-accent" /> Invite vendors</div>
+              <div className="flex items-center gap-2 font-semibold text-sm"><UserPlus className="h-4 w-4 text-accent" /> Invite vendors — select categories per item</div>
               <button onClick={() => setInviteModal(false)} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
             </div>
-            <div className="overflow-y-auto max-h-[50vh] p-4 space-y-2">
-              {categories.map((cat: any) => {
-                const available = (cat.vendors || []).filter((v: any) => !existingVendorIds.has(v.id) && v.status === "active");
-                if (available.length === 0) return null;
-                return (
-                  <div key={cat.id}>
-                    <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">{cat.name}</div>
-                    {available.map((v: any) => (
-                      <label key={v.id} className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors">
-                        <input type="checkbox" checked={!!selectedVendors[v.id]} onChange={() => toggleVendor(v.id)} className="h-4 w-4 accent-primary rounded" />
-                        <div className="min-w-0">
-                          <div className="text-sm font-medium truncate">{v.name}</div>
-                          <div className="text-[11px] text-muted-foreground truncate">{v.email}</div>
-                        </div>
-                        {v.erp_code && <span className="ml-auto text-[10px] font-mono text-muted-foreground shrink-0">{v.erp_code}</span>}
-                      </label>
-                    ))}
+            <div className="overflow-y-auto max-h-[60vh] p-4 space-y-4">
+              {(tender.pr?.items ?? []).map((item: any, idx: number) => (
+                <div key={idx} className="border border-border/40 rounded-xl p-3">
+                  <div className="text-sm font-semibold mb-2">{item.name} <span className="text-xs font-normal text-muted-foreground">({item.qty} {item.unit})</span></div>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat: any) => {
+                      const selected = (inviteItemCats[idx] ?? []).includes(cat.id);
+                      return (
+                        <label key={cat.id} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs cursor-pointer border transition-colors ${selected ? "bg-accent/10 border-accent/40 text-accent font-medium" : "bg-background border-border/60 hover:border-accent/30"}`}>
+                          <input type="checkbox" checked={selected} onChange={() => toggleInviteCat(idx, cat.id)} className="h-3.5 w-3.5 accent-primary rounded" />
+                          {cat.name}
+                        </label>
+                      );
+                    })}
                   </div>
-                );
-              })}
-              {categories.every((cat: any) => (cat.vendors || []).filter((v: any) => !existingVendorIds.has(v.id) && v.status === "active").length === 0) && (
-                <p className="text-xs text-muted-foreground text-center py-6">No additional vendors available.</p>
+                </div>
+              ))}
+              {Object.values(inviteItemCats).every((ids) => ids.length === 0) && (
+                <p className="text-xs text-muted-foreground text-center py-6">Select at least one category for an item to invite vendors.</p>
               )}
             </div>
-            <div className="flex gap-2 justify-end px-5 py-3 border-t border-border/40 bg-muted/10">
-              <Button variant="outline" size="sm" onClick={() => setInviteModal(false)}>Cancel</Button>
-              <Button size="sm" onClick={sendInvites}>Invite selected</Button>
+            <div className="flex gap-2 justify-between items-center px-5 py-3 border-t border-border/40 bg-muted/10">
+              <span className="text-xs text-muted-foreground">Vendors matching selected categories will be invited.</span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setInviteModal(false)}>Cancel</Button>
+                <Button size="sm" onClick={sendInvites}><UserPlus className="h-3.5 w-3.5 mr-1" /> Invite vendors</Button>
+              </div>
             </div>
           </div>
         </div>
