@@ -49,6 +49,7 @@ class BidController extends Controller {
             'item_prices.*.qty' => 'required|numeric',
             'item_prices.*.unit' => 'required|string',
             'item_prices.*.unit_price' => 'required|numeric|min:0',
+            'item_prices.*.remarks' => 'nullable|string',
             'notes' => 'nullable|string',
             'document' => 'nullable|file|mimes:pdf|max:10240',
         ]);

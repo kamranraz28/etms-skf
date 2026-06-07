@@ -16,6 +16,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
   const lowest = bids[0];
   const [inviteModal, setInviteModal] = useState(false);
   const [selectedVendors, setSelectedVendors] = useState<Record<string, boolean>>({});
+  const [viewBidItems, setViewBidItems] = useState<any>(null);
 
   const existingVendorIds = new Set(vendors.map((v: any) => v.id));
 
@@ -68,6 +69,17 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
     },
     { key: "erp_code", label: "ERP", sortable: false, render: (r: any) => <span className="font-mono text-xs whitespace-nowrap">{r.vendor?.erp_code ?? <span className="text-warning">—</span>}</span> },
     { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
+    {
+      key: "actions" as string,
+      label: "Items",
+      className: "text-right",
+      exportable: false,
+      render: (r: any) => (
+        <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setViewBidItems(r); }}>
+          View Items
+        </Button>
+      ),
+    },
   ];
 
   const itemColumns: Column[] = [
@@ -188,6 +200,52 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
           )}
         </div>
       </div>
+
+      {viewBidItems && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setViewBidItems(null)}>
+          <div className="bg-card border border-border/60 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden m-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
+              <div className="flex items-center gap-2 font-semibold text-sm">
+                <FileText className="h-4 w-4 text-accent" /> {viewBidItems.vendor?.name} — Item prices
+              </div>
+              <button onClick={() => setViewBidItems(null)} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="overflow-x-auto max-h-[60vh]">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gradient-to-r from-muted/40 to-muted/20">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Item</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Qty</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Unit</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Unit price</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Line total</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/30">
+                  {(viewBidItems.item_prices ?? []).map((it: any, i: number) => (
+                    <tr key={i} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-3 font-medium">{it.name}</td>
+                      <td className="px-4 py-3">{it.qty}</td>
+                      <td className="px-4 py-3">{it.unit}</td>
+                      <td className="px-4 py-3 text-right font-mono">{Number(it.unit_price).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right font-mono">{(Number(it.unit_price) * Number(it.qty)).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground italic max-w-[200px]">{it.remarks || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="font-bold bg-gradient-to-r from-muted/30 to-muted/10">
+                    <td colSpan={4} className="text-right px-4 py-3 text-sm text-muted-foreground">Total bid value</td>
+                    <td className="text-right font-mono px-4 py-3">{Number(viewBidItems.total_price).toLocaleString()} BDT</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       {inviteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setInviteModal(false)}>

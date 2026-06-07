@@ -33,6 +33,7 @@ export default function SubmitBid({ tender, vendor }: any) {
   }, [allItems, itemCategoryMap, vendorCategoryId]);
 
   const [prices, setPrices] = useState<Record<string, string>>({});
+  const [remarks, setRemarks] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const sa = useSweetAlert();
@@ -56,6 +57,7 @@ export default function SubmitBid({ tender, vendor }: any) {
       fd.append(`item_prices[${i}][qty]`, String(it.qty));
       fd.append(`item_prices[${i}][unit]`, it.unit);
       fd.append(`item_prices[${i}][unit_price]`, String(Number(prices[`${it.name}_${i}`] || 0)));
+      if (remarks[`${it.name}_${i}`]) fd.append(`item_prices[${i}][remarks]`, remarks[`${it.name}_${i}`]);
     });
     if (notes) fd.append("notes", notes);
     if (file) fd.append("document", file);
@@ -97,6 +99,7 @@ export default function SubmitBid({ tender, vendor }: any) {
                       <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Unit</th>
                       <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Unit price (BDT)</th>
                       <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Line total</th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Remarks</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
@@ -112,6 +115,11 @@ export default function SubmitBid({ tender, vendor }: any) {
                         </td>
                         <td className="px-4 py-3 text-right font-mono font-medium">
                           {(Number(prices[`${it.name}_${i}`] || 0) * it.qty).toFixed(2)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input type="text" className="h-9 w-36"
+                            value={remarks[`${it.name}_${i}`] ?? ""}
+                            onChange={(e) => setRemarks({ ...remarks, [`${it.name}_${i}`]: e.target.value })} placeholder="Optional" />
                         </td>
                       </tr>
                     ))}
