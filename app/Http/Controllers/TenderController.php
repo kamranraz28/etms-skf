@@ -44,7 +44,8 @@ class TenderController extends Controller {
 
         // Collect all vendor IDs from per-item category selections
         $catIds = collect($data['item_categories'])->pluck('category_ids')->flatten()->unique()->values()->all();
-        $vendorIds = Vendor::whereIn('vendor_category_id', $catIds)->pluck('id')->unique()->values()->all();
+        $vendorIds = Vendor::whereHas('categories', fn($q) => $q->whereIn('vendor_categories.id', $catIds))
+            ->pluck('id')->unique()->values()->all();
 
         if (empty($vendorIds)) {
             return back()->with('error', 'Please select vendor categories for at least one item');
@@ -82,12 +83,12 @@ class TenderController extends Controller {
 
     public function show(Tender $tender) {
         $tender->load('pr', 'itemCategories.vendorCategory');
-        $vendors = $tender->vendors()->select(['vendors.id','name','email','erp_code','status','vendor_category_id'])->with('vendorCategory:id,name')->get();
+        $vendors = $tender->vendors()->select(['vendors.id','name','email','erp_code','status'])->with('categories:id,name')->get();
         $bids = Bid::with('vendor:id,name,erp_code')
             ->where('tender_id', $tender->id)
             ->orderBy('total_price')->get();
         $cs = $tender->cs;
-        $categories = VendorCategory::with('vendors:id,name,email,erp_code,status,vendor_category_id')
+        $categories = VendorCategory::with('vendors:id,name,email,erp_code,status')
             ->orderBy('name')->get();
         return Inertia::render('Tenders/Show', compact('tender', 'vendors', 'bids', 'cs', 'categories'));
     }

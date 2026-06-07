@@ -13,5 +13,5 @@ class VendorCategory extends Model
 
     protected $fillable = ['name'];
 
-    public function vendors() { return $this->hasMany(Vendor::class); }
+    public function vendors() { return $this->belongsToMany(Vendor::class, 'category_vendor'); }
 }

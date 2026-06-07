@@ -185,7 +185,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
                   <div className="text-xs text-muted-foreground truncate">{v.email}</div>
                   <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                     <StatusBadge status={v.status} />
-                    {v.vendor_category_id && <span className="text-[10px] bg-muted/50 text-muted-foreground px-2 py-0.5 rounded-full">{v.vendor_category?.name ?? ''}</span>}
+                    {(v.categories ?? []).map((c: any) => <span key={c.id} className="text-[10px] bg-muted/50 text-muted-foreground px-2 py-0.5 rounded-full">{c.name}</span>)}
                     {v.erp_code ? <span className="text-[10px] font-mono text-muted-foreground">ERP: {v.erp_code}</span> : <span className="text-[10px] text-warning font-medium">No ERP code</span>}
                   </div>
                 </li>

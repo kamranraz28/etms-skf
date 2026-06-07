@@ -12,7 +12,7 @@ import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 export default function SubmitBid({ tender, vendor }: any) {
   const allItems = (tender.pr?.items ?? []) as any[];
-  const vendorCategoryId = vendor?.vendor_category_id?.toString();
+  const vendorCategoryIds = (vendor?.categories ?? []).map((c: any) => c.id.toString());
 
   const itemCategoryMap = useMemo(() => {
     const map: Record<number, string[]> = {};
@@ -24,13 +24,13 @@ export default function SubmitBid({ tender, vendor }: any) {
   }, [tender.item_categories]);
 
   const items = useMemo(() => {
-    if (!vendorCategoryId) return [];
+    if (vendorCategoryIds.length === 0) return [];
     return allItems.filter((_, idx) => {
       const allowedCats = itemCategoryMap[idx];
       if (!allowedCats || allowedCats.length === 0) return true;
-      return allowedCats.includes(vendorCategoryId);
+      return allowedCats.some((catId) => vendorCategoryIds.includes(catId));
     });
-  }, [allItems, itemCategoryMap, vendorCategoryId]);
+  }, [allItems, itemCategoryMap, vendorCategoryIds]);
 
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [remarks, setRemarks] = useState<Record<string, string>>({});
@@ -153,12 +153,12 @@ export default function SubmitBid({ tender, vendor }: any) {
           </div>
           <div className="text-sm font-medium">{vendor.name}</div>
           <div className="text-xs text-muted-foreground">{vendor.email}</div>
-          {vendor.vendor_category && (
-            <div className="text-xs">Category: <span className="font-medium">{vendor.vendor_category.name}</span></div>
+          {(vendor.categories ?? []).length > 0 && (
+            <div className="text-xs">Categories: <span className="font-medium">{(vendor.categories ?? []).map((c: any) => c.name).join(', ')}</span></div>
           )}
           <div className="text-xs mt-1">ERP: <span className="font-mono">{vendor.erp_code ?? <span className="text-warning">not yet assigned</span>}</span></div>
           <div className="text-xs text-muted-foreground leading-relaxed pt-3 border-t border-border/40">
-            You are invited to bid on {items.length} of {allItems.length} items based on your vendor category.
+            You are invited to bid on {items.length} of {allItems.length} items based on your vendor categories.
           </div>
         </div>
       </div>

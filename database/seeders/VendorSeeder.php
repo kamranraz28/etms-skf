@@ -19,10 +19,11 @@ class VendorSeeder extends Seeder
         ];
         foreach ($rows as [$email, $name, $erp, $status, $phone]) {
             $u = User::where('email', $email)->first();
-            Vendor::updateOrCreate(['email' => $email], [
+            $vendor = Vendor::updateOrCreate(['email' => $email], [
                 'user_id' => $u?->id, 'name' => $name, 'erp_code' => $erp, 'status' => $status,
-                'phone' => $phone, 'vendor_category_id' => $categories[array_rand($categories)],
+                'phone' => $phone,
             ]);
+            $vendor->categories()->sync([$categories[array_rand($categories)]]);
         }
     }
 }

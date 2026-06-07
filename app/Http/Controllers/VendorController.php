@@ -14,7 +14,7 @@ class VendorController extends Controller
 {
     public function index()
     {
-        $vendors = Vendor::with('vendorCategory')->orderByDesc('created_at')->get();
+        $vendors = Vendor::with('categories')->orderByDesc('created_at')->get();
         $categories = VendorCategory::orderBy('name')->get();
         return Inertia::render('Vendors', ['vendors' => $vendors, 'categories' => $categories]);
     }
@@ -27,7 +27,8 @@ class VendorController extends Controller
             'erp_code' => 'nullable|string',
             'status' => 'required|in:pending,active,inactive,blacklisted',
             'notes' => 'nullable|string',
-            'vendor_category_id' => 'required|exists:vendor_categories,id',
+            'vendor_category_ids' => 'required|array|min:1',
+            'vendor_category_ids.*' => 'exists:vendor_categories,id',
         ]);
         $data['email'] = strtolower($data['email']);
 
@@ -61,8 +62,9 @@ class VendorController extends Controller
             'status' => $data['status'],
             'notes' => $data['notes'],
             'user_id' => $user->id,
-            'vendor_category_id' => $data['vendor_category_id'],
         ]);
+
+        $vendor->categories()->sync($data['vendor_category_ids']);
 
         if ($vendor->wasRecentlyCreated) {
             event(new VendorCreated($vendor, 'password'));
@@ -78,10 +80,12 @@ class VendorController extends Controller
             'erp_code' => 'nullable|string',
             'status' => 'required|in:pending,active,inactive,blacklisted',
             'notes' => 'nullable|string',
-            'vendor_category_id' => 'required|exists:vendor_categories,id',
+            'vendor_category_ids' => 'required|array|min:1',
+            'vendor_category_ids.*' => 'exists:vendor_categories,id',
         ]);
         $data['email'] = strtolower($data['email']);
         $vendor->update($data);
+        $vendor->categories()->sync($data['vendor_category_ids']);
         return back()->with('success', 'Vendor updated');
     }
     public function destroy(Vendor $vendor)

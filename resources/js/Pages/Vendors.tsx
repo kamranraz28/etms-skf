@@ -21,11 +21,11 @@ export default function Vendors({ vendors, categories }: any) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", notes: "", status: "pending" as VendorStatus, vendor_category_id: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", notes: "", status: "pending" as VendorStatus, vendor_category_ids: [] as number[] });
   const sa = useSweetAlert();
 
-  const openNew = () => { setEditing(null); setForm({ name:"",email:"",phone:"",notes:"",status:"pending",vendor_category_id:"" }); setOpen(true); };
-  const openEdit = (v: any) => { setEditing(v); setForm({ name:v.name,email:v.email,phone:v.phone??"",notes:v.notes??"",status:v.status,vendor_category_id:v.vendor_category_id??"" }); setOpen(true); };
+  const openNew = () => { setEditing(null); setForm({ name:"",email:"",phone:"",notes:"",status:"pending",vendor_category_ids:[] }); setOpen(true); };
+  const openEdit = (v: any) => { setEditing(v); setForm({ name:v.name,email:v.email,phone:v.phone??"",notes:v.notes??"",status:v.status,vendor_category_ids:v.categories?.map((c:any)=>c.id)??[] }); setOpen(true); };
   const save = async () => {
     if (saving) return; setSaving(true);
     const confirmed = await sa.confirmAction(editing ? "Update vendor?" : "Create vendor?", `Save vendor "${form.name}"?`, "Save");
@@ -55,7 +55,10 @@ export default function Vendors({ vendors, categories }: any) {
 
   const baseColumns: Column[] = [
     { key: "name", label: "Vendor", sortable: true, render: (r) => <div><div className="font-medium">{r.name}</div><div className="text-xs text-muted-foreground">{r.email}</div></div> },
-    { key: "vendor_category", label: "Category", sortable: false, render: (r) => <span className="text-xs whitespace-nowrap">{r.vendor_category?.name ?? "—"}</span> },
+    { key: "categories", label: "Categories", sortable: false, render: (r) => (r.categories ?? []).length > 0
+      ? <div className="flex flex-wrap gap-1">{r.categories.map((c:any) => <span key={c.id} className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">{c.name}</span>)}</div>
+      : <span className="text-xs text-muted-foreground">—</span>
+    },
     { key: "phone", label: "Phone", sortable: false, render: (r) => <span className="text-xs whitespace-nowrap">{r.phone ?? "—"}</span> },
     { key: "erp_code", label: "ERP code", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.erp_code ?? <span className="text-warning font-medium">Not mapped</span>}</span> },
     { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.status} /> },
@@ -113,13 +116,24 @@ export default function Vendors({ vendors, categories }: any) {
                     {errors.status && <p className="text-xs text-destructive">{errors.status}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Category <span className="text-destructive">*</span></Label>
-                    <select value={form.vendor_category_id} onChange={(e) => setForm({ ...form, vendor_category_id: e.target.value })}
-                      className={cn("w-full h-10 rounded-lg border bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring", errors.vendor_category_id && "border-destructive")}>
-                      <option value="">Select a category</option>
-                      {categories.map((cat: any) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-                    </select>
-                    {errors.vendor_category_id && <p className="text-xs text-destructive">{errors.vendor_category_id}</p>}
+                    <Label>Categories <span className="text-destructive">*</span></Label>
+                    <div className="flex flex-wrap gap-2 p-3 rounded-lg border bg-background/80">
+                      {categories.map((cat: any) => (
+                        <label key={cat.id} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                          <input type="checkbox" value={cat.id}
+                            checked={form.vendor_category_ids.includes(cat.id)}
+                            onChange={(e) => {
+                              const ids = e.target.checked
+                                ? [...form.vendor_category_ids, cat.id]
+                                : form.vendor_category_ids.filter((id) => id !== cat.id);
+                              setForm({ ...form, vendor_category_ids: ids });
+                            }}
+                            className="h-4 w-4 accent-primary rounded" />
+                          {cat.name}
+                        </label>
+                      ))}
+                    </div>
+                    {errors.vendor_category_ids && <p className="text-xs text-destructive">{errors.vendor_category_ids}</p>}
                   </div>
                 </div>
                 <div className="space-y-1.5">

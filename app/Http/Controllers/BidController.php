@@ -33,7 +33,7 @@ class BidController extends Controller {
     }
 
     public function create(Request $r, Tender $tender) {
-        $vendor = Vendor::with('vendorCategory:id,name')->where('user_id', $r->user()->id)->first();
+        $vendor = Vendor::with('categories:id,name')->where('user_id', $r->user()->id)->first();
         $tender->load('pr', 'itemCategories.vendorCategory');
         return Inertia::render('SubmitBid', compact('tender', 'vendor'));
     }
@@ -54,8 +54,9 @@ class BidController extends Controller {
             'document' => 'nullable|file|mimes:pdf|max:10240',
         ]);
 
-        // Validate vendor can only bid on items their category is invited to
+        // Validate vendor can only bid on items their categories are invited to
         $tender->load('itemCategories');
+        $vendorCatIds = $vendor->categories->pluck('id')->all();
         $prItems = $tender->pr->items ?? [];
         $itemCatMap = [];
         foreach ($tender->itemCategories as $ic) {
@@ -69,7 +70,7 @@ class BidController extends Controller {
             if ($prIdx === null) continue;
             $allowed = $itemCatMap[$prIdx] ?? null;
             // If there's no restriction on this item, any vendor can bid
-            if ($allowed !== null && !in_array($vendor->vendor_category_id, $allowed)) {
+            if ($allowed !== null && empty(array_intersect($vendorCatIds, $allowed))) {
                 return back()->with('error', "You are not invited to bid on item: {$row['name']}");
             }
         }
