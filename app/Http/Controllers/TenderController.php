@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Events\TenderCreated;
 use App\Models\Pr;
+use App\Models\PrItemAssignment;
 use App\Models\Tender;
 use App\Models\TenderItemCategory;
 use App\Models\TenderVendor;
@@ -23,7 +24,7 @@ class TenderController extends Controller {
 
     public function create(Request $r) {
         return Inertia::render('Tenders/New', [
-            'prs' => Pr::orderByDesc('created_at')->get(['id','pr_number','title','status','items']),
+            'prs' => Pr::with('assignments')->orderByDesc('created_at')->get(['id','pr_number','title','status','items']),
             'categories' => VendorCategory::orderBy('name')->get(['id','name']),
             'preselect_pr' => $r->query('pr'),
         ]);
@@ -41,6 +42,18 @@ class TenderController extends Controller {
             'item_categories.*.category_ids' => 'required|array|min:1',
             'item_categories.*.category_ids.*' => 'exists:vendor_categories,id',
         ]);
+
+        $pr = Pr::with('assignments')->findOrFail($data['pr_id']);
+        $items = $pr->items ?? [];
+
+        // Validate selected items are pending
+        $selectedIndices = collect($data['item_categories'])->pluck('item_index')->unique()->values()->all();
+        foreach ($selectedIndices as $idx) {
+            $existing = $pr->assignments->firstWhere('item_index', $idx);
+            if ($existing && $existing->status !== 'pending') {
+                return back()->with('error', "Item #" . ($idx + 1) . " already has an active assignment.");
+            }
+        }
 
         // Collect all vendor IDs from per-item category selections
         $catIds = collect($data['item_categories'])->pluck('category_ids')->flatten()->unique()->values()->all();
@@ -76,7 +89,21 @@ class TenderController extends Controller {
         foreach ($vendorIds as $vid) {
             TenderVendor::create(['tender_id' => $tender->id, 'vendor_id' => $vid]);
         }
-        Pr::where('id', $data['pr_id'])->update(['status' => 'tendered']);
+
+        // Create PrItemAssignment for each selected item
+        foreach ($selectedIndices as $idx) {
+            PrItemAssignment::updateOrCreate(
+                ['pr_id' => $pr->id, 'item_index' => $idx],
+                ['status' => 'in_tender', 'tender_id' => $tender->id, 'cs_id' => null]
+            );
+        }
+
+        // Update PR status based on how many items are now fully assigned
+        $totalItems = count($items);
+        $assignedCount = PrItemAssignment::where('pr_id', $pr->id)
+            ->whereIn('status', ['in_tender', 'cs_assigned'])->count();
+        $pr->update(['status' => $assignedCount >= $totalItems ? 'tendered' : 'tendered']);
+
         TenderCreated::dispatch($tender);
         return redirect()->route('app.tenders.show', $tender)->with('success', 'Tender created');
     }

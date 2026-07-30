@@ -54,6 +54,12 @@ const STYLES: Record<string, string> = {
     "bg-accent/10 text-accent border-accent/30 shadow-lg shadow-accent/15 hover:shadow-xl",
   payment_receipt:
     "bg-success/10 text-success border-success/30 shadow-lg shadow-success/15 hover:shadow-xl",
+  partial:
+    "bg-warning/10 text-warning border-warning/30 shadow-lg shadow-warning/20 hover:shadow-xl hover:shadow-warning/30",
+  in_tender:
+    "bg-info/10 text-info border-info/30 shadow-lg shadow-info/20 hover:shadow-xl hover:shadow-info/30",
+  cs_assigned:
+    "bg-success/10 text-success border-success/30 shadow-lg shadow-success/20 hover:shadow-xl hover:shadow-success/30",
   other: "bg-muted/50 text-muted-foreground border-border/30 hover:bg-muted/60",
 };
 export const StatusBadge = ({

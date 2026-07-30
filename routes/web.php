@@ -43,8 +43,10 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::delete('/vendor-categories/{vendorCategory}', [VendorCategoryController::class, 'destroy'])->name('vendor-categories.destroy')->middleware('role:admin');
 
         Route::get('/prs', [PrController::class, 'index'])->name('prs.index');
+        Route::get('/prs/{pr}', [PrController::class, 'show'])->name('prs.show');
         Route::post('/prs/sync', [PrController::class, 'sync'])->name('prs.sync');
         Route::post('/prs', [PrController::class, 'store'])->name('prs.store');
+        Route::post('/prs/{pr}/assign-cs', [PrController::class, 'assignCs'])->name('prs.assign-cs');
         Route::delete('/prs/{pr}', [PrController::class, 'destroy'])->name('prs.destroy');
 
         Route::get('/pos', [PoController::class, 'index'])->name('pos.index');

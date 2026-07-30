@@ -3,12 +3,13 @@ import { router, Head, usePage } from "@inertiajs/react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/StatusBadge";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
-import { ArrowLeft, Gavel, FileText } from "lucide-react";
+import { ArrowLeft, Gavel, FileText, CheckSquare, Square } from "lucide-react";
 
 export default function TenderNew({ prs, categories, preselect_pr }: any) {
   const { props } = usePage();
@@ -20,13 +21,36 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState(() => { const d = new Date(); d.setDate(d.getDate()+7); return d.toISOString().slice(0,16); });
   const [itemCategoryMap, setItemCategoryMap] = useState<Record<number, Set<string>>>({});
+  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
   const [saving, setSaving] = useState(false);
 
   const selectedPr = useMemo(() => prs.find((p: any) => p.id.toString() === prId.toString()), [prId, prs]);
   const items: any[] = selectedPr?.items ?? [];
+  const assignments = selectedPr?.assignments ?? [];
+  const pendingIndices = useMemo(() => {
+    const assigned = new Set(assignments.filter((a: any) => a.status !== "pending").map((a: any) => a.item_index));
+    return items.map((_: any, idx: number) => idx).filter((idx: number) => !assigned.has(idx));
+  }, [items, assignments]);
 
   useEffect(() => { if (prId && !title) { const pr = prs.find((p: any) => p.id === prId); if (pr) setTitle(pr.title); } }, [prId]);
-  useEffect(() => { setItemCategoryMap({}); }, [prId]);
+  useEffect(() => { setItemCategoryMap({}); setSelectedItems(new Set(pendingIndices)); }, [prId, pendingIndices]);
+
+  const toggleItemSelection = (idx: number) => {
+    if (!pendingIndices.includes(idx)) return;
+    setSelectedItems(prev => {
+      const next = new Set(prev);
+      next.has(idx) ? next.delete(idx) : next.add(idx);
+      return next;
+    });
+    setItemCategoryMap(prev => {
+      if (selectedItems.has(idx)) {
+        const copy = { ...prev };
+        delete copy[idx];
+        return copy;
+      }
+      return prev;
+    });
+  };
 
   const toggleItemCategory = (itemIndex: number, catId: string) => {
     setItemCategoryMap(prev => {
@@ -81,7 +105,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
                 <select value={prId} onChange={(e)=>setPrId(e.target.value)}
                   className={cn("w-full h-10 rounded-lg border bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring", errors.pr_id && "border-destructive")}>
                   <option value="">— Select PR —</option>
-                  {prs.filter((p: any) => p.status !== "tendered").map((p: any) => <option key={p.id} value={p.id}>{p.pr_number} · {p.title}</option>)}
+                  {prs.filter((p: any) => p.derived_status !== "tendered").map((p: any) => <option key={p.id} value={p.id}>{p.pr_number} · {p.title}</option>)}
                 </select>
                 {errors.pr_id && <p className="text-xs text-destructive">{errors.pr_id}</p>}
               </div>
@@ -112,31 +136,64 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
             {items.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-4">
-                  <FileText className="h-4 w-4 text-accent" /> Item-wise vendor category selection
+                  <FileText className="h-4 w-4 text-accent" /> Select items & assign vendor categories
                 </div>
                 <div className="space-y-4">
-                  {items.map((it: any, idx: number) => (
-                    <div key={idx} className="border border-border/60 rounded-xl p-5 bg-muted/10 hover-limit">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
-                        <div className="text-sm font-semibold">Item {idx + 1}: {it.name}</div>
-                        <div className="text-xs text-muted-foreground bg-muted/30 px-2.5 py-1 rounded-full">{it.qty} × {it.unit}</div>
+                  {items.map((it: any, idx: number) => {
+                    const isPending = pendingIndices.includes(idx);
+                    const isSelected = selectedItems.has(idx);
+                    return (
+                      <div key={idx} className={`border rounded-xl p-5 transition-colors ${isPending ? "border-border/60 bg-muted/10" : "border-border/30 bg-muted/5 opacity-60"}`}>
+                        <div className="flex items-start gap-3">
+                          <button type="button" onClick={() => toggleItemSelection(idx)}
+                            className={`mt-0.5 shrink-0 transition-all duration-200 ${isPending ? "cursor-pointer hover:scale-110" : "cursor-not-allowed"}`}
+                            disabled={!isPending}>
+                            {isSelected ? (
+                              <CheckSquare className="h-5 w-5 text-accent" />
+                            ) : (
+                              <Square className={`h-5 w-5 ${isPending ? "text-muted-foreground/50" : "text-muted-foreground/20"}`} />
+                            )}
+                          </button>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold">Item {idx + 1}: {it.name}</span>
+                                {!isPending && (
+                                  <StatusBadge status={assignments.find((a: any) => a.item_index === idx)?.status ?? "assigned"} />
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground bg-muted/30 px-2.5 py-1 rounded-full inline-block w-fit">{it.qty} × {it.unit}</div>
+                            </div>
+                            {isPending && isSelected && (
+                              <div className="mt-3">
+                                <div className="text-[11px] text-muted-foreground font-medium mb-2">Vendor categories to invite:</div>
+                                <div className="flex flex-wrap gap-2">
+                                  {categories.map((cat: any) => {
+                                    const selected = itemCategoryMap[idx]?.has(cat.id.toString());
+                                    return (
+                                      <button key={cat.id} type="button" onClick={() => toggleItemCategory(idx, cat.id.toString())}
+                                        className={`text-xs px-3.5 py-1.5 rounded-lg border font-medium transition-all duration-200 ${
+                                          selected ? 'bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20' : 'bg-background border-input hover:bg-muted hover:border-muted-foreground/30'
+                                        }`}>
+                                        {cat.name}
+                                      </button>
+                                    );
+                                  })}
+                                  {categories.length === 0 && <span className="text-xs text-muted-foreground">No categories defined.</span>}
+                                </div>
+                              </div>
+                            )}
+                            {!isPending && (
+                              <div className="text-xs text-muted-foreground mt-1">Already assigned — cannot be included in this tender.</div>
+                            )}
+                            {isPending && !isSelected && (
+                              <div className="text-xs text-muted-foreground mt-1">Not selected for this tender.</div>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {categories.map((cat: any) => {
-                          const selected = itemCategoryMap[idx]?.has(cat.id.toString());
-                          return (
-                            <button key={cat.id} type="button" onClick={() => toggleItemCategory(idx, cat.id.toString())}
-                              className={`text-xs px-3.5 py-1.5 rounded-lg border font-medium transition-all duration-200 ${
-                                selected ? 'bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20' : 'bg-background border-input hover:bg-muted hover:border-muted-foreground/30'
-                              }`}>
-                              {cat.name}
-                            </button>
-                          );
-                        })}
-                        {categories.length === 0 && <span className="text-xs text-muted-foreground">No categories defined.</span>}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -159,19 +216,26 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
               <div className="space-y-3">
                 {items.map((it: any, idx: number) => {
                   const cats = itemCategoryMap[idx];
+                  const isPending = pendingIndices.includes(idx);
+                  const isSelected = selectedItems.has(idx);
                   return (
-                    <div key={idx} className="text-sm border-b border-border/40 pb-3 last:border-0 last:pb-0">
-                      <div className="font-medium truncate">{it.name}</div>
+                    <div key={idx} className={`text-sm border-b border-border/40 pb-3 last:border-0 last:pb-0 ${!isSelected ? "opacity-50" : ""}`}>
+                      <div className="font-medium truncate flex items-center gap-1.5">
+                        {isSelected ? <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" /> : <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 shrink-0" />}
+                        {it.name}
+                      </div>
                       <div className="text-xs text-muted-foreground">{it.qty} {it.unit}</div>
-                      {cats && cats.size > 0 ? (
+                      {isSelected && cats && cats.size > 0 ? (
                         <div className="mt-1.5 flex flex-wrap gap-1">
                           {Array.from(cats).map(cid => {
                             const cat = categories.find((c: any) => c.id.toString() === cid);
                             return <span key={cid} className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">{cat?.name ?? cid}</span>;
                           })}
                         </div>
+                      ) : isSelected ? (
+                        <div className="text-[10px] text-warning mt-1 font-medium">Select categories</div>
                       ) : (
-                        <div className="text-[10px] text-warning mt-1 font-medium">No categories selected</div>
+                        <div className="text-[10px] text-muted-foreground mt-1">{isPending ? "Not selected" : "Already assigned"}</div>
                       )}
                     </div>
                   );

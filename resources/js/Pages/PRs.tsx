@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, RefreshCw, ChevronRight, Trash2 } from "lucide-react";
+import { Plus, RefreshCw, ChevronRight, Trash2, ExternalLink } from "lucide-react";
 
 export default function PRs({ prs }: any) {
   const { props } = usePage();
@@ -49,10 +49,17 @@ export default function PRs({ prs }: any) {
     { key: "department", label: "Department", sortable: true, render: (r) => <span className="text-xs whitespace-nowrap">{r.department ?? "—"}</span> },
     { key: "items", label: "Items", sortable: false, render: (r) => {
       const raw = r.items ?? [];
+      const assignments = r.assignments ?? [];
+      const assignedCount = assignments.filter((a: any) => a.status !== "pending").length;
       const preview = raw.slice(0,2).map((i: any) => `${i.name} ×${i.qty}`).join(", ");
-      return <span className="text-xs text-muted-foreground min-w-0 max-w-[200px] truncate block">{preview}{raw.length > 2 && ` +${raw.length - 2} more`}</span>;
+      return (
+        <span className="text-xs text-muted-foreground min-w-0 max-w-[200px] truncate block">
+          {preview}{raw.length > 2 && ` +${raw.length - 2} more`}
+          {assignedCount > 0 && <span className="ml-1.5 text-[10px] text-success font-medium">({assignedCount}/{raw.length})</span>}
+        </span>
+      );
     }},
-    { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.status} /> },
+    { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.derived_status ?? r.status} /> },
     { key: "created_at", label: "Synced", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</span> },
     {
       key: "actions" as string,
@@ -61,9 +68,12 @@ export default function PRs({ prs }: any) {
       exportable: false,
       render: (r: any) => (
         <div className="inline-flex items-center gap-1">
-          {r.status === "new" && (
+          <Link href={`/app/prs/${r.id}`}>
+            <Button size="sm" variant="ghost" onClick={(e) => e.stopPropagation()}><ExternalLink className="h-4 w-4" /></Button>
+          </Link>
+          {(!r.derived_status || r.derived_status === "new" || r.derived_status === "partial") && (
             <Link href={`/app/tenders/new?pr=${r.id}`}>
-              <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>Create tender <ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
+              <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>Tender <ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
             </Link>
           )}
           <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); remove(r); }} className="hover:bg-destructive/10"><Trash2 className="h-4 w-4 text-destructive" /></Button>
