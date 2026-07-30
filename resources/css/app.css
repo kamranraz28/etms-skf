@@ -338,22 +338,21 @@
 
   /* ─── Navigation Items with Glow ─── */
   .nav-item {
-    @apply relative px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2;
+    @apply relative py-1.5 rounded-lg transition-all duration-200 flex items-center gap-2 text-xs;
   }
 
   .nav-item::before {
     content: "";
     @apply absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200;
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.1), transparent);
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.08), transparent);
   }
 
   .nav-item:hover {
     @apply bg-primary/5;
-    box-shadow: inset 0 0 12px hsl(var(--primary) / 0.05);
   }
 
   .nav-item.active {
-    @apply bg-gradient-to-r from-primary/15 to-primary/5 text-primary font-semibold shadow-md;
+    @apply bg-gradient-to-r from-primary/15 to-primary/5 text-primary font-semibold shadow-sm;
   }
 
   .nav-item.active::before {
@@ -509,28 +508,30 @@
 
   /* ─── Sidebar Enhancements ─── */
   .sidebar-item {
-    @apply relative px-4 py-3 rounded-lg transition-all duration-200;
+    @apply relative py-1.5 rounded-lg transition-all duration-200 text-xs;
   }
 
-  .sidebar-item::after {
+  .sidebar-item::before {
     content: "";
-    @apply absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/0 via-primary to-primary/0 rounded-r-lg opacity-0 transition-opacity duration-200;
+    @apply absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300;
+    background: linear-gradient(135deg, hsl(var(--sidebar-primary) / 0.08), transparent);
   }
 
-  .sidebar-item.active::after {
+  .sidebar-item:hover::before {
     @apply opacity-100;
   }
 
-  .sidebar-item:hover {
-    @apply bg-primary/5;
+  .sidebar-item.active::before {
+    @apply opacity-100;
   }
 
   .sidebar-tooltip {
-    @apply absolute left-full ml-2 px-2.5 py-1.5 rounded-md shadow-lg whitespace-nowrap z-50 pointer-events-none border;
-    background: hsl(var(--sidebar-background));
+    @apply absolute left-full ml-2 px-2 py-1 rounded-md shadow-lg whitespace-nowrap z-50 pointer-events-none border;
+    background: hsl(var(--sidebar-background) / 0.95);
     color: hsl(var(--sidebar-foreground));
     border-color: hsl(var(--sidebar-border) / 0.5);
     animation: tooltip-in 0.2s ease-out;
+    backdrop-filter: blur(8px);
   }
 
   @keyframes tooltip-in {
