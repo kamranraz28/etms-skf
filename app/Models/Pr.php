@@ -20,10 +20,10 @@ class Pr extends Model
     public function getDerivedStatusAttribute(): string
     {
         $items = $this->items ?? [];
-        if (empty($items)) return $this->status;
+        if (empty($items)) return $this->status ?? 'new';
         $assignments = $this->relationLoaded('assignments') ? $this->assignments : $this->assignments()->get();
         $assigned = $assignments->whereIn('status', ['in_tender', 'cs_assigned'])->count();
-        if ($assigned === 0) return $this->status;
+        if ($assigned === 0) return $this->status ?? 'new';
         if ($assigned < count($items)) return 'partial';
         return 'tendered';
     }

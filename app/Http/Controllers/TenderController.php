@@ -16,7 +16,7 @@ use Inertia\Inertia;
 
 class TenderController extends Controller {
     public function index() {
-        $tenders = Tender::with('pr:id,pr_number')
+        $tenders = Tender::with('pr:id,pr_number,status,items')
             ->withCount(['bids as bid_count', 'vendors as vendor_count'])
             ->orderByDesc('created_at')->get();
         return Inertia::render('Tenders/Index', ['tenders' => $tenders]);

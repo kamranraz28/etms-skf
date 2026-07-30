@@ -33,18 +33,26 @@ class CsController extends Controller {
         return Inertia::render('CS/Show', compact('cs', 'items', 'selections', 'approvals', 'erpLogs', 'prItems', 'workflowTypes'));
     }
 
-    public function select(Request $r, Cs $cs) {
+    public function award(Request $r, Cs $cs) {
         if ($cs->status !== 'draft') return back()->with('error', 'CS is locked.');
         $data = $r->validate([
             'item_index' => 'required|integer|min:0',
-            'vendor_id' => 'required|exists:vendors,id',
+            'awards' => 'required|array|min:1',
+            'awards.*.vendor_id' => 'required|exists:vendors,id',
+            'awards.*.qty' => 'required|numeric|min:0',
         ]);
-        CsItemSelection::where('cs_id', $cs->id)
-            ->where('item_index', $data['item_index'])->update(['selected' => false]);
-        CsItemSelection::where('cs_id', $cs->id)
-            ->where('item_index', $data['item_index'])
-            ->where('vendor_id', $data['vendor_id'])
-            ->update(['selected' => true]);
+        $prItems = $cs->tender->pr->items ?? [];
+        $totalItemQty = (float) ($prItems[$data['item_index']]['qty'] ?? 0);
+        $totalAwarded = (float) collect($data['awards'])->sum('qty');
+        if ($totalAwarded > $totalItemQty) {
+            return back()->with('error', 'Awarded quantity exceeds the item\'s requested quantity.');
+        }
+        foreach ($data['awards'] as $award) {
+            CsItemSelection::where('cs_id', $cs->id)
+                ->where('item_index', $data['item_index'])
+                ->where('vendor_id', $award['vendor_id'])
+                ->update(['qty' => $award['qty'], 'selected' => $award['qty'] > 0]);
+        }
         $selectedVendorIds = CsItemSelection::where('cs_id', $cs->id)
             ->where('selected', true)->pluck('vendor_id')->unique();
         \App\Models\CsItem::where('cs_id', $cs->id)->update(['selected' => false]);
@@ -56,7 +64,15 @@ class CsController extends Controller {
     public function submit(Request $r, Cs $cs) {
         if ($cs->status !== 'draft') return back()->with('error', 'CS is already submitted.');
         if (! $cs->selections()->where('selected', true)->exists())
-            return back()->with('error', 'Select at least one vendor for an item.');
+            return back()->with('error', 'Award at least one vendor for an item.');
+        $prItems = $cs->tender->pr->items ?? [];
+        foreach ($prItems as $idx => $item) {
+            $awardedQty = (float) CsItemSelection::where('cs_id', $cs->id)
+                ->where('item_index', $idx)->where('selected', true)->sum('qty');
+            if ($awardedQty < (float) $item['qty']) {
+                return back()->with('error', "Item \"{$item['name']}\" has only {$awardedQty} of {$item['qty']} {$item['unit']} awarded. Award the full quantity before submitting.");
+            }
+        }
 
         $data = $r->validate([
             'workflow_type_id' => 'required|exists:workflow_types,id',

@@ -35,7 +35,7 @@ class CsGenerator
                     CsItemSelection::create([
                         'cs_id' => $cs->id, 'item_index' => $idx, 'vendor_id' => $bid->vendor_id,
                         'bid_id' => $bid->id, 'unit_price' => $unit,
-                        'qty' => $prItem['qty'], 'selected' => false,
+                        'qty' => 0, 'selected' => false,
                     ]);
                 }
             }

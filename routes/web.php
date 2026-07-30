@@ -66,7 +66,7 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
 
         Route::get('/cs', [CsController::class, 'index'])->name('cs.index');
         Route::get('/cs/{cs}', [CsController::class, 'show'])->name('cs.show');
-        Route::post('/cs/{cs}/select', [CsController::class, 'select'])->name('cs.select');
+        Route::post('/cs/{cs}/award', [CsController::class, 'award'])->name('cs.award');
         Route::post('/cs/{cs}/submit', [CsController::class, 'submit'])->name('cs.submit');
         Route::post('/cs/{cs}/decide', [CsController::class, 'decide'])->name('cs.decide');
         Route::post('/cs/{cs}/erp', [CsController::class, 'sendToErp'])->name('cs.erp');

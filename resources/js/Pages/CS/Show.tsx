@@ -7,7 +7,7 @@ import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSharedProps } from "@/lib/types";
 import { Head, router, usePage } from "@inertiajs/react";
-import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle, Scale, FileText, UserCheck, Workflow, RefreshCw } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle, Scale, FileText, UserCheck, Workflow, RefreshCw, Wand2, Save } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export default function CSShow({
@@ -20,6 +20,7 @@ export default function CSShow({
   const isAdmin = primary === "admin";
   const [comment, setComment] = useState("");
   const [selectedWf, setSelectedWf] = useState("");
+  const [savingAwards, setSavingAwards] = useState<Record<number, boolean>>({});
   const sa = useSweetAlert();
 
   const matrix = useMemo(() => {
@@ -34,11 +35,52 @@ export default function CSShow({
     return Array.from(seen.values());
   }, [selections]);
 
+  const [draftQtys, setDraftQtys] = useState<Record<string, number>>(() => {
+    const init: Record<string, number> = {};
+    selections.forEach((s: any) => { init[`${s.item_index}-${s.vendor_id}`] = Number(s.qty ?? 0); });
+    return init;
+  });
+
   const currentStep = cs.current_step;
   const canActOnCurrentStep = currentStep && (userRoles.includes(currentStep.role_name));
 
-  const setSelected = (item_index: number, vendor_id: string) =>
-    router.post(`/app/cs/${cs.id}/select`, { item_index, vendor_id }, { preserveScroll: true });
+  const updateQty = (itemIdx: number, vendorId: string, val: string) => {
+    const key = `${itemIdx}-${vendorId}`;
+    setDraftQtys(prev => ({ ...prev, [key]: Math.max(0, Number(val) || 0) }));
+  };
+
+  const autoFill = (itemIdx: number) => {
+    const row = matrix[itemIdx] ?? [];
+    if (row.length === 0) return;
+    const prItem = prItems[itemIdx];
+    if (!prItem) return;
+    const requested = Number(prItem.qty);
+    const lowest = row.reduce((a: any, b: any) => Number(a.unit_price) < Number(b.unit_price) ? a : b);
+    const newQtys: Record<string, number> = {};
+    row.forEach((s: any) => { newQtys[`${itemIdx}-${s.vendor_id}`] = 0; });
+    newQtys[`${itemIdx}-${lowest.vendor_id}`] = requested;
+    setDraftQtys(prev => ({ ...prev, ...newQtys }));
+  };
+
+  const saveAwards = (itemIdx: number) => {
+    const row = matrix[itemIdx] ?? [];
+    const prItem = prItems[itemIdx];
+    if (!prItem) return;
+    const awards = row.map((s: any) => ({
+      vendor_id: s.vendor_id,
+      qty: draftQtys[`${itemIdx}-${s.vendor_id}`] ?? 0,
+    }));
+    const total = awards.reduce((sum: number, a: any) => sum + a.qty, 0);
+    if (total > Number(prItem.qty)) {
+      sa.alert("Qty exceeded", `Total awarded (${total}) exceeds requested (${prItem.qty}).`, "error");
+      return;
+    }
+    setSavingAwards(prev => ({ ...prev, [itemIdx]: true }));
+    router.post(`/app/cs/${cs.id}/award`, { item_index: itemIdx, awards }, {
+      preserveScroll: true,
+      onFinish: () => setSavingAwards(prev => ({ ...prev, [itemIdx]: false })),
+    });
+  };
 
   const submitForApproval = () => {
     if (!selectedWf) { sa.alert("Select workflow", "Please select a workflow type before submitting.", "warning"); return; }
@@ -144,42 +186,96 @@ export default function CSShow({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gradient-to-r from-muted/40 to-muted/20">
-                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Item</th>
-                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Qty</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Item</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Qty</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Awarded</th>
                     {vendorsInCs.map((v) => (
-                      <th key={v.id} className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 whitespace-nowrap">{v.name}</th>
+                      <th key={v.id} className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 whitespace-nowrap" colSpan={cs.status === "draft" ? 3 : 2}>{v.name}</th>
                     ))}
+                    {cs.status === "draft" && <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Save</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/30">
                   {prItems.map((pr: any, idx: number) => {
                     const row = matrix[idx] ?? [];
+                    const requestedQty = Number(pr.qty);
+                    const totalAwarded = row.reduce((sum: number, s: any) => {
+                      return sum + Number(draftQtys[`${idx}-${s.vendor_id}`] ?? s.qty ?? 0);
+                    }, 0);
+                    const isComplete = totalAwarded === requestedQty;
+                    const isOver = totalAwarded > requestedQty;
                     const lowestUnit = Math.min(...row.map((r: any) => Number(r.unit_price)));
                     return (
                       <tr key={idx} className="hover:bg-muted/20 transition-colors">
-                        <td className="px-4 py-3 whitespace-nowrap font-medium">{pr.name}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium min-w-[120px]">{pr.name}</td>
                         <td className="px-4 py-3 text-xs whitespace-nowrap">{pr.qty} {pr.unit}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className={`text-xs font-mono font-semibold ${isOver ? "text-destructive" : isComplete ? "text-success" : "text-warning"}`}>
+                            {totalAwarded} / {requestedQty}
+                          </span>
+                          {isComplete && <CheckCircle2 className="h-3 w-3 text-success inline ml-1" />}
+                        </td>
                         {vendorsInCs.map((v) => {
                           const s = row.find((r: any) => r.vendor_id === v.id);
-                          if (!s) return <td key={v.id} className="px-4 py-3 text-right text-xs text-muted-foreground">—</td>;
-                          const isLow = Number(s.unit_price) === lowestUnit;
+                          if (!s) return <td key={v.id} className="px-3 py-3 text-center text-xs text-muted-foreground" colSpan={cs.status === "draft" ? 3 : 2}>—</td>;
+                          const unitPrice = Number(s.unit_price);
+                          const qty = draftQtys[`${idx}-${s.vendor_id}`] ?? 0;
+                          const lineTotal = unitPrice * qty;
+                          const isLow = unitPrice === lowestUnit;
                           return (
-                            <td key={v.id} className={`px-4 py-3 text-right whitespace-nowrap ${isLow ? "bg-success/5" : ""}`}>
-                              <div className="font-mono text-xs">
-                                {Number(s.unit_price).toLocaleString()}
-                                {isLow && <span className="ml-1 text-[10px] uppercase text-success font-semibold">low</span>}
+                            <td key={v.id} className={`px-3 py-2 ${cs.status === "draft" ? "min-w-[150px]" : "min-w-[120px]"}`}>
+                              <div className="text-center space-y-1">
+                                <div className={`font-mono text-sm font-bold ${isLow ? "text-success" : "text-foreground"}`}>
+                                  {unitPrice.toLocaleString()}
+                                  {isLow && <span className="ml-1 text-[9px] uppercase text-success font-semibold bg-success/10 px-1 py-0.5 rounded">best</span>}
+                                </div>
+                                <div className="text-[9px] uppercase tracking-wider text-muted-foreground/60">BDT / {pr.unit}</div>
+                                {cs.status === "draft" ? (
+                                  <div className="flex flex-col items-center gap-1 mt-1.5">
+                                    <div className="flex items-center gap-1">
+                                      <input
+                                        type="number"
+                                        min={0}
+                                        max={requestedQty}
+                                        value={qty}
+                                        onChange={(e) => updateQty(idx, s.vendor_id, e.target.value)}
+                                        className="w-16 h-7 rounded-md border border-border/50 bg-background px-1.5 text-xs text-center font-mono focus:outline-none focus:ring-1 focus:ring-accent/40"
+                                      />
+                                    </div>
+                                    {qty > 0 && (
+                                      <div className="text-[10px] font-mono text-muted-foreground">
+                                        = {(lineTotal).toLocaleString()}
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : qty > 0 ? (
+                                  <div className="mt-1 border-t border-success/20 pt-1">
+                                    <div className="font-mono text-sm font-semibold text-success">× {qty}</div>
+                                    <div className="font-mono text-xs text-success">= {lineTotal.toLocaleString()}</div>
+                                  </div>
+                                ) : (
+                                  <div className="text-[10px] text-muted-foreground/40 mt-1">—</div>
+                                )}
                               </div>
-                              {cs.status === "draft" ? (
-                                <label className="flex items-center justify-end gap-1.5 cursor-pointer text-[11px] mt-1">
-                                  <input type="radio" name={`pick-${idx}`} checked={!!s.selected} onChange={() => setSelected(idx, v.id)} className="h-3.5 w-3.5 accent-primary" />
-                                  Award
-                                </label>
-                              ) : s.selected ? (
-                                <span className="text-[10px] uppercase text-success font-semibold">selected</span>
-                              ) : null}
                             </td>
                           );
                         })}
+                        {cs.status === "draft" && (
+                          <td className="px-3 py-2 text-right align-middle">
+                            <div className="flex flex-col items-end gap-1">
+                              <button onClick={() => autoFill(idx)} title="Fill remaining qty to lowest bidder"
+                                className="h-7 w-7 rounded-md border border-border/50 flex items-center justify-center text-muted-foreground hover:text-accent hover:border-accent/40 transition-all">
+                                <Wand2 className="h-3.5 w-3.5" />
+                              </button>
+                              <button onClick={() => saveAwards(idx)} disabled={savingAwards[idx]}
+                                className={`h-7 px-2.5 rounded-md text-xs font-medium flex items-center gap-1 transition-all ${
+                                  isComplete ? "bg-success/10 text-success border border-success/30 hover:bg-success/20" : "bg-accent/10 text-accent border border-accent/30 hover:bg-accent/20"
+                                } ${savingAwards[idx] ? "opacity-50" : ""}`}>
+                                <Save className="h-3 w-3" /> {savingAwards[idx] ? "…" : "Save"}
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
@@ -372,7 +468,7 @@ export default function CSShow({
                 <ol className="space-y-1.5 ml-1">
                   <li className="flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-accent/50 shrink-0" />
-                    0. Procurement picks vendor per item (draft)
+                    0. Procurement awards quantities per item (draft)
                   </li>
                   {workflowSteps.map((step: any, i: number) => {
                     const isCurrent = cs.current_step_id === step.id;
