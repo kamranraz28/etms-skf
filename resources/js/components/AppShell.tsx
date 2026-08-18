@@ -14,6 +14,7 @@ import {
     LayoutDashboard,
     LogOut,
     Menu,
+    Bell,
     Receipt,
     Scale,
     Settings,
@@ -56,22 +57,45 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { props, url } = usePage<PageSharedProps>();
   const user = props.auth.user;
   const primary = user?.primary_role ?? null;
+  const notifications = props.notifications ?? [];
+  const unreadCount = props.unread_notifications ?? 0;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const bellRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
       }
+      if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
+        setBellOpen(false);
+      }
     };
-    if (userMenuOpen) {
+    if (userMenuOpen || bellOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [userMenuOpen]);
+  }, [userMenuOpen, bellOpen]);
+
+  const openNotification = (n: any) => {
+    if (!n.read_at) {
+      router.post(`/app/notifications/${n.id}/read`, {}, {
+        preserveScroll: false,
+        onSuccess: () => setBellOpen(false),
+      });
+    } else {
+      setBellOpen(false);
+      if (n.data?.url) router.visit(n.data.url);
+    }
+  };
+
+  const markAllRead = () => {
+    router.post("/app/notifications/read-all", {}, { preserveScroll: true, onSuccess: () => setBellOpen(false) });
+  };
 
   const items = useMemo(() => {
     if (!primary) return [];
@@ -258,6 +282,52 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="relative flex items-center gap-3" ref={userMenuRef}>
+            <div className="relative" ref={bellRef}>
+              <button
+                onClick={() => setBellOpen(!bellOpen)}
+                className="relative flex items-center justify-center h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-border/40 bg-gradient-to-r from-muted/50 to-muted/30 smooth-transition"
+                title="Notifications"
+              >
+                <Bell className="h-3.5 w-3.5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-destructive text-white text-[9px] font-bold flex items-center justify-center">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {bellOpen && (
+                <div className="absolute right-0 top-full mt-2 z-50 w-80 bg-card border border-border/60 rounded-xl shadow-lg overflow-hidden animate-scale-in origin-top-right">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
+                    <span className="text-sm font-semibold text-foreground">Notifications</span>
+                    {unreadCount > 0 && (
+                      <button onClick={markAllRead} className="text-[10px] text-accent hover:underline font-medium">Mark all read</button>
+                    )}
+                  </div>
+                  <div className="max-h-80 overflow-y-auto divide-y divide-border/30">
+                    {notifications.length === 0 && (
+                      <div className="px-4 py-6 text-center text-xs text-muted-foreground">No notifications yet.</div>
+                    )}
+                    {notifications.map((n) => (
+                      <button
+                        key={n.id}
+                        onClick={() => openNotification(n)}
+                        className={`w-full text-left px-4 py-3 hover:bg-muted/10 transition-colors ${!n.read_at ? "bg-accent/[0.03]" : ""}`}
+                      >
+                        <div className="flex items-start gap-2">
+                          {!n.read_at && <span className="h-2 w-2 rounded-full bg-accent shrink-0 mt-1" />}
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-semibold text-foreground">{n.data?.title ?? "Notification"}</div>
+                            <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{n.data?.message}</div>
+                            <div className="text-[10px] text-muted-foreground/50 mt-1">{new Date(n.created_at).toLocaleString()}</div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground bg-gradient-to-r from-muted/50 to-muted/30 px-3 py-1.5 rounded-full border border-border/40 smooth-transition hover:border-primary/30 hover:bg-muted/60 group cursor-pointer"

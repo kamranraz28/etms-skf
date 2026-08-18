@@ -26,10 +26,25 @@ class BidController extends Controller {
     public function myBids(Request $r) {
         $vendor = Vendor::where('user_id', $r->user()->id)->first();
         if (! $vendor) return Inertia::render('MyBids', ['bids' => []]);
-        $bids = Bid::with(['tender:id,tender_number,title,status,deadline', 'csItems.cs:id,status'])
-            ->where('vendor_id', $vendor->id)
+        $bids = Bid::with([
+            'tender:id,tender_number,title,status,deadline',
+            'csItems.cs:id,status',
+            'negotiations',
+        ])->where('vendor_id', $vendor->id)
             ->orderByDesc('submitted_at')->get();
         return Inertia::render('MyBids', ['bids' => $bids]);
+    }
+
+    public function myBidShow(Request $r, Bid $bid) {
+        $vendor = Vendor::where('user_id', $r->user()->id)->firstOrFail();
+        if ($bid->vendor_id !== $vendor->id) {
+            abort(403, 'You can only view your own bids.');
+        }
+        $bid->load([
+            'tender.pr', 'vendor', 'negotiations',
+            'csItems.cs:id,status',
+        ]);
+        return Inertia::render('MyBidDetail', ['bid' => $bid]);
     }
 
     public function create(Request $r, Tender $tender) {

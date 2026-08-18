@@ -111,7 +111,7 @@ class TenderController extends Controller {
     public function show(Tender $tender) {
         $tender->load('pr', 'itemCategories.vendorCategory');
         $vendors = $tender->vendors()->select(['vendors.id','name','email','erp_code','status'])->with('categories:id,name')->get();
-        $bids = Bid::with('vendor:id,name,erp_code')
+        $bids = Bid::with('vendor:id,name,erp_code', 'negotiations')
             ->where('tender_id', $tender->id)
             ->orderBy('total_price')->get();
         $cs = $tender->cs;

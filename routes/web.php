@@ -15,6 +15,8 @@ use App\Http\Controllers\VendorProfileController;
 use App\Http\Controllers\ClaimController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\WorkflowTypeController;
+use App\Http\Controllers\NegotiationController;
+use App\Http\Controllers\NotificationController;
 
 // Auth
 Route::get('/', [AuthController::class, 'show'])->name('auth.show');
@@ -29,6 +31,10 @@ Route::get('/auth/unlock/{email}', [AuthController::class, 'unlock'])->name('aut
 // App
 Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Notifications
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
     // Staff
     Route::middleware('role:admin,procurement,approver,department_head,executive_director,counter_ed,scm_head,finance_head,line_manager,user,unit_head,scm_user')->group(function () {
@@ -63,6 +69,7 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::post('/tenders/{tender}/invite', [TenderController::class, 'inviteVendors'])->name('tenders.invite');
         Route::post('/tenders/{tender}/generate-cs', [TenderController::class, 'generateCs'])->name('tenders.generate-cs');
         Route::get('/bids/{bid}/document', [BidController::class, 'document'])->name('bids.document');
+        Route::post('/tenders/{tender}/bids/{bid}/offer', [NegotiationController::class, 'offer'])->name('tenders.offers.store')->middleware('role:admin,procurement');
 
         Route::get('/cs', [CsController::class, 'index'])->name('cs.index');
         Route::get('/cs/{cs}', [CsController::class, 'show'])->name('cs.show');
@@ -98,6 +105,10 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
         Route::get('/my-tenders/{tender}/bid', [BidController::class, 'create'])->name('bids.create');
         Route::post('/my-tenders/{tender}/bid', [BidController::class, 'store'])->name('bids.store');
         Route::get('/my-bids', [BidController::class, 'myBids'])->name('my-bids');
+        Route::get('/my-bids/{bid}', [BidController::class, 'myBidShow'])->name('my-bids.show');
+        Route::post('/offers/{negotiation}/accept', [NegotiationController::class, 'accept'])->name('offers.accept');
+        Route::post('/offers/{negotiation}/reject', [NegotiationController::class, 'reject'])->name('offers.reject');
+        Route::post('/offers/{negotiation}/counter', [NegotiationController::class, 'counter'])->name('offers.counter');
         Route::get('/my-claims', [ClaimController::class, 'myClaims'])->name('my-claims');
         Route::get('/my-claims/{claim}', [ClaimController::class, 'myClaimShow'])->name('my-claims.show');
         Route::get('/claims/new', [ClaimController::class, 'createClaim'])->name('claims.create');

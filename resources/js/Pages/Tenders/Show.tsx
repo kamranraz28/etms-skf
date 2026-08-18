@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { PageSharedProps } from "@/lib/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { ArrowLeft, ExternalLink, Lock, Scale, Gavel, Users, FileText, UserPlus, X, Edit3, Check } from "lucide-react";
+import { ArrowLeft, ExternalLink, Lock, Scale, Gavel, Users, FileText, UserPlus, X, Edit3, Check, Handshake, MessageSquare } from "lucide-react";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { useMemo, useState } from "react";
 
@@ -18,6 +18,54 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
   const [viewBidItems, setViewBidItems] = useState<any>(null);
   const [editingDeadline, setEditingDeadline] = useState(false);
   const [deadlineVal, setDeadlineVal] = useState("");
+  const [settleBid, setSettleBid] = useState<any>(null);
+  const [offerInputs, setOfferInputs] = useState<Record<string, string>>({});
+  const [sendingOffers, setSendingOffers] = useState(false);
+
+  const openSettle = (bid: any) => {
+    setSettleBid(bid);
+    const prefill: Record<string, string> = {};
+    (bid.item_prices ?? []).forEach((it: any) => {
+      const neg = (bid.negotiations ?? []).filter((n: any) => n.item_name === it.name);
+      const last = neg[neg.length - 1];
+      if (last && last.status === "pending") prefill[it.name] = String(last.offered_price);
+    });
+    setOfferInputs(prefill);
+  };
+
+  const sendOffers = () => {
+    if (!settleBid) return;
+    const offers = Object.entries(offerInputs)
+      .filter(([, v]) => Number(v) > 0)
+      .map(([item_name, offered_price]) => ({ item_name, offered_price: Number(offered_price) }));
+    if (offers.length === 0) { sa.alert("No offers", "Enter a settled price for at least one item.", "warning"); return; }
+    sa.confirmAction("Send settled prices?", "The vendor will be notified and can accept, deny, or counter each price.", "Send offers").then((ok) => {
+      if (!ok) return;
+      setSendingOffers(true);
+      router.post(`/app/tenders/${tender.id}/bids/${settleBid.id}/offer`, { offers }, {
+        onSuccess: () => { setSettleBid(null); setOfferInputs({}); sa.alert("Sent", "Settled price offers sent to vendor.", "success"); },
+        onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+        onFinish: () => setSendingOffers(false),
+      });
+    });
+  };
+
+  const negotiationBadge = (bid: any) => {
+    const negs = bid.negotiations ?? [];
+    if (negs.length === 0) return null;
+    const pending = negs.filter((n: any) => n.status === "pending").length;
+    const accepted = negs.filter((n: any) => n.status === "accepted").length;
+    const countered = negs.filter((n: any) => n.status === "counter").length;
+    const rejected = negs.filter((n: any) => n.status === "rejected").length;
+    return (
+      <div className="flex flex-wrap gap-1">
+        {pending > 0 && <span className="text-[9px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-full font-medium">{pending} pending</span>}
+        {accepted > 0 && <span className="text-[9px] bg-success/10 text-success px-1.5 py-0.5 rounded-full font-medium">{accepted} accepted</span>}
+        {countered > 0 && <span className="text-[9px] bg-info/10 text-info px-1.5 py-0.5 rounded-full font-medium">{countered} countered</span>}
+        {rejected > 0 && <span className="text-[9px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-medium">{rejected} denied</span>}
+      </div>
+    );
+  };
 
   // Build item-category map from existing item_categories
   const initialItemCats = useMemo(() => {
@@ -100,16 +148,25 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
       ),
     },
     { key: "erp_code", label: "ERP", sortable: false, render: (r: any) => <span className="font-mono text-xs whitespace-nowrap">{r.vendor?.erp_code ?? <span className="text-warning">—</span>}</span> },
+    { key: "total_price", label: "Total bid", sortable: true, className: "text-right", render: (r) => <span className="font-mono text-xs whitespace-nowrap font-semibold">{Number(r.total_price).toLocaleString()}</span> },
+    { key: "negotiations", label: "Negotiation", sortable: false, render: (r: any) => negotiationBadge(r) },
     { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
     {
       key: "actions" as string,
-      label: "Items",
+      label: "Actions",
       className: "text-right",
       exportable: false,
       render: (r: any) => (
-        <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setViewBidItems(r); }}>
-          View Items
-        </Button>
+        <div className="flex items-center justify-end gap-1.5">
+          {tender.status !== "awarded" && (primary === "admin" || primary === "procurement") && (
+            <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); openSettle(r); }}>
+              <Handshake className="h-3.5 w-3.5 mr-1" /> Settle price
+            </Button>
+          )}
+          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setViewBidItems(r); }}>
+            View Items
+          </Button>
+        </div>
       ),
     },
   ];
@@ -330,6 +387,76 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => setInviteModal(false)}>Cancel</Button>
                 <Button size="sm" onClick={sendInvites}><UserPlus className="h-3.5 w-3.5 mr-1" /> Invite vendors</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {settleBid && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setSettleBid(null)}>
+          <div className="bg-card border border-border/60 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden m-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
+              <div className="flex items-center gap-2 font-semibold text-sm">
+                <Handshake className="h-4 w-4 text-accent" /> Settle price — {settleBid.vendor?.name}
+              </div>
+              <button onClick={() => setSettleBid(null)} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="overflow-x-auto max-h-[55vh]">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gradient-to-r from-muted/40 to-muted/20">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Item</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Current price</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Vendor response</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Settled price (BDT)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/30">
+                  {(settleBid.item_prices ?? []).map((it: any, i: number) => {
+                    const negs = (settleBid.negotiations ?? []).filter((n: any) => n.item_name === it.name);
+                    const last = negs[negs.length - 1];
+                    const status = last?.status;
+                    return (
+                      <tr key={i} className="hover:bg-muted/20 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="font-medium">{it.name}</div>
+                          <div className="text-[10px] text-muted-foreground">{it.qty} {it.unit}</div>
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono">{Number(it.unit_price).toLocaleString()}</td>
+                        <td className="px-4 py-3 text-xs">
+                          {!last ? (
+                            <span className="text-muted-foreground">—</span>
+                          ) : status === "pending" ? (
+                            <span className="flex items-center gap-1 text-accent">
+                              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" /> Pending ({Number(last.offered_price).toLocaleString()})
+                            </span>
+                          ) : status === "accepted" ? (
+                            <span className="text-success font-medium">Accepted ({Number(last.offered_price).toLocaleString()})</span>
+                          ) : status === "counter" ? (
+                            <span className="text-info font-medium">Countered {Number(last.counter_price).toLocaleString()}{last.vendor_comment ? ` — "${last.vendor_comment}"` : ""}</span>
+                          ) : (
+                            <span className="text-destructive flex items-center gap-1">
+                              <MessageSquare className="h-3 w-3" /> Denied{last.vendor_comment ? ` — "${last.vendor_comment}"` : ""}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <input type="number" min="0" step="0.01" className="h-8 w-28 rounded-md border border-border/60 bg-background px-2 text-xs font-mono text-right focus:outline-none focus:ring-2 focus:ring-accent/30"
+                            value={offerInputs[it.name] ?? ""}
+                            onChange={(e) => setOfferInputs({ ...offerInputs, [it.name]: e.target.value })} />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex gap-2 justify-between items-center px-5 py-3 border-t border-border/40 bg-muted/10">
+              <span className="text-xs text-muted-foreground">Vendor will be notified. They can accept, deny, or counter each price.</span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setSettleBid(null)}>Cancel</Button>
+                <Button size="sm" onClick={sendOffers} disabled={sendingOffers}><Handshake className="h-3.5 w-3.5 mr-1" /> {sendingOffers ? "Sending…" : "Send offers"}</Button>
               </div>
             </div>
           </div>
