@@ -209,7 +209,7 @@ class CsController extends Controller {
             return back()->with('error', 'Only approved CS can be downloaded.');
         }
 
-        $cs->load(['tender.pr', 'approvals.workflowStep', 'workflowType']);
+        $cs->load(['tender.pr', 'approvals.workflowStep', 'approvals.actor:id,full_name', 'workflowType']);
         $items = $cs->items()->with('vendor:id,name,erp_code,email')->orderBy('rank')->get();
         $selections = $cs->selections()->with('vendor:id,name,erp_code')->where('selected', true)->get();
         $prItems = $cs->tender->pr->items ?? [];

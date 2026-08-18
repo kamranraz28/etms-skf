@@ -3,28 +3,38 @@
 <head>
 <meta charset="utf-8">
 <style>
-  @page { margin: 20mm 15mm; }
-  body { font-family: 'DejaVu Sans', sans-serif; font-size: 10pt; color: #1a1a1a; line-height: 1.5; }
-  .header { text-align: center; border-bottom: 3px solid #1a56db; padding-bottom: 12px; margin-bottom: 20px; }
-  .header h1 { font-size: 18pt; color: #1a56db; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 1px; }
-  .header .ref { font-size: 9pt; color: #6b7280; }
-  .header .status { display: inline-block; background: #059669; color: #fff; font-size: 8pt; padding: 2px 10px; border-radius: 3px; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .section { margin-bottom: 18px; }
-  .section-title { font-size: 11pt; font-weight: bold; color: #1a56db; border-bottom: 1px solid #d1d5db; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  @page { margin: 10mm 13mm; }
+  body { font-family: 'DejaVu Sans', sans-serif; font-size: 10pt; color: #1a1a1a; line-height: 1.4; }
+  .header { text-align: center; border-bottom: 3px solid #1a56db; padding-bottom: 8px; margin-bottom: 12px; }
+  .header h1 { font-size: 16pt; color: #1a56db; margin: 0 0 2px; text-transform: uppercase; letter-spacing: 1px; }
+  .header .ref { font-size: 8.5pt; color: #6b7280; }
+  .header .status { display: inline-block; background: #059669; color: #fff; font-size: 8pt; padding: 2px 10px; border-radius: 3px; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .section { margin-bottom: 10px; }
+  .section-title { font-size: 10pt; font-weight: bold; color: #1a56db; border-bottom: 1px solid #d1d5db; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
   .info-grid { width: 100%; }
-  .info-grid td { padding: 3px 8px; vertical-align: top; }
-  .info-grid .label { font-weight: bold; color: #6b7280; width: 140px; font-size: 9pt; }
-  .info-grid .value { font-size: 9pt; }
-  table.data { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 6px; }
-  table.data th { background: #f3f4f6; color: #374151; font-weight: bold; text-align: left; padding: 6px 8px; border: 1px solid #d1d5db; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.3px; }
-  table.data td { padding: 5px 8px; border: 1px solid #d1d5db; }
+  .info-grid td { padding: 2px 8px; vertical-align: top; }
+  .info-grid .label { font-weight: bold; color: #6b7280; width: 140px; font-size: 8.5pt; }
+  .info-grid .value { font-size: 8.5pt; }
+  table.data { width: 100%; border-collapse: collapse; font-size: 8.5pt; margin-top: 4px; }
+  table.data th { background: #f3f4f6; color: #374151; font-weight: bold; text-align: left; padding: 4px 8px; border: 1px solid #d1d5db; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.3px; }
+  table.data td { padding: 4px 8px; border: 1px solid #d1d5db; }
   table.data tr:nth-child(even) { background: #f9fafb; }
+  table.sign { width: 100%; border-collapse: collapse; margin-top: 8px; table-layout: fixed; }
+  table.sign td { border: 1px solid #d1d5db; padding: 8px 10px; vertical-align: top; }
+  .sign-decision { font-weight: bold; font-size: 8pt; margin-top: 2px; }
+  .sign-step { font-size: 7pt; color: #1a56db; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold; }
+  .sign-meta { font-size: 7.5pt; color: #6b7280; margin-top: 4px; line-height: 1.35; }
+  .sign-name { font-size: 8.5pt; font-weight: bold; color: #111827; text-transform: uppercase; letter-spacing: 0.5px; }
+  .sign-dot { font-size: 7.5pt; color: #6b7280; }
+  .sign-comment { font-style: italic; }
+  .sign-line { border-top: 1px solid #6b7280; margin-top: 10px; padding-top: 3px; font-size: 7pt; color: #9ca3af; text-align: center; }
+  .sign-empty { text-align: center; color: #9ca3af; font-size: 8pt; }
   .text-right { text-align: right; }
   .text-center { text-align: center; }
   .text-success { color: #059669; font-weight: bold; }
   .badge { display: inline-block; background: #e5e7eb; font-size: 7pt; padding: 1px 6px; border-radius: 2px; text-transform: uppercase; }
   .badge-success { background: #d1fae5; color: #065f46; }
-  .approved-stamp { text-align: center; margin-top: 24px; border: 2px solid #059669; padding: 10px 20px; display: inline-block; border-radius: 4px; }
+  .approved-stamp { text-align: center; margin-top: 10px; border: 2px solid #059669; padding: 6px 18px; display: inline-block; border-radius: 4px; }
   .approved-stamp h2 { color: #059669; margin: 0; font-size: 14pt; text-transform: uppercase; letter-spacing: 2px; }
   .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 7pt; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 6px; }
   .page-break { page-break-before: always; }
@@ -104,64 +114,25 @@
   @endif
 </div>
 
-<div class="section">
-  <div class="section-title">Bid Comparison — Vendor Totals</div>
-  <table class="data">
-    <thead>
-      <tr>
-        <th style="width:8%">Rank</th>
-        <th>Vendor</th>
-        <th style="width:12%">ERP Code</th>
-        <th style="width:18%" class="text-right">Total Price</th>
-        <th style="width:12%" class="text-center">Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      @forelse($items as $it)
-        <tr>
-          <td class="text-center">L{{ $it->rank }}</td>
-          <td>{{ $it->vendor->name ?? '—' }}</td>
-          <td>{{ $it->vendor->erp_code ?? '—' }}</td>
-          <td class="text-right">{{ number_format($it->total_price, 2) }}</td>
-          <td class="text-center">
-            @if($it->selected)
-              <span class="badge badge-success">Selected</span>
-            @else
-              <span class="badge">—</span>
-            @endif
-          </td>
-        </tr>
-      @empty
-        <tr><td colspan="5" style="text-align:center;color:#6b7280;">No bids found.</td></tr>
-      @endforelse
-    </tbody>
-  </table>
-</div>
-
 @if(count($cs->approvals) > 0)
   <div class="section">
-    <div class="section-title">Approval History</div>
-    <table class="data">
-      <thead>
-        <tr>
-          <th>Step</th>
-          <th>Decision</th>
-          <th>Comment</th>
-          <th>Device</th>
-          <th>Acted At</th>
-        </tr>
-      </thead>
-      <tbody>
+    <div class="section-title">Approval / Attestation</div>
+    <table class="sign">
+      <tr>
         @foreach($cs->approvals as $a)
-          <tr>
-            <td><span class="badge">{{ ucfirst($a->step) }}</span></td>
-            <td style="color:{{ $a->decision === 'approved' ? '#059669' : '#ef4444' }};font-weight:bold;">{{ ucfirst($a->decision) }}</td>
-            <td>{{ $a->comment ?? '—' }}</td>
-            <td>{{ $a->device_name ? $a->device_name . ' (' . ($a->device_ip ?? '—') . ')' : ($a->device_ip ?? '—') }}</td>
-            <td>{{ $a->acted_at ? date('d M Y, h:i A', strtotime($a->acted_at)) : '—' }}</td>
-          </tr>
+          <td style="width:{{ 100 / count($cs->approvals) }}%">
+            <div class="sign-name">{{ $a->actor->full_name ?? '—' }}</div>
+            <div class="sign-step">{{ ucfirst($a->step) }}</div>
+            <div class="sign-decision" style="color:{{ $a->decision === 'approved' ? '#059669' : '#ef4444' }};">{{ ucfirst($a->decision) }}</div>
+            <div class="sign-meta">{{ $a->acted_at ? date('d M Y, h:i A', strtotime($a->acted_at)) : '—' }}</div>
+            <div class="sign-meta">Device:{{ $a->device_name ? ' ' . $a->device_name : '' }}{{ $a->device_ip ? ' (' . $a->device_ip . ')' : '' }}{{ !$a->device_name && !$a->device_ip ? ' —' : '' }}</div>
+            @if($a->comment)
+              <div class="sign-meta sign-comment">"{{ $a->comment }}"</div>
+            @endif
+            <div class="sign-line">Signature</div>
+          </td>
         @endforeach
-      </tbody>
+      </tr>
     </table>
   </div>
 @endif
