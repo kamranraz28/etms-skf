@@ -9,7 +9,7 @@ class CsApproval extends Model
     use HasFactory;
 
     protected $table = 'cs_approvals';
-    protected $fillable = ['cs_id', 'step', 'workflow_step_id', 'decision', 'comment', 'acted_by', 'acted_at'];
+    protected $fillable = ['cs_id', 'step', 'workflow_step_id', 'decision', 'comment', 'acted_by', 'acted_at', 'device_ip', 'device_name'];
     protected $casts = ['acted_at' => 'datetime'];
 
     public function cs() { return $this->belongsTo(Cs::class); }

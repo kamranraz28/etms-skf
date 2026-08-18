@@ -7,7 +7,7 @@ import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSharedProps } from "@/lib/types";
 import { Head, router, usePage } from "@inertiajs/react";
-import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle, Scale, FileText, UserCheck, Workflow, RefreshCw, Wand2, Save } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle, Scale, FileText, UserCheck, Workflow, RefreshCw, Wand2, Save, Monitor } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export default function CSShow({
@@ -353,11 +353,18 @@ export default function CSShow({
                               </div>
                               <div className="text-[10px] text-muted-foreground/70">Role: {step.role_name}</div>
                               {approval && (
-                                <div className="mt-1.5 bg-muted/20 rounded-lg px-2.5 py-1.5 border border-border/30">
+                                <div className="mt-1.5 bg-muted/20 rounded-lg px-2.5 py-1.5 border border-border/30 space-y-1">
                                   <div className="flex items-center gap-2 text-[10px]">
                                     <span className="font-medium text-foreground">{approval.actor?.full_name}</span>
                                     {approval.comment && <span className="text-muted-foreground italic">— "{approval.comment}"</span>}
                                   </div>
+                                  {(approval.device_name || approval.device_ip) && (
+                                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70">
+                                      <Monitor className="h-3 w-3" />
+                                      <span className="font-mono">{approval.device_name ?? "Unknown device"}</span>
+                                      {approval.device_ip && <span className="font-mono text-muted-foreground/50">· {approval.device_ip}</span>}
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -380,6 +387,13 @@ export default function CSShow({
                               <span>·</span>
                               <span>{new Date(a.acted_at).toLocaleString()}</span>
                             </div>
+                            {(a.device_name || a.device_ip) && (
+                              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 mt-0.5">
+                                <Monitor className="h-3 w-3" />
+                                <span className="font-mono">{a.device_name ?? "Unknown device"}</span>
+                                {a.device_ip && <span className="font-mono text-muted-foreground/50">· {a.device_ip}</span>}
+                              </div>
+                            )}
                             {a.comment && <div className="text-[10px] text-muted-foreground italic mt-0.5">"{a.comment}"</div>}
                           </div>
                         </div>

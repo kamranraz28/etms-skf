@@ -116,6 +116,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Decision</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">By</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Device</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Comment</th>
                   </tr>
                 </thead>
@@ -132,6 +133,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{claim.vendor?.name || "—"}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{new Date(claim.submitted_at).toLocaleString()}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">—</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground italic">—</td>
                   </tr>
                   {workflowSteps.map((step: any) => {
@@ -164,6 +166,11 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                         </td>
                         <td className="px-4 py-3 text-xs text-muted-foreground">{approval?.actor?.full_name || "—"}</td>
                         <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{approval?.acted_at ? new Date(approval.acted_at).toLocaleString() : "—"}</td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground">
+                          {approval?.device_name || approval?.device_ip ? (
+                            <span className="font-mono whitespace-nowrap">{approval.device_name ?? "Unknown device"}{approval.device_ip ? ` · ${approval.device_ip}` : ""}</span>
+                          ) : "—"}
+                        </td>
                         <td className="px-4 py-3 text-xs text-muted-foreground italic max-w-[200px] truncate">{approval?.comment ? `"${approval.comment}"` : "—"}</td>
                       </tr>
                     );
@@ -181,6 +188,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">—</td>
                       <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{claim.forwarded_to_finance_at ? new Date(claim.forwarded_to_finance_at).toLocaleString() : "—"}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">—</td>
                       <td className="px-4 py-3 text-xs text-muted-foreground italic">—</td>
                     </tr>
                   )}
@@ -197,6 +205,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">—</td>
                       <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{claim.rejected_at ? new Date(claim.rejected_at).toLocaleString() : "—"}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">—</td>
                       <td className="px-4 py-3 text-xs text-muted-foreground italic max-w-[200px] truncate">{claim.rejection_reason ? `"${claim.rejection_reason}"` : "—"}</td>
                     </tr>
                   )}

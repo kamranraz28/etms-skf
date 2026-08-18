@@ -147,6 +147,7 @@
           <th>Step</th>
           <th>Decision</th>
           <th>Comment</th>
+          <th>Device</th>
           <th>Acted At</th>
         </tr>
       </thead>
@@ -156,6 +157,7 @@
             <td><span class="badge">{{ ucfirst($a->step) }}</span></td>
             <td style="color:{{ $a->decision === 'approved' ? '#059669' : '#ef4444' }};font-weight:bold;">{{ ucfirst($a->decision) }}</td>
             <td>{{ $a->comment ?? '—' }}</td>
+            <td>{{ $a->device_name ? $a->device_name . ' (' . ($a->device_ip ?? '—') . ')' : ($a->device_ip ?? '—') }}</td>
             <td>{{ $a->acted_at ? date('d M Y, h:i A', strtotime($a->acted_at)) : '—' }}</td>
           </tr>
         @endforeach

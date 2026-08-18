@@ -10,6 +10,7 @@ use App\Models\WorkflowStep;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use App\Support\DeviceInfo;
 
 class ClaimController extends Controller
 {
@@ -234,6 +235,7 @@ class ClaimController extends Controller
                 'comment' => $data['comment'] ?? null,
                 'acted_by' => $user->id,
                 'acted_at' => now(),
+                ...DeviceInfo::capture($r),
             ]);
 
             $nextStep = WorkflowStep::where('workflow_type_id', $claim->workflow_type_id)
@@ -262,6 +264,7 @@ class ClaimController extends Controller
             'comment' => $data['comment'] ?? null,
             'acted_by' => $user->id,
             'acted_at' => now(),
+            ...DeviceInfo::capture($r),
         ]);
 
         $claim->update([

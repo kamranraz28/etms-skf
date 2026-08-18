@@ -9,7 +9,7 @@ class ClaimApproval extends Model
     use HasFactory;
 
     protected $table = 'claim_approvals';
-    protected $fillable = ['claim_id', 'panel', 'workflow_step_id', 'decision', 'comment', 'acted_by', 'acted_at'];
+    protected $fillable = ['claim_id', 'panel', 'workflow_step_id', 'decision', 'comment', 'acted_by', 'acted_at', 'device_ip', 'device_name'];
     protected $casts = ['acted_at' => 'datetime'];
 
     public function claim()

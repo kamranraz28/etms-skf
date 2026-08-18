@@ -10,6 +10,7 @@ use App\Models\WorkflowType;
 use App\Models\WorkflowStep;
 use App\Services\ErpSyncService;
 use App\Models\CsTenderLog;
+use App\Support\DeviceInfo;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -117,6 +118,7 @@ class CsController extends Controller {
                 'comment' => $data['comment'] ?? null,
                 'acted_by' => $user->id,
                 'acted_at' => now(),
+                ...DeviceInfo::capture($r),
             ]);
 
             $nextStep = WorkflowStep::where('workflow_type_id', $cs->workflow_type_id)
@@ -140,6 +142,7 @@ class CsController extends Controller {
                 'comment' => $data['comment'] ?? null,
                 'acted_by' => $user->id,
                 'acted_at' => now(),
+                ...DeviceInfo::capture($r),
             ]);
             $cs->update(['status' => 'draft', 'current_step_id' => null]);
             return back()->with('success', 'CS returned to draft');
@@ -154,6 +157,7 @@ class CsController extends Controller {
                 'comment' => $data['comment'] ?? null,
                 'acted_by' => $user->id,
                 'acted_at' => now(),
+                ...DeviceInfo::capture($r),
             ]);
 
             // Create a new tender from the same PR with deadline 7 days from now
