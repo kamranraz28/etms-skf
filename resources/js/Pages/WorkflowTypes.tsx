@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Head, router } from "@inertiajs/react";
-import { Plus, Edit3, Trash2, GripVertical, Workflow, ListOrdered } from "lucide-react";
+import { Plus, Edit3, Trash2, GripVertical, Workflow, ListOrdered, ChevronRight, Settings } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export default function WorkflowTypes({ types }: any) {
   const sa = useSweetAlert();
@@ -54,30 +55,65 @@ export default function WorkflowTypes({ types }: any) {
     const url = editing ? `/app/workflow-types/${editing.id}` : "/app/workflow-types";
     const method = editing ? "put" : "post";
     router[method](url, { name, description, steps }, {
-      onSuccess: () => { setModal(false); sa.alert("Saved", "Workflow type saved", "success"); },
+      onSuccess: () => { setModal(false); sa.alert("Saved", "Workflow type saved successfully.", "success"); },
       onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
     });
   };
 
   const destroy = async (id: number) => {
-    const ok = await sa.confirmAction("Delete?", "This cannot be undone.", "Delete");
+    const ok = await sa.confirmAction("Delete Workflow Type?", "This will permanently remove this approval path. Workflows currently in progress may be impacted.", "Delete");
     if (ok) router.delete(`/app/workflow-types/${id}`, {
-      onSuccess: () => sa.alert("Deleted", "Workflow type deleted", "success"),
+      onSuccess: () => sa.alert("Deleted", "Workflow type deleted successfully.", "success"),
     });
   };
 
   const columns: Column[] = [
-    { key: "name", label: "Name", sortable: true, render: (r: any) => <span className="font-semibold">{r.name}</span> },
-    { key: "description", label: "Description", sortable: false, render: (r: any) => <span className="text-xs text-muted-foreground">{r.description || "—"}</span> },
-    { key: "steps", label: "Steps", sortable: false, render: (r: any) => <span className="text-xs">{(r.steps || []).length} step(s)</span> },
+    {
+      key: "name",
+      label: "Workflow Name",
+      sortable: true,
+      render: (r: any) => (
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+            <Workflow className="h-4 w-4" />
+          </div>
+          <span className="font-semibold text-sm text-foreground">{r.name}</span>
+        </div>
+      )
+    },
+    { key: "description", label: "Description", sortable: false, render: (r: any) => <span className="text-xs text-muted-foreground">{r.description || "No description provided."}</span> },
+    {
+      key: "steps",
+      label: "Approval Sequence",
+      sortable: false,
+      render: (r: any) => {
+        const sequence = r.steps ?? [];
+        return (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {sequence.map((step: any, idx: number) => (
+              <div key={idx} className="flex items-center gap-1 text-[10px] bg-muted/60 text-foreground px-2 py-0.5 rounded-md font-semibold border border-border">
+                <span>{step.label}</span>
+                {idx !== sequence.length - 1 && <ChevronRight className="h-3 w-3 text-muted-foreground/40 shrink-0" />}
+              </div>
+            ))}
+            {sequence.length === 0 && <span className="text-xs text-muted-foreground/40">No steps defined</span>}
+          </div>
+        );
+      }
+    },
     {
       key: "actions",
-      label: "",
+      label: "Actions",
       sortable: false,
+      className: "text-right",
       render: (r: any) => (
         <div className="flex gap-1 justify-end">
-          <Button size="icon" variant="ghost" onClick={() => openEdit(r)}><Edit3 className="h-3.5 w-3.5" /></Button>
-          <Button size="icon" variant="ghost" onClick={() => destroy(r.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+          <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => openEdit(r)} title="Edit Workflow">
+            <Edit3 className="h-4 w-4" />
+          </Button>
+          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 hover:bg-destructive/10" onClick={() => destroy(r.id)} title="Delete Workflow">
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
         </div>
       ),
     },
@@ -85,50 +121,72 @@ export default function WorkflowTypes({ types }: any) {
 
   return (
     <AppShell>
-      <Head title="Workflow Types" />
+      <Head title="Workflow Management" />
       <PageHeader
-        title="Workflow Types"
-        description="Manage approval workflows for Comparative Statements"
-        actions={<Button size="sm" onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> Add Workflow</Button>}
+        title="Workflow Management"
+        description="Configure sequential multi-role approval paths for comparative statements and payments."
+        actions={<Button onClick={openCreate} className="gap-1.5"><Plus className="h-4 w-4" /> Add Workflow</Button>}
       />
-      <DataTable columns={columns} data={types} searchable={false} exportable={false} compact emptyMessage="No workflow types." />
+      
+      <DataTable columns={columns} data={types} searchable={false} exportable={false} compact emptyMessage="No workflows configured yet." />
 
+      {/* Edit/Create Modal */}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setModal(false)}>
-          <div className="bg-card border border-border/60 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 m-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-2 text-lg font-semibold mb-4">
-              <Workflow className="h-5 w-5 text-accent" />
-              {editing ? "Edit Workflow" : "New Workflow"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setModal(false)}>
+          <div className="bg-card border border-border/60 rounded-2xl shadow-dialog w-full max-w-2xl max-h-[90vh] overflow-hidden m-4 animate-scale-in flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4.5 border-b border-border/40 bg-gradient-to-r from-card to-muted/20 shrink-0">
+              <div className="flex items-center gap-2 font-bold text-sm text-foreground">
+                <Workflow className="h-4.5 w-4.5 text-accent animate-pulse-soft" />
+                {editing ? "Configure Approval Workflow" : "Create Approval Workflow"}
+              </div>
+              <button onClick={() => setModal(false)} className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                <X className="h-4 w-4" />
+              </button>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Name</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30" placeholder="e.g. Plant Purchase" />
+            <div className="overflow-y-auto p-6 space-y-5 flex-1">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Workflow Name <span className="text-destructive">*</span></Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} className="h-11" placeholder="e.g. IT Equipment Purchases" />
               </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Description</label>
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30" rows={2} placeholder="Optional description" />
+              
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Description</Label>
+                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Optional workflow parameters or scope..." />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                    <ListOrdered className="h-3.5 w-3.5" /> Approval Steps
-                  </label>
-                  <Button size="sm" variant="outline" onClick={addStep}><Plus className="h-3 w-3 mr-1" /> Add Step</Button>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-border/40">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-foreground/80 flex items-center gap-1.5">
+                    <ListOrdered className="h-4 w-4 text-accent" /> Approval Steps Sequence
+                  </Label>
+                  <Button size="sm" variant="outline" onClick={addStep} className="h-8 text-xs gap-1"><Plus className="h-3.5 w-3.5" /> Add Step</Button>
                 </div>
-                <div className="space-y-2">
+                
+                <div className="space-y-3">
                   {steps.map((s, i) => (
-                    <div key={i} className="flex gap-2 items-start p-3 rounded-lg border border-border/40 bg-muted/20">
-                      <span className="text-xs font-mono text-muted-foreground mt-2.5 w-5">#{i + 1}</span>
-                      <div className="flex-1 grid grid-cols-3 gap-2">
-                        <input value={s.step_name} onChange={(e) => setStep(i, "step_name", e.target.value)} className="rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" placeholder="Step name" />
-                        <input value={s.label} onChange={(e) => setStep(i, "label", e.target.value)} className="rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" placeholder="Label (e.g. Dept Head)" />
-                        <input value={s.role_name} onChange={(e) => setStep(i, "role_name", e.target.value)} className="rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" placeholder="Role name" />
+                    <div key={i} className="flex gap-3 items-start p-4 rounded-xl border border-border/60 bg-gradient-to-br from-card to-muted/15 relative">
+                      <span className="text-xs font-bold font-mono text-muted-foreground/60 mt-2.5 w-6">#{i + 1}</span>
+                      
+                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Step Identifier</Label>
+                          <Input value={s.step_name} onChange={(e) => setStep(i, "step_name", e.target.value)} className="h-9 text-xs" placeholder="e.g. dept_head" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Display Label</Label>
+                          <Input value={s.label} onChange={(e) => setStep(i, "label", e.target.value)} className="h-9 text-xs" placeholder="e.g. Department Head" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Assigned Role</Label>
+                          <Input value={s.role_name} onChange={(e) => setStep(i, "role_name", e.target.value)} className="h-9 text-xs" placeholder="e.g. department_head" />
+                        </div>
                       </div>
+                      
                       {steps.length > 1 && (
-                        <Button size="icon" variant="ghost" onClick={() => removeStep(i)} className="shrink-0 mt-1"><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => removeStep(i)} className="h-8 w-8 p-0 shrink-0 mt-4 hover:bg-destructive/10">
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
                       )}
                     </div>
                   ))}
@@ -136,9 +194,9 @@ export default function WorkflowTypes({ types }: any) {
               </div>
             </div>
 
-            <div className="flex gap-2 justify-end mt-6">
+            <div className="flex gap-2 justify-end px-6 py-4 border-t border-border/40 bg-muted/10 shrink-0">
               <Button variant="outline" onClick={() => setModal(false)}>Cancel</Button>
-              <Button onClick={save}>{editing ? "Update" : "Create"}</Button>
+              <Button onClick={save}>{editing ? "Save changes" : "Create workflow"}</Button>
             </div>
           </div>
         </div>
@@ -146,4 +204,8 @@ export default function WorkflowTypes({ types }: any) {
       {sa.SweetAlert}
     </AppShell>
   );
+}
+
+function X(props: any) {
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 }

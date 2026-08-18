@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/DataTable";
-import { ChevronRight, Search, Filter } from "lucide-react";
+import { ChevronRight, Search, Filter, Calendar } from "lucide-react";
 
 export default function ClaimHistory({ claims, vendors, filters }: any) {
   const [vendorId, setVendorId] = useState(filters.vendor_id);
@@ -21,56 +21,93 @@ export default function ClaimHistory({ claims, vendors, filters }: any) {
   const statuses = ["", "submitted", "forwarded_to_finance", "rejected"];
 
   const columns: Column[] = [
-    { key: "claim_number", label: "Claim #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.claim_number}</span> },
-    { key: "vendor", label: "Vendor", sortable: false, render: (r) => <span className="whitespace-nowrap font-medium">{r.vendor?.name}</span> },
-    { key: "erp_code", label: "ERP", sortable: false, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.vendor?.erp_code ?? "—"}</span> },
-    { key: "bill_number", label: "Bill #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.bill_number ?? "—"}</span> },
-    { key: "po_number", label: "PO #", sortable: true, render: (r) => <span className="font-mono text-xs whitespace-nowrap">{r.po_number}</span> },
-    { key: "title", label: "Title", sortable: true, render: (r) => <span className="max-w-32 md:max-w-40 truncate block">{r.title}</span> },
-    { key: "amount", label: "Amount", sortable: true, className: "text-right", render: (r) => <span className="font-mono whitespace-nowrap">{Number(r.amount).toLocaleString()}</span> },
-    { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
+    {
+      key: "claim_number",
+      label: "Claim #",
+      sortable: true,
+      render: (r) => <span className="font-mono text-xs font-semibold bg-muted/60 px-2 py-0.5 rounded-md whitespace-nowrap">{r.claim_number}</span>
+    },
+    {
+      key: "vendor",
+      label: "Vendor",
+      sortable: false,
+      render: (r) => (
+        <div className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+            {r.vendor?.name?.charAt(0)?.toUpperCase()}
+          </div>
+          <span className="text-sm font-semibold text-foreground whitespace-nowrap">{r.vendor?.name}</span>
+        </div>
+      )
+    },
+    { key: "erp_code", label: "ERP Code", sortable: false, render: (r) => <span className="font-mono text-xs whitespace-nowrap bg-muted/60 px-2 py-0.5 rounded-md">{r.vendor?.erp_code ?? <span className="text-warning font-semibold">—</span>}</span> },
+    { key: "bill_number", label: "Bill Reference", sortable: true, render: (r) => <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">{r.bill_number ?? "—"}</span> },
+    { key: "po_number", label: "PO Reference", sortable: true, render: (r) => <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">{r.po_number}</span> },
+    { key: "title", label: "Claim Title", sortable: true, render: (r) => <span className="font-medium text-foreground max-w-40 truncate block">{r.title}</span> },
+    {
+      key: "amount",
+      label: "Claim Amount",
+      sortable: true,
+      className: "text-right",
+      render: (r) => <span className="font-mono text-xs font-bold text-foreground whitespace-nowrap">৳ {Number(r.amount).toLocaleString()}</span>
+    },
+    {
+      key: "submitted_at",
+      label: "Submitted Date",
+      sortable: true,
+      render: (r) => (
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground whitespace-nowrap">
+          <Calendar className="h-3.5 w-3.5" />
+          <span>{new Date(r.submitted_at).toLocaleDateString()}</span>
+        </div>
+      )
+    },
     { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.status} /> },
     {
       key: "actions" as string,
-      label: "Actions",
+      label: "Action",
       className: "text-right",
       exportable: false,
       render: (r: any) => (
         <Link href={`/app/claims/${r.id}`} onClick={(e) => e.stopPropagation()}>
-          <Button size="sm" variant="outline">View <ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
+          <Button size="sm" variant="outline" className="h-8 py-0 px-3 text-xs gap-1">
+            Open <ChevronRight className="h-3.5 w-3.5" />
+          </Button>
         </Link>
       ),
     },
   ];
 
   const filtersEl = (
-    <div className="flex flex-col sm:flex-row items-end gap-3">
-      <div className="w-full sm:flex-1">
-        <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Vendor</label>
-        <select className="h-10 w-full rounded-lg border border-input bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring" value={vendorId} onChange={(e) => setVendorId(e.target.value)}>
+    <div className="flex flex-col sm:flex-row items-end gap-3.5">
+      <div className="w-full sm:flex-1 space-y-1.5">
+        <label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Vendor Account</label>
+        <select className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/25 transition-all" value={vendorId} onChange={(e) => setVendorId(e.target.value)}>
           <option value="">All vendors</option>
           {vendors.map((v: any) => <option key={v.id} value={v.id}>{v.name} ({v.erp_code ?? "—"})</option>)}
         </select>
       </div>
-      <div className="w-full sm:flex-1">
-        <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Status</label>
-        <select className="h-10 w-full rounded-lg border border-input bg-background/80 px-3 text-sm transition-all focus:border-primary/50 focus:ring-2 focus:ring-ring" value={status} onChange={(e) => setStatus(e.target.value)}>
-          {statuses.map((s) => <option key={s} value={s}>{s || "All statuses"}</option>)}
+      <div className="w-full sm:flex-1 space-y-1.5">
+        <label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Approval Status</label>
+        <select className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/25 transition-all" value={status} onChange={(e) => setStatus(e.target.value)}>
+          {statuses.map((s) => <option key={s} value={s}>{s ? s.replace(/_/g, " ").toUpperCase() : "ALL STATUSES"}</option>)}
         </select>
       </div>
-      <Button onClick={filter} className="w-full sm:w-auto"><Search className="h-4 w-4 mr-1" /> Filter</Button>
+      <Button onClick={filter} className="w-full sm:w-auto h-10 px-5 gap-2 shrink-0">
+        <Search className="h-4 w-4" /> Apply Filters
+      </Button>
     </div>
   );
 
   return (
     <AppShell>
-      <Head title="Claim History" />
-      <PageHeader title="Claim History" description="Complete bill claiming history report. Filter by vendor and status." />
+      <Head title="Claim History Reports" />
+      <PageHeader title="Claim History Reports" description="Complete audit reports of vendor invoice billing claims. Filter records by status or supplier." />
       <DataTable
         columns={columns}
         data={claims}
         exportFilename="claim-history"
-        emptyMessage="No claims match your filters."
+        emptyMessage="No claims matched the filter query parameters."
         searchPlaceholder="Search claim history..."
         filterable
         filters={filtersEl}
