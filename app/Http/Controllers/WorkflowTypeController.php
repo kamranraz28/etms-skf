@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\UserRole;
 use App\Models\WorkflowType;
 use App\Models\WorkflowStep;
 use Illuminate\Http\Request;
@@ -11,7 +12,15 @@ class WorkflowTypeController extends Controller
     public function index()
     {
         $types = WorkflowType::with('steps')->orderBy('name')->get();
-        return Inertia::render('WorkflowTypes', ['types' => $types]);
+
+        $roles = UserRole::query()->distinct()->pluck('role')
+            ->reject(fn($r) => $r === 'vendor')
+            ->sort()
+            ->values()
+            ->map(fn($r) => ['value' => $r, 'label' => ucfirst(str_replace('_', ' ', $r))])
+            ->all();
+
+        return Inertia::render('WorkflowTypes', ['types' => $types, 'roles' => $roles]);
     }
 
     public function store(Request $r)

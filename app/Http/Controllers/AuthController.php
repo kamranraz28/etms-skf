@@ -14,7 +14,12 @@ use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class AuthController extends Controller {
-    public function show() { return Inertia::render('Auth'); }
+    public function show() {
+        if (Auth::check()) {
+            return redirect()->route('app.dashboard');
+        }
+        return Inertia::render('Auth');
+    }
 
     public function login(Request $r) {
         $data = $r->validate(['email' => 'required|email', 'password' => 'required']);

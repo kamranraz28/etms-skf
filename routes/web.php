@@ -19,9 +19,9 @@ use App\Http\Controllers\NegotiationController;
 use App\Http\Controllers\NotificationController;
 
 // Auth
-Route::get('/', [AuthController::class, 'show'])->name('auth.show');
 Route::middleware('guest')->group(function () {
-    Route::get('/auth', [AuthController::class, 'show'])->name('auth.show');
+    Route::get('/', [AuthController::class, 'show'])->name('auth.show');
+    Route::get('/auth', [AuthController::class, 'show']);
     Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
     Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
 });

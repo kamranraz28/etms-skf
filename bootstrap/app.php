@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\HandleCors::class,
             HandleInertiaRequests::class,
         ]);
+        $middleware->redirectUsersTo(fn() => route('app.dashboard'));
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
             'auth' => Authenticate::class,
