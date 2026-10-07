@@ -37,8 +37,8 @@ export default function ClaimsIndex({ rows = [] }: any) {
         </div>
       )
     },
-    { key: "bill_number", label: "Bill Reference", sortable: true, render: (r) => <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">{r.bill_number ?? "—"}</span> },
-    { key: "po_number", label: "PO Reference", sortable: true, render: (r) => <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">{r.po_number}</span> },
+    { key: "bill_number", label: "Bill Reference", sortable: true, render: (r) => <span className="font-mono text-xs text-foreground whitespace-nowrap">{r.bill_number ?? "—"}</span> },
+    { key: "po_number", label: "PO Reference", sortable: true, render: (r) => <span className="font-mono text-xs text-foreground whitespace-nowrap">{r.po_number}</span> },
     { key: "title", label: "Claim Title", sortable: true, render: (r) => <span className="font-medium text-foreground max-w-48 truncate block">{r.title}</span> },
     {
       key: "amount",
@@ -47,8 +47,8 @@ export default function ClaimsIndex({ rows = [] }: any) {
       className: "text-right",
       render: (r) => <span className="font-mono text-xs font-bold text-foreground whitespace-nowrap">৳ {Number(r.amount).toLocaleString()}</span>
     },
-    { key: "current_step", label: "Current workflow step", sortable: false, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">{r.current_step?.label ?? "—"}</span> },
-    { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
+    { key: "current_step", label: "Current workflow step", sortable: false, render: (r) => <span className="text-xs text-foreground whitespace-nowrap font-medium">{r.current_step?.label ?? "—"}</span> },
+    { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
     { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.status} /> },
     {
       key: "actions" as string,
@@ -82,7 +82,7 @@ export default function ClaimsIndex({ rows = [] }: any) {
         {summaryCards.map((card, i) => (
           <div key={i} className="relative bg-card border border-border/50 rounded-2xl p-4 overflow-hidden hover-lift">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{card.label}</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-foreground">{card.label}</span>
               <div className={`h-8 w-8 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center`}>
                 <card.icon className={`h-4 w-4 ${card.iconColor}`} />
               </div>

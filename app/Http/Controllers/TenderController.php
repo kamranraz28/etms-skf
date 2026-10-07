@@ -57,7 +57,8 @@ class TenderController extends Controller {
 
         // Collect all vendor IDs from per-item category selections
         $catIds = collect($data['item_categories'])->pluck('category_ids')->flatten()->unique()->values()->all();
-        $vendorIds = Vendor::whereHas('categories', fn($q) => $q->whereIn('vendor_categories.id', $catIds))
+        $vendorIds = Vendor::where('status', 'active')
+            ->whereHas('categories', fn($q) => $q->whereIn('vendor_categories.id', $catIds))
             ->pluck('id')->unique()->values()->all();
 
         if (empty($vendorIds)) {
@@ -157,9 +158,10 @@ class TenderController extends Controller {
             }
         }
 
-        // Find vendors matching selected categories and add them
+        // Find active vendors matching selected categories and add them
         $catIds = collect($data['item_categories'])->pluck('category_ids')->flatten()->unique()->values()->all();
-        $vendorIds = Vendor::whereHas('categories', fn($q) => $q->whereIn('vendor_categories.id', $catIds))
+        $vendorIds = Vendor::where('status', 'active')
+            ->whereHas('categories', fn($q) => $q->whereIn('vendor_categories.id', $catIds))
             ->pluck('id')->unique()->values()->all();
 
         $added = 0;

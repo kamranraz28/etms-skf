@@ -48,7 +48,7 @@ export default function TenderIndex({ tenders }: any) {
           className={`text-left relative bg-card border rounded-2xl p-4 overflow-hidden transition-all duration-200 ${filter === "all" ? "border-primary shadow-md ring-2 ring-primary/10" : "border-border/60 hover-lift"}`}
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">All Tenders</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-foreground">All Tenders</span>
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
               <Gavel className="h-4 w-4" />
             </div>
@@ -61,7 +61,7 @@ export default function TenderIndex({ tenders }: any) {
           className={`text-left relative bg-card border rounded-2xl p-4 overflow-hidden transition-all duration-200 ${filter === "open" ? "border-info shadow-md ring-2 ring-info/10" : "border-border/60 hover-lift"}`}
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Open</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-foreground">Open</span>
             <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
               <AlertCircle className="h-4 w-4" />
             </div>
@@ -74,8 +74,8 @@ export default function TenderIndex({ tenders }: any) {
           className={`text-left relative bg-card border rounded-2xl p-4 overflow-hidden transition-all duration-200 ${filter === "closed" ? "border-muted-foreground shadow-md ring-2 ring-muted/10" : "border-border/60 hover-lift"}`}
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Closed</span>
-            <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+            <span className="text-xs font-semibold uppercase tracking-wider text-foreground">Closed</span>
+            <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-foreground">
               <Calendar className="h-4 w-4" />
             </div>
           </div>
@@ -87,7 +87,7 @@ export default function TenderIndex({ tenders }: any) {
           className={`text-left relative bg-card border rounded-2xl p-4 overflow-hidden transition-all duration-200 ${filter === "awarded" ? "border-success shadow-md ring-2 ring-success/10" : "border-border/60 hover-lift"}`}
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Awarded</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-foreground">Awarded</span>
             <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
               <Award className="h-4 w-4" />
             </div>
@@ -99,10 +99,10 @@ export default function TenderIndex({ tenders }: any) {
       {/* Tender List */}
       <div className="card-grid stagger-children">
         {filteredTenders.length === 0 && (
-          <div className="sm:col-span-2 lg:col-span-3 text-center text-muted-foreground py-16 bg-card border border-border/60 rounded-2xl">
-            <Gavel className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30 animate-float" />
+          <div className="sm:col-span-2 lg:col-span-3 text-center text-foreground py-16 bg-card border border-border/60 rounded-2xl">
+            <Gavel className="h-10 w-10 mx-auto mb-3 text-foreground/60 animate-float" />
             <p className="font-semibold text-foreground text-sm">No tenders found</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-foreground mt-1">
               {filter === "all"
                 ? "Create a new tender from a Purchase Requisition to get started."
                 : `No tenders have a status of '${filter}' currently.`}
@@ -117,7 +117,7 @@ export default function TenderIndex({ tenders }: any) {
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="font-mono text-xs text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md">
+                <span className="font-mono text-xs text-foreground bg-muted/60 px-2 py-0.5 rounded-md">
                   {t.tender_number}
                 </span>
                 <StatusBadge status={t.status} className="text-[10px]" />
@@ -125,19 +125,19 @@ export default function TenderIndex({ tenders }: any) {
               <h3 className="font-bold text-sm text-foreground line-clamp-2 mb-3 group-hover:text-primary transition-colors">
                 {t.title}
               </h3>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
+              <div className="flex items-center gap-3 text-xs text-foreground mb-4">
                 <span className="flex items-center gap-1">
                   <Users className="h-3.5 w-3.5" />
                   {t.vendor_count} vendor{t.vendor_count !== 1 ? "s" : ""} invited
                 </span>
-                <span className="text-muted-foreground/30">·</span>
+                <span className="text-foreground/60">·</span>
                 <span className="flex items-center gap-1 font-semibold text-foreground/80">
                   <FileText className="h-3.5 w-3.5 text-accent" />
                   {t.bid_count} bid{t.bid_count !== 1 ? "s" : ""} received
                 </span>
               </div>
             </div>
-            <div className="pt-3 border-t border-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-muted-foreground">
+            <div className="pt-3 border-t border-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-foreground">
               <span>
                 Created: {new Date(t.created_at).toLocaleDateString()}
               </span>
@@ -145,7 +145,7 @@ export default function TenderIndex({ tenders }: any) {
                 Deadline: {new Date(t.deadline).toLocaleDateString()}
               </span>
             </div>
-            <ArrowUpRight className="h-4 w-4 text-muted-foreground absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRight className="h-4 w-4 text-foreground absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         ))}
       </div>

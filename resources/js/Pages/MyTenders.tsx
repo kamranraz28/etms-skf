@@ -23,8 +23,8 @@ export default function MyTenders({ rows }: any) {
         const past = new Date(r.deadline) < new Date();
         return (
           <div className="flex items-center gap-1.5 text-xs whitespace-nowrap">
-            <Calendar className="h-3.5 w-3.5 text-muted-foreground/60" />
-            <span className={past ? "text-destructive font-medium" : "text-muted-foreground"}>
+            <Calendar className="h-3.5 w-3.5 text-foreground/70" />
+            <span className={past ? "text-destructive font-medium" : "text-foreground"}>
               {new Date(r.deadline).toLocaleString()}
             </span>
           </div>
@@ -38,7 +38,7 @@ export default function MyTenders({ rows }: any) {
       sortable: false,
       render: (r) => r.hasBid 
         ? <span className="text-[10px] bg-success/10 text-success border border-success/20 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Submitted</span> 
-        : <span className="text-muted-foreground/40 text-xs font-medium">—</span>,
+        : <span className="text-foreground/70 text-xs font-medium">—</span>,
     },
     {
       key: "actions" as string,

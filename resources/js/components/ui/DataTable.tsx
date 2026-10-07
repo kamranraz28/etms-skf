@@ -275,7 +275,7 @@ export function DataTable<T extends Record<string, any>>({
         <div className="flex items-center gap-2 flex-1 min-w-0 w-full sm:w-auto">
           {searchable && (
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/70" />
               <Input
                 type="search"
                 name="datatable-search"
@@ -294,7 +294,7 @@ export function DataTable<T extends Record<string, any>>({
               {search && (
                 <button
                   onClick={() => setSearch("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/70 hover:text-foreground transition-colors"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -338,7 +338,7 @@ export function DataTable<T extends Record<string, any>>({
                     onClick={exportCSV}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-foreground/80 hover:bg-muted/50 transition-colors"
                   >
-                    <Download className="h-4 w-4 text-muted-foreground" />{" "}
+                    <Download className="h-4 w-4 text-foreground" />{" "}
                     Export as CSV
                   </button>
                   <button
@@ -379,7 +379,7 @@ export function DataTable<T extends Record<string, any>>({
                   key={col.key}
                   onClick={() => col.sortable && toggleSort(col.key)}
                   className={cn(
-                    "px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 group",
+                    "px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80 group",
                     col.sortable &&
                       "cursor-pointer select-none hover:text-foreground transition-colors",
                     col.className,
@@ -403,11 +403,11 @@ export function DataTable<T extends Record<string, any>>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="text-center py-16 text-muted-foreground"
+                  className="text-center py-16 text-foreground"
                 >
                   <div className="flex flex-col items-center gap-3">
                     <div className="h-14 w-14 rounded-2xl bg-muted/30 flex items-center justify-center">
-                      <FileTextIcon className="h-7 w-7 text-muted-foreground/40" />
+                      <FileTextIcon className="h-7 w-7 text-foreground/70" />
                     </div>
                     <p className="font-medium text-sm">{emptyMessage}</p>
                   </div>
@@ -441,7 +441,7 @@ export function DataTable<T extends Record<string, any>>({
                           className={
                             row[col.key] != null
                               ? undefined
-                              : "text-muted-foreground/60"
+                              : "text-foreground/70"
                           }
                         >
                           {row[col.key] ?? "—"}
@@ -462,7 +462,7 @@ export function DataTable<T extends Record<string, any>>({
           compact ? "py-2.5" : "py-3.5",
         )}
       >
-        <div className="flex items-center gap-3 text-muted-foreground">
+        <div className="flex items-center gap-3 text-foreground">
           {!hidePageSize && (
             <span className="flex items-center gap-1.5">
               <span className="text-xs hidden sm:inline">Rows:</span>
@@ -482,7 +482,7 @@ export function DataTable<T extends Record<string, any>>({
               </select>
             </span>
           )}
-          <span className="text-xs text-muted-foreground/70">
+          <span className="text-xs text-foreground/80">
             {startItem}–{endItem} of {sorted.length}
           </span>
         </div>
@@ -490,14 +490,14 @@ export function DataTable<T extends Record<string, any>>({
           <button
             onClick={() => setPage(1)}
             disabled={page <= 1}
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           >
             <ChevronsLeft className="h-4 w-4" />
           </button>
           <button
             onClick={() => setPage(page - 1)}
             disabled={page <= 1}
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -509,8 +509,8 @@ export function DataTable<T extends Record<string, any>>({
                 className={cn(
                   "h-8 min-w-[2rem] rounded-lg text-xs font-medium transition-all duration-150 px-2",
                   page === pageNum
-                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20 scale-105"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ? "bg-foreground text-background shadow-sm scale-105"
+                    : "text-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
                 {pageNum}
@@ -520,14 +520,14 @@ export function DataTable<T extends Record<string, any>>({
           <button
             onClick={() => setPage(page + 1)}
             disabled={page >= totalPages}
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
           <button
             onClick={() => setPage(totalPages)}
             disabled={page >= totalPages}
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           >
             <ChevronsRight className="h-4 w-4" />
           </button>

@@ -20,7 +20,7 @@ export default function MyClaims({ claims }: any) {
     { key: "title", label: "Title", sortable: true, render: (r) => <span className="font-medium max-w-32 md:max-w-48 truncate block">{r.title}</span> },
     { key: "amount", label: "Amount", sortable: true, className: "text-right", render: (r) => <span className="font-mono whitespace-nowrap">{Number(r.amount).toLocaleString()}</span> },
     { key: "current_step", label: "Current Step", sortable: false, render: (r) => <span className="text-xs whitespace-nowrap">{r.current_step?.label ?? "—"}</span> },
-    { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
+    { key: "submitted_at", label: "Submitted", sortable: true, render: (r) => <span className="text-xs text-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
     { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.status} /> },
     {
       key: "actions" as string,

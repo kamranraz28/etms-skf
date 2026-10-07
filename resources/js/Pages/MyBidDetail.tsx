@@ -79,7 +79,7 @@ export default function MyBidDetail({ bid }: any) {
   if (!bid) {
     return (
       <AppShell>
-        <div className="panel p-6 text-sm text-muted-foreground">Bid not found.</div>
+        <div className="panel p-6 text-sm text-foreground">Bid not found.</div>
       </AppShell>
     );
   }
@@ -113,10 +113,10 @@ export default function MyBidDetail({ bid }: any) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gradient-to-r from-muted/40 to-muted/20">
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Item</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Qty</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Unit price (BDT)</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Line total</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Item</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Qty</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-foreground/80">Unit price (BDT)</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-foreground/80">Line total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/30">
@@ -131,7 +131,7 @@ export default function MyBidDetail({ bid }: any) {
                 </tbody>
                 <tfoot>
                   <tr className="font-bold bg-gradient-to-r from-muted/30 to-muted/10">
-                    <td colSpan={3} className="text-right px-4 py-3 text-sm text-muted-foreground">Total bid value</td>
+                    <td colSpan={3} className="text-right px-4 py-3 text-sm text-foreground">Total bid value</td>
                     <td className="text-right font-mono px-4 py-3">{Number(bidsTotal).toLocaleString()} BDT</td>
                   </tr>
                 </tfoot>
@@ -144,7 +144,7 @@ export default function MyBidDetail({ bid }: any) {
               <div className="panel-title"><Handshake className="h-4.5 w-4.5 text-accent" /> Settled price offers ({negotiations.length})</div>
             </div>
             {negotiations.length === 0 && (
-              <div className="px-5 py-6 text-center text-xs text-muted-foreground">
+              <div className="px-5 py-6 text-center text-xs text-foreground">
                 No settled-price offers from the authority yet.
               </div>
             )}
@@ -156,15 +156,15 @@ export default function MyBidDetail({ bid }: any) {
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="font-medium text-sm">{n.item_name}</div>
-                        <div className="text-xs text-muted-foreground mt-1 space-x-2">
+                        <div className="text-xs text-foreground mt-1 space-x-2">
                           <span>Your price: <span className="font-mono">{Number(n.old_price).toLocaleString()}</span></span>
-                          <span className="text-muted-foreground/50">→</span>
+                          <span className="text-foreground/70">→</span>
                           <span>Authority offers: <span className="font-mono font-semibold">{Number(n.offered_price).toLocaleString()}</span></span>
                         </div>
                         {n.status === "counter" && n.counter_price != null && (
                           <div className="text-xs text-info mt-0.5">Your counter: <span className="font-mono font-semibold">{Number(n.counter_price).toLocaleString()}</span></div>
                         )}
-                        {n.vendor_comment && <div className="text-xs text-muted-foreground italic mt-0.5">"{(n as any).vendor_comment}"</div>}
+                        {n.vendor_comment && <div className="text-xs text-foreground italic mt-0.5">"{(n as any).vendor_comment}"</div>}
                       </div>
                       <span className={`text-[10px] px-2 py-1 rounded-full font-medium ${st.cls}`}>{st.text}</span>
                     </div>
@@ -207,7 +207,7 @@ export default function MyBidDetail({ bid }: any) {
         </div>
 
         <div className="space-y-6">
-          <div className="panel p-5 text-xs text-muted-foreground space-y-1.5">
+          <div className="panel p-5 text-xs text-foreground space-y-1.5">
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
               <Handshake className="h-4 w-4 text-accent" /> How offers work
             </div>

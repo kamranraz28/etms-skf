@@ -88,7 +88,7 @@ export default function SubmitBid({ tender, vendor }: any) {
             <Gavel className="h-4.5 w-4.5 text-accent" /> Item-wise pricing
           </div>
           {items.length === 0 && (
-            <div className="text-sm text-muted-foreground py-4 bg-muted/20 rounded-lg p-4 border border-border/40">
+            <div className="text-sm text-foreground py-4 bg-muted/20 rounded-lg p-4 border border-border/40">
               Your vendor category has not been invited for any items in this tender.
             </div>
           )}
@@ -98,12 +98,12 @@ export default function SubmitBid({ tender, vendor }: any) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gradient-to-r from-muted/40 to-muted/20">
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Item</th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Qty</th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Unit</th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Unit price (BDT)</th>
-                      <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Line total</th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Remarks</th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Item</th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Qty</th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Unit</th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Unit price (BDT)</th>
+                      <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-foreground/80">Line total</th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Remarks</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
@@ -130,7 +130,7 @@ export default function SubmitBid({ tender, vendor }: any) {
                   </tbody>
                   <tfoot>
                     <tr className="font-bold bg-gradient-to-r from-muted/30 to-muted/10">
-                      <td colSpan={4} className="text-right px-4 py-3.5 text-sm text-muted-foreground">Total bid value</td>
+                      <td colSpan={4} className="text-right px-4 py-3.5 text-sm text-foreground">Total bid value</td>
                       <td className="text-right font-mono px-4 py-3.5 text-lg">{total.toFixed(2)} BDT</td>
                     </tr>
                   </tfoot>
@@ -156,12 +156,12 @@ export default function SubmitBid({ tender, vendor }: any) {
             <Building2 className="h-4 w-4 text-accent" /> Bidder
           </div>
           <div className="text-sm font-medium">{vendor.name}</div>
-          <div className="text-xs text-muted-foreground">{vendor.email}</div>
+          <div className="text-xs text-foreground">{vendor.email}</div>
           {(vendor.categories ?? []).length > 0 && (
             <div className="text-xs">Categories: <span className="font-medium">{(vendor.categories ?? []).map((c: any) => c.name).join(', ')}</span></div>
           )}
           <div className="text-xs mt-1">ERP: <span className="font-mono">{vendor.erp_code ?? <span className="text-warning">not yet assigned</span>}</span></div>
-          <div className="text-xs text-muted-foreground leading-relaxed pt-3 border-t border-border/40">
+          <div className="text-xs text-foreground leading-relaxed pt-3 border-t border-border/40">
             You are invited to bid on {items.length} of {allItems.length} items based on your vendor categories.
           </div>
         </div>

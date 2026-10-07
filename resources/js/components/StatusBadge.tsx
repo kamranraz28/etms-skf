@@ -35,7 +35,7 @@ const CONFIG: Record<string, BadgeConfig> = {
     icon: <CheckCircle2 className="h-3 w-3" />,
   },
   inactive: {
-    classes: "bg-muted/50 text-muted-foreground border-border/30",
+    classes: "bg-muted/50 text-foreground border-border/30",
     icon: <MinusCircle className="h-3 w-3" />,
   },
   blacklisted: {
@@ -48,7 +48,7 @@ const CONFIG: Record<string, BadgeConfig> = {
     dotPulse: true,
   },
   closed: {
-    classes: "bg-muted/50 text-muted-foreground border-border/30",
+    classes: "bg-muted/50 text-foreground border-border/30",
     icon: <MinusCircle className="h-3 w-3" />,
   },
   awarded: {
@@ -64,7 +64,7 @@ const CONFIG: Record<string, BadgeConfig> = {
     icon: <Gavel className="h-3 w-3" />,
   },
   draft: {
-    classes: "bg-muted/50 text-muted-foreground border-border/30",
+    classes: "bg-muted/50 text-foreground border-border/30",
     icon: <FileText className="h-3 w-3" />,
   },
   pending_approver: {
@@ -111,7 +111,7 @@ const CONFIG: Record<string, BadgeConfig> = {
     icon: <CheckCircle2 className="h-3 w-3" />,
   },
   not_selected: {
-    classes: "bg-muted/50 text-muted-foreground border-border/30",
+    classes: "bg-muted/50 text-foreground border-border/30",
     icon: <MinusCircle className="h-3 w-3" />,
   },
   submitted: {
@@ -163,12 +163,12 @@ const CONFIG: Record<string, BadgeConfig> = {
     icon: <CheckCircle2 className="h-3 w-3" />,
   },
   other: {
-    classes: "bg-muted/50 text-muted-foreground border-border/30",
+    classes: "bg-muted/50 text-foreground border-border/30",
   },
 };
 
 const DEFAULT_CONFIG: BadgeConfig = {
-  classes: "bg-muted/50 text-muted-foreground border-border/30",
+  classes: "bg-muted/50 text-foreground border-border/30",
 };
 
 export const StatusBadge = ({

@@ -96,7 +96,7 @@ export default function WorkflowTypes({ types, roles }: any) {
         </div>
       )
     },
-    { key: "description", label: "Description", sortable: false, render: (r: any) => <span className="text-xs text-muted-foreground">{r.description || "No description provided."}</span> },
+    { key: "description", label: "Description", sortable: false, render: (r: any) => <span className="text-xs text-foreground">{r.description || "No description provided."}</span> },
     {
       key: "steps",
       label: "Approval Sequence",
@@ -108,10 +108,10 @@ export default function WorkflowTypes({ types, roles }: any) {
             {sequence.map((step: any, idx: number) => (
               <div key={idx} className="flex items-center gap-1 text-[10px] bg-muted/60 text-foreground px-2 py-0.5 rounded-md font-semibold border border-border">
                 <span>{step.label}</span>
-                {idx !== sequence.length - 1 && <ChevronRight className="h-3 w-3 text-muted-foreground/40 shrink-0" />}
+                {idx !== sequence.length - 1 && <ChevronRight className="h-3 w-3 text-foreground/70 shrink-0" />}
               </div>
             ))}
-            {sequence.length === 0 && <span className="text-xs text-muted-foreground/40">No steps defined</span>}
+            {sequence.length === 0 && <span className="text-xs text-foreground/70">No steps defined</span>}
           </div>
         );
       }
@@ -154,7 +154,7 @@ export default function WorkflowTypes({ types, roles }: any) {
                 <Workflow className="h-4.5 w-4.5 text-accent animate-pulse-soft" />
                 {editing ? "Configure Approval Workflow" : "Create Approval Workflow"}
               </div>
-              <button onClick={() => setModal(false)} className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              <button onClick={() => setModal(false)} className="h-8 w-8 rounded-lg flex items-center justify-center text-foreground hover:text-foreground hover:bg-muted transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -181,10 +181,10 @@ export default function WorkflowTypes({ types, roles }: any) {
                 <div className="space-y-3">
                   {steps.map((s, i) => (
                     <div key={i} className="flex gap-3 items-center p-4 rounded-xl border border-border/60 bg-gradient-to-br from-card to-muted/15 relative">
-                      <span className="text-xs font-bold font-mono text-muted-foreground/60 w-6"># {i + 1}</span>
+                      <span className="text-xs font-bold font-mono text-foreground/70 w-6"># {i + 1}</span>
 
                       <div className="flex-1 space-y-1.5">
-                        <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Approval Level (User Role)</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-wider text-foreground/70">Approval Level (User Role)</Label>
                         <select
                           className="h-10 w-full rounded-xl border border-border/70 bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/25 transition-all"
                           value={s.role_name}

@@ -173,8 +173,8 @@ class CsController extends Controller {
                 'created_by' => $user->id,
             ]);
 
-            // Copy vendors from old tender
-            $oldVendorIds = $oldTender->vendors()->pluck('vendors.id');
+            // Copy active vendors from old tender
+            $oldVendorIds = $oldTender->vendors()->where('vendors.status', 'active')->pluck('vendors.id');
             foreach ($oldVendorIds as $vid) {
                 \App\Models\TenderVendor::create(['tender_id' => $newTender->id, 'vendor_id' => $vid]);
             }

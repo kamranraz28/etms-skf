@@ -91,7 +91,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
     <AppShell>
       <Head title="Create Tender" />
       
-      <Button variant="ghost" size="sm" onClick={() => history.back()} className="mb-4 hover:bg-muted/80 gap-1 text-muted-foreground hover:text-foreground">
+      <Button variant="ghost" size="sm" onClick={() => history.back()} className="mb-4 hover:bg-muted/80 gap-1 text-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Back
       </Button>
 
@@ -188,14 +188,14 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
                                   <StatusBadge status={assignments.find((a: any) => a.item_index === idx)?.status ?? "assigned"} className="text-[9px]" />
                                 )}
                               </div>
-                              <span className="text-xs font-semibold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md self-start sm:self-auto">
+                              <span className="text-xs font-semibold text-foreground bg-muted/60 px-2 py-0.5 rounded-md self-start sm:self-auto">
                                 {it.qty} {it.unit}
                               </span>
                             </div>
                             
                             {isPending && isSelected && (
                               <div className="mt-3.5 space-y-2">
-                                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Select Vendor Category Invitations:</div>
+                                <div className="text-[10px] text-foreground uppercase font-bold tracking-wider">Select Vendor Category Invitations:</div>
                                 <div className="flex flex-wrap gap-1.5">
                                   {categories.map((cat: any) => {
                                     const selected = itemCategoryMap[idx]?.has(cat.id.toString());
@@ -204,23 +204,23 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
                                         className={cn(
                                           "text-xs px-3.5 py-1.5 rounded-lg border font-medium transition-all duration-150",
                                           selected 
-                                            ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
-                                            : 'bg-card border-border/85 hover:bg-muted/40 hover:border-muted-foreground/30 text-muted-foreground hover:text-foreground'
+                                            ? 'bg-foreground text-background border-foreground shadow-sm font-bold' 
+                                            : 'bg-card border-border/85 hover:bg-muted/40 hover:border-muted-foreground/30 text-foreground hover:text-foreground'
                                         )}>
                                         {cat.name}
                                       </button>
                                     );
                                   })}
-                                  {categories.length === 0 && <span className="text-xs text-muted-foreground">No categories defined.</span>}
+                                  {categories.length === 0 && <span className="text-xs text-foreground">No categories defined.</span>}
                                 </div>
                               </div>
                             )}
                             
                             {!isPending && (
-                              <div className="text-xs text-muted-foreground mt-1">Already handled. Cannot be included in new tenders.</div>
+                              <div className="text-xs text-foreground mt-1">Already handled. Cannot be included in new tenders.</div>
                             )}
                             {isPending && !isSelected && (
-                              <div className="text-xs text-muted-foreground/50 mt-1">Check to select this item and invite supplier categories.</div>
+                              <div className="text-xs text-foreground/70 mt-1">Check to select this item and invite supplier categories.</div>
                             )}
                           </div>
                         </div>
@@ -244,8 +244,8 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-4 pb-2 border-b border-border/40">
               <Info className="h-4 w-4 text-accent" /> Invitation Summary
             </div>
-            {!prId && <p className="text-sm text-muted-foreground">Select a Purchase Requisition to summarize invites.</p>}
-            {prId && items.length === 0 && <p className="text-sm text-muted-foreground">No items detected in requisition.</p>}
+            {!prId && <p className="text-sm text-foreground">Select a Purchase Requisition to summarize invites.</p>}
+            {prId && items.length === 0 && <p className="text-sm text-foreground">No items detected in requisition.</p>}
             {items.length > 0 && (
               <div className="space-y-3.5">
                 {items.map((it: any, idx: number) => {
@@ -258,7 +258,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
                         <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", isSelected ? "bg-accent" : "bg-muted-foreground/30")} />
                         {it.name}
                       </div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5">{it.qty} {it.unit}</div>
+                      <div className="text-[11px] text-foreground mt-0.5">{it.qty} {it.unit}</div>
                       {isSelected && cats && cats.size > 0 ? (
                         <div className="mt-1.5 flex flex-wrap gap-1">
                           {Array.from(cats).map(cid => {
@@ -269,7 +269,7 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
                       ) : isSelected ? (
                         <div className="text-[10px] text-warning mt-1 font-bold">Select category invitations</div>
                       ) : (
-                        <div className="text-[10px] text-muted-foreground/60 mt-1">{isPending ? "Not selected" : "Handled"}</div>
+                        <div className="text-[10px] text-foreground/70 mt-1">{isPending ? "Not selected" : "Handled"}</div>
                       )}
                     </div>
                   );

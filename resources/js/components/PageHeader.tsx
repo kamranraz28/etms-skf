@@ -18,7 +18,7 @@ export const PageHeader = ({
           {title}
         </h1>
         {description && (
-          <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl leading-relaxed animate-fade-in-left">
+          <p className="text-sm text-foreground mt-1.5 max-w-2xl leading-relaxed animate-fade-in-left">
             {description}
           </p>
         )}

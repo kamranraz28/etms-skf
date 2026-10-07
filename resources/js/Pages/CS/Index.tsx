@@ -37,7 +37,7 @@ export default function CsIndex({ rows = [] }: any) {
           className={`text-left relative bg-card border rounded-2xl p-4 overflow-hidden transition-all duration-200 ${filter === "all" ? "border-primary shadow-md ring-2 ring-primary/10" : "border-border/60 hover-lift"}`}
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">All Statements</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-foreground">All Statements</span>
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
               <Scale className="h-4 w-4" />
             </div>
@@ -50,7 +50,7 @@ export default function CsIndex({ rows = [] }: any) {
           className={`text-left relative bg-card border rounded-2xl p-4 overflow-hidden transition-all duration-200 ${filter === "pending" ? "border-warning shadow-md ring-2 ring-warning/10" : "border-border/60 hover-lift"}`}
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pending Review</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-foreground">Pending Review</span>
             <div className="h-8 w-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
               <Workflow className="h-4 w-4 animate-pulse-soft" />
             </div>
@@ -63,7 +63,7 @@ export default function CsIndex({ rows = [] }: any) {
           className={`text-left relative bg-card border rounded-2xl p-4 overflow-hidden transition-all duration-200 ${filter === "approved" ? "border-success shadow-md ring-2 ring-success/10" : "border-border/60 hover-lift"}`}
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Approved</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-foreground">Approved</span>
             <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
               <CheckCircle2 className="h-4 w-4" />
             </div>
@@ -76,7 +76,7 @@ export default function CsIndex({ rows = [] }: any) {
           className={`text-left relative bg-card border rounded-2xl p-4 overflow-hidden transition-all duration-200 ${filter === "rejected" ? "border-destructive shadow-md ring-2 ring-destructive/10" : "border-border/60 hover-lift"}`}
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rejected</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-foreground">Rejected</span>
             <div className="h-8 w-8 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive">
               <XCircle className="h-4 w-4" />
             </div>
@@ -88,10 +88,10 @@ export default function CsIndex({ rows = [] }: any) {
       {/* Grid List */}
       <div className="card-grid stagger-children">
         {filteredCS.length === 0 && (
-          <div className="sm:col-span-2 lg:col-span-3 text-center text-muted-foreground py-16 bg-card border border-border/60 rounded-2xl">
-            <Scale className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30 animate-float" />
+          <div className="sm:col-span-2 lg:col-span-3 text-center text-foreground py-16 bg-card border border-border/60 rounded-2xl">
+            <Scale className="h-10 w-10 mx-auto mb-3 text-foreground/60 animate-float" />
             <p className="font-semibold text-foreground text-sm">No comparative statements found</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-foreground mt-1">
               {filter === "all"
                 ? "Close a tender and generate a comparative statement to compare bids."
                 : `No statements match status '${filter}'.`}
@@ -110,8 +110,8 @@ export default function CsIndex({ rows = [] }: any) {
               <h3 className="font-bold text-sm text-foreground line-clamp-2 mb-3 group-hover:text-primary transition-colors">
                 {cs.tender?.title ?? "Untitled statement"}
               </h3>
-              <div className="text-xs text-muted-foreground space-y-1.5 mb-4">
-                <div className="flex items-center gap-1 font-mono text-[11px] text-muted-foreground/70">
+              <div className="text-xs text-foreground space-y-1.5 mb-4">
+                <div className="flex items-center gap-1 font-mono text-[11px] text-foreground/80">
                   <Hash className="h-3.5 w-3.5" /> {cs.tender?.tender_number ?? "No tender ref"}
                 </div>
                 {cs.workflow_type && (
@@ -121,7 +121,7 @@ export default function CsIndex({ rows = [] }: any) {
                 )}
               </div>
             </div>
-            <div className="pt-3 border-t border-border/40 flex items-center justify-between text-[11px] text-muted-foreground">
+            <div className="pt-3 border-t border-border/40 flex items-center justify-between text-[11px] text-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" /> {new Date(cs.created_at).toLocaleDateString()}
               </span>
@@ -129,7 +129,7 @@ export default function CsIndex({ rows = [] }: any) {
                 View CS <ExternalLink className="h-3 w-3" />
               </span>
             </div>
-            <ArrowUpRight className="h-4 w-4 text-muted-foreground absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRight className="h-4 w-4 text-foreground absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         ))}
       </div>

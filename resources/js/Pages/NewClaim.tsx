@@ -31,7 +31,7 @@ export default function NewClaim({ vendor, pos = [], billTypes = [] }: any) {
           <div className="text-destructive font-bold mb-2 flex items-center gap-2">
             <XCircle className="h-5 w-5" /> Account Registration Incomplete
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm text-foreground leading-relaxed">
             No active vendor profile is linked to your user account. Please navigate to the vendor profile section or contact the administration team.
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function NewClaim({ vendor, pos = [], billTypes = [] }: any) {
   return (
     <AppShell>
       <Head title="Submit New Claim" />
-      <Button variant="ghost" size="sm" onClick={() => history.back()} className="mb-4 hover:bg-muted/80 gap-1 text-muted-foreground hover:text-foreground">
+      <Button variant="ghost" size="sm" onClick={() => history.back()} className="mb-4 hover:bg-muted/80 gap-1 text-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Back
       </Button>
       
@@ -133,7 +133,7 @@ export default function NewClaim({ vendor, pos = [], billTypes = [] }: any) {
               <div className="space-y-1.5 sm:col-span-2">
                 <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Claim Amount (BDT) <span className="text-destructive">*</span></Label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3 text-sm font-semibold font-mono text-muted-foreground/60">৳</span>
+                  <span className="absolute left-3 text-sm font-semibold font-mono text-foreground/70">৳</span>
                   <Input type="number" min="0.01" step="0.01" className={cn("h-11 pl-7", errors.amount && "border-destructive")} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
                 </div>
                 {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
@@ -146,7 +146,7 @@ export default function NewClaim({ vendor, pos = [], billTypes = [] }: any) {
               {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Detailed Description <span className="text-muted-foreground">(optional)</span></Label>
+              <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Detailed Description <span className="text-foreground">(optional)</span></Label>
               <Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Provide additional details or transaction remarks..." />
             </div>
           </div>
@@ -168,13 +168,13 @@ export default function NewClaim({ vendor, pos = [], billTypes = [] }: any) {
                   <div key={i} className={cn("flex gap-3 p-4 border border-border/60 rounded-xl bg-gradient-to-br from-card to-muted/20 relative", fileErr && "border-destructive")}>
                     <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
                       <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Doc Classification</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-wider text-foreground/70">Doc Classification</Label>
                         <select className="h-10 w-full rounded-xl border border-border/70 bg-background px-3 text-xs focus:outline-none" value={d.type} onChange={(e) => setDocType(i, e.target.value)}>
                           {docTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                         </select>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Choose File</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-wider text-foreground/70">Choose File</Label>
                         <Input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" className="h-10 text-xs px-2.5 pt-1.5" onChange={(e) => setDocFile(i, e.target.files?.[0] ?? null)} />
                         {fileErr && <p className="text-xs text-destructive mt-1">{fileErr}</p>}
                       </div>
@@ -209,12 +209,12 @@ export default function NewClaim({ vendor, pos = [], billTypes = [] }: any) {
               </div>
               <div className="min-w-0">
                 <div className="text-sm font-semibold text-foreground truncate">{vendor.name}</div>
-                <div className="text-xs text-muted-foreground truncate">{vendor.email}</div>
+                <div className="text-xs text-foreground truncate">{vendor.email}</div>
               </div>
             </div>
             
             <div className="text-xs space-y-1.5 pt-3 border-t border-border/30">
-              <div className="flex justify-between"><span className="text-muted-foreground">ERP Code</span> <span className="font-mono font-semibold">{vendor.erp_code ?? "—"}</span></div>
+              <div className="flex justify-between"><span className="text-foreground">ERP Code</span> <span className="font-mono font-semibold">{vendor.erp_code ?? "—"}</span></div>
             </div>
             
             <div className="bg-info/[0.04] border border-info/20 rounded-xl p-3.5 flex items-start gap-2 leading-relaxed">

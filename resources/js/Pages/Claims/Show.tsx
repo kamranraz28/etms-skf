@@ -66,7 +66,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
     <AppShell>
       <Head title={`Claim Details - ${claim.claim_number}`} />
       
-      <Button variant="ghost" size="sm" onClick={() => history.back()} className="mb-4 hover:bg-muted/80 gap-1 text-muted-foreground hover:text-foreground">
+      <Button variant="ghost" size="sm" onClick={() => history.back()} className="mb-4 hover:bg-muted/80 gap-1 text-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Back to Claims
       </Button>
 
@@ -88,7 +88,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
               <div className="space-y-0.5">
-                <span className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Vendor Company</span>
+                <span className="text-foreground text-xs uppercase font-bold tracking-wider">Vendor Company</span>
                 <div className="font-semibold text-foreground flex items-center gap-1.5 mt-0.5">
                   <div className="h-5 w-5 rounded-md bg-primary/10 flex items-center justify-center text-[9px] font-bold text-primary">
                     {claim.vendor?.name?.charAt(0)?.toUpperCase()}
@@ -97,31 +97,31 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                 </div>
               </div>
               <div className="space-y-0.5">
-                <span className="text-muted-foreground text-xs uppercase font-bold tracking-wider">ERP Code</span>
+                <span className="text-foreground text-xs uppercase font-bold tracking-wider">ERP Code</span>
                 <div className="font-mono text-xs font-semibold text-foreground mt-1 bg-muted/60 px-2 py-0.5 rounded-md w-fit">{claim.vendor?.erp_code ?? "Not mapped"}</div>
               </div>
               <div className="space-y-0.5">
-                <span className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Bill Reference #</span>
+                <span className="text-foreground text-xs uppercase font-bold tracking-wider">Bill Reference #</span>
                 <div className="font-mono text-xs font-semibold text-foreground mt-1 bg-muted/60 px-2 py-0.5 rounded-md w-fit">{claim.bill_number ?? "—"}</div>
               </div>
               <div className="space-y-0.5">
-                <span className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Bill Date</span>
+                <span className="text-foreground text-xs uppercase font-bold tracking-wider">Bill Date</span>
                 <div className="font-semibold text-foreground mt-0.5">{claim.bill_date ?? "—"}</div>
               </div>
               <div className="space-y-0.5">
-                <span className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Bill Type</span>
+                <span className="text-foreground text-xs uppercase font-bold tracking-wider">Bill Type</span>
                 <div className="font-semibold text-foreground mt-0.5">{billTypeLabel[claim.bill_type] ?? claim.bill_type ?? "—"}</div>
               </div>
               <div className="space-y-0.5">
-                <span className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Purchase Order #</span>
+                <span className="text-foreground text-xs uppercase font-bold tracking-wider">Purchase Order #</span>
                 <div className="font-mono text-xs font-semibold text-foreground mt-1 bg-muted/60 px-2 py-0.5 rounded-md w-fit">{claim.po_number}</div>
               </div>
               <div className="space-y-0.5 sm:col-span-2">
-                <span className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Claimed Amount (BDT)</span>
+                <span className="text-foreground text-xs uppercase font-bold tracking-wider">Claimed Amount (BDT)</span>
                 <div className="font-mono font-black text-xl text-foreground mt-1">৳ {Number(claim.amount).toLocaleString()}</div>
               </div>
               <div className="space-y-0.5 sm:col-span-2">
-                <span className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Description</span>
+                <span className="text-foreground text-xs uppercase font-bold tracking-wider">Description</span>
                 <div className="text-sm text-foreground/80 leading-relaxed mt-1 bg-muted/20 border border-border/40 p-3 rounded-xl whitespace-pre-line">{claim.description ?? "No description remarks provided."}</div>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
             </div>
             <ul className="divide-y divide-border/30">
               {claim.documents?.length === 0 && (
-                <li className="px-6 py-8 text-center text-xs text-muted-foreground">No supporting documents uploaded for this claim.</li>
+                <li className="px-6 py-8 text-center text-xs text-foreground">No supporting documents uploaded for this claim.</li>
               )}
               {claim.documents?.map((doc: any) => (
                 <li key={doc.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-muted/10 transition-colors">
@@ -147,7 +147,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                     <StatusBadge status={doc.document_type} className="text-[9px] shrink-0" />
                     <div className="min-w-0">
                       <div className="text-sm font-semibold text-foreground truncate">{doc.original_name}</div>
-                      {doc.file_size && <div className="text-[10px] text-muted-foreground/60 font-medium mt-0.5">{(doc.file_size / 1024).toFixed(1)} KB</div>}
+                      {doc.file_size && <div className="text-[10px] text-foreground/70 font-medium mt-0.5">{(doc.file_size / 1024).toFixed(1)} KB</div>}
                     </div>
                   </div>
                   <a href={docUrl(doc)} className="shrink-0 self-end sm:self-auto">
@@ -174,12 +174,12 @@ export default function ClaimsShow({ claim = {} as any }: any) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gradient-to-r from-muted/40 to-muted/20 border-b border-border/40">
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Step</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 w-28">Decision</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">By User</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Action Date</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Client Identity</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Remarks / Comment</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Step</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80 w-28">Decision</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">By User</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Action Date</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Client Identity</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Remarks / Comment</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/25">
@@ -194,9 +194,9 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                       <span className="text-[10px] font-bold uppercase tracking-wider text-success bg-success/10 px-2 py-0.5 rounded-md">Submitted</span>
                     </td>
                     <td className="px-5 py-3.5 text-xs text-foreground font-semibold">{claim.vendor?.name || "—"}</td>
-                    <td className="px-5 py-3.5 text-xs text-muted-foreground whitespace-nowrap">{new Date(claim.submitted_at).toLocaleString()}</td>
-                    <td className="px-5 py-3.5 text-xs text-muted-foreground/40">—</td>
-                    <td className="px-5 py-3.5 text-xs text-muted-foreground/45 italic">—</td>
+                    <td className="px-5 py-3.5 text-xs text-foreground whitespace-nowrap">{new Date(claim.submitted_at).toLocaleString()}</td>
+                    <td className="px-5 py-3.5 text-xs text-foreground/70">—</td>
+                    <td className="px-5 py-3.5 text-xs text-foreground/70 italic">—</td>
                   </tr>
                   
                   {workflowSteps.map((step: any) => {
@@ -226,20 +226,20 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                               {approval.decision}
                             </span>
                           ) : (
-                            <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider bg-muted px-2 py-0.5 rounded-md">Pending</span>
+                            <span className="text-[10px] font-semibold text-foreground/70 uppercase tracking-wider bg-muted px-2 py-0.5 rounded-md">Pending</span>
                           )}
                         </td>
                         <td className="px-5 py-3.5 text-xs text-foreground font-semibold">{approval?.actor?.full_name || "—"}</td>
-                        <td className="px-5 py-3.5 text-xs text-muted-foreground whitespace-nowrap">{approval?.acted_at ? new Date(approval.acted_at).toLocaleString() : "—"}</td>
-                        <td className="px-5 py-3.5 text-xs text-muted-foreground">
+                        <td className="px-5 py-3.5 text-xs text-foreground whitespace-nowrap">{approval?.acted_at ? new Date(approval.acted_at).toLocaleString() : "—"}</td>
+                        <td className="px-5 py-3.5 text-xs text-foreground">
                           {approval?.device_name || approval?.device_ip ? (
-                            <div className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground/60">
+                            <div className="flex items-center gap-1 font-mono text-[10px] text-foreground/70">
                               <Monitor className="h-3 w-3 shrink-0" />
                               <span>{approval.device_name ?? "Client"}{approval.device_ip ? ` · ${approval.device_ip}` : ""}</span>
                             </div>
                           ) : "—"}
                         </td>
-                        <td className="px-5 py-3.5 text-xs text-muted-foreground/80 italic max-w-[200px] truncate" title={approval?.comment}>{approval?.comment ? `"${approval.comment}"` : "—"}</td>
+                        <td className="px-5 py-3.5 text-xs text-foreground/80 italic max-w-[200px] truncate" title={approval?.comment}>{approval?.comment ? `"${approval.comment}"` : "—"}</td>
                       </tr>
                     );
                   })}
@@ -255,10 +255,10 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                       <td className="px-5 py-3.5">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-success bg-success/15 px-2 py-0.5 rounded-md">Completed</span>
                       </td>
-                      <td className="px-5 py-3.5 text-xs text-muted-foreground">—</td>
-                      <td className="px-5 py-3.5 text-xs text-muted-foreground whitespace-nowrap">{claim.forwarded_to_finance_at ? new Date(claim.forwarded_to_finance_at).toLocaleString() : "—"}</td>
-                      <td className="px-5 py-3.5 text-xs text-muted-foreground">—</td>
-                      <td className="px-5 py-3.5 text-xs text-muted-foreground italic">—</td>
+                      <td className="px-5 py-3.5 text-xs text-foreground">—</td>
+                      <td className="px-5 py-3.5 text-xs text-foreground whitespace-nowrap">{claim.forwarded_to_finance_at ? new Date(claim.forwarded_to_finance_at).toLocaleString() : "—"}</td>
+                      <td className="px-5 py-3.5 text-xs text-foreground">—</td>
+                      <td className="px-5 py-3.5 text-xs text-foreground italic">—</td>
                     </tr>
                   )}
                   {claim.status === "rejected" && (
@@ -272,10 +272,10 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                       <td className="px-5 py-3.5">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-destructive bg-destructive/15 px-2 py-0.5 rounded-md">Rejected</span>
                       </td>
-                      <td className="px-5 py-3.5 text-xs text-muted-foreground">—</td>
-                      <td className="px-5 py-3.5 text-xs text-muted-foreground whitespace-nowrap">{claim.rejected_at ? new Date(claim.rejected_at).toLocaleString() : "—"}</td>
-                      <td className="px-5 py-3.5 text-xs text-muted-foreground">—</td>
-                      <td className="px-5 py-3.5 text-xs text-muted-foreground font-semibold italic max-w-[200px] truncate" title={claim.rejection_reason}>{claim.rejection_reason ? `"${claim.rejection_reason}"` : "—"}</td>
+                      <td className="px-5 py-3.5 text-xs text-foreground">—</td>
+                      <td className="px-5 py-3.5 text-xs text-foreground whitespace-nowrap">{claim.rejected_at ? new Date(claim.rejected_at).toLocaleString() : "—"}</td>
+                      <td className="px-5 py-3.5 text-xs text-foreground">—</td>
+                      <td className="px-5 py-3.5 text-xs text-foreground font-semibold italic max-w-[200px] truncate" title={claim.rejection_reason}>{claim.rejection_reason ? `"${claim.rejection_reason}"` : "—"}</td>
                     </tr>
                   )}
                 </tbody>
@@ -290,7 +290,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-1 pb-1 border-b border-border/40">
               <Info className="h-4 w-4 text-accent" /> Control Center
             </div>
-            <div className="text-xs font-semibold text-muted-foreground bg-muted/40 px-3 py-2 rounded-lg border border-border/40 flex items-center gap-1.5">
+            <div className="text-xs font-semibold text-foreground bg-muted/40 px-3 py-2 rounded-lg border border-border/40 flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-soft" />
               {statusLabel[claim.status] ?? claim.status}
             </div>
@@ -308,18 +308,18 @@ export default function ClaimsShow({ claim = {} as any }: any) {
               </div>
             )}
             {claim.status === "submitted" && !canActOnCurrentStep && !isVendor && (
-              <p className="text-xs text-muted-foreground/60 leading-relaxed font-semibold bg-muted/20 p-3 rounded-lg border border-border/30">
+              <p className="text-xs text-foreground/70 leading-relaxed font-semibold bg-muted/20 p-3 rounded-lg border border-border/30">
                 Awaiting review action by step approver: {currentStep?.label || "authorized reviewer"}. Your assigned roles do not match action parameters.
               </p>
             )}
             {isVendor && (
-              <div className="text-xs text-muted-foreground/60 leading-relaxed bg-muted/20 p-3.5 rounded-xl border border-border/30 font-semibold">
+              <div className="text-xs text-foreground/70 leading-relaxed bg-muted/20 p-3.5 rounded-xl border border-border/30 font-semibold">
                 Your claim has been submitted to Eskayef Pharmaceuticals. Live approval timeline is shown below.
               </div>
             )}
           </div>
 
-          <div className="panel p-5 text-xs text-muted-foreground space-y-3">
+          <div className="panel p-5 text-xs text-foreground space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-1 pb-1 border-b border-border/40">
               <Workflow className="h-4 w-4 text-primary" /> Approval Path Progress
             </div>
@@ -338,7 +338,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                     const isCurrent = claim.current_step_id === step.id && claim.status === "submitted";
                     const done = (claim.approvals || []).some((a: any) => a.workflow_step_id === step.id && a.decision === "approved");
                     return (
-                      <li key={step.id} className={cn("flex items-center gap-2", isCurrent ? "text-accent font-bold" : done ? "text-success font-semibold" : "text-muted-foreground/45")}>
+                      <li key={step.id} className={cn("flex items-center gap-2", isCurrent ? "text-accent font-bold" : done ? "text-success font-semibold" : "text-foreground/70")}>
                         {done ? (
                           <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                         ) : isCurrent ? (
@@ -350,7 +350,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                       </li>
                     );
                   })}
-                  <li className={cn("flex items-center gap-2", claim.status === "forwarded_to_finance" ? "text-success font-semibold" : "text-muted-foreground/45")}>
+                  <li className={cn("flex items-center gap-2", claim.status === "forwarded_to_finance" ? "text-success font-semibold" : "text-foreground/70")}>
                     {claim.status === "forwarded_to_finance" ? (
                       <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                     ) : (
@@ -361,7 +361,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
                 </ol>
               </>
             ) : (
-              <div className="flex items-center gap-1.5 text-muted-foreground/50 font-medium">
+              <div className="flex items-center gap-1.5 text-foreground/70 font-medium">
                 <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" /> No workflow path assigned
               </div>
             )}

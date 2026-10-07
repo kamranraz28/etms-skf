@@ -113,7 +113,7 @@ export default function Auth() {
               </div>
               <div>
                 <div className="text-base font-bold text-foreground">ETMS</div>
-                <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Procurement</div>
+                <div className="text-[10px] text-foreground uppercase tracking-widest">Procurement</div>
               </div>
             </div>
 
@@ -122,7 +122,7 @@ export default function Auth() {
               <h2 className="text-2xl font-bold text-foreground tracking-tight font-display">
                 Welcome back
               </h2>
-              <p className="text-sm text-muted-foreground mt-1.5">
+              <p className="text-sm text-foreground mt-1.5">
                 Sign in to access the procurement platform.
               </p>
             </div>
@@ -190,7 +190,7 @@ export default function Auth() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground hover:text-foreground transition-colors p-0.5"
                       tabIndex={-1}
                     >
                       {showPassword ? (
@@ -229,7 +229,7 @@ export default function Auth() {
             </div>
 
             {/* Trust indicators */}
-            <div className="mt-6 flex items-center justify-center gap-4 text-[11px] text-muted-foreground/50">
+            <div className="mt-6 flex items-center justify-center gap-4 text-[11px] text-foreground/70">
               <span className="flex items-center gap-1">
                 <ShieldCheck className="h-3 w-3" />
                 Secure connection

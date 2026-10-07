@@ -88,12 +88,12 @@ export default function Roles({ roles, permissions }: any) {
             <div className="font-semibold text-sm text-foreground flex items-center gap-1.5">
               {r.label}
               {r.is_system && (
-                <span className="inline-flex items-center gap-0.5 text-[9px] uppercase font-bold tracking-wider text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-md">
+                <span className="inline-flex items-center gap-0.5 text-[9px] uppercase font-bold tracking-wider text-foreground bg-muted/60 px-1.5 py-0.5 rounded-md">
                   <Lock className="h-2.5 w-2.5" /> System
                 </span>
               )}
             </div>
-            <div className="text-[11px] text-muted-foreground font-mono">{r.slug}</div>
+            <div className="text-[11px] text-foreground font-mono">{r.slug}</div>
           </div>
         </div>
       ),
@@ -114,7 +114,7 @@ export default function Roles({ roles, permissions }: any) {
       key: "permissions",
       label: "Permissions",
       sortable: false,
-      render: (r: any) => <span className="text-xs text-muted-foreground font-semibold">{(r.permissions ?? []).length} granted</span>,
+      render: (r: any) => <span className="text-xs text-foreground font-semibold">{(r.permissions ?? []).length} granted</span>,
     },
     {
       key: "actions",
@@ -162,7 +162,7 @@ export default function Roles({ roles, permissions }: any) {
                 <ShieldCheck className="h-4.5 w-4.5 text-accent" />
                 {editing ? "Rename Role" : "Add Role"}
               </div>
-              <button onClick={() => setModal(false)} className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              <button onClick={() => setModal(false)} className="h-8 w-8 rounded-lg flex items-center justify-center text-foreground hover:text-foreground hover:bg-muted transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -171,10 +171,10 @@ export default function Roles({ roles, permissions }: any) {
                 <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Role Name <span className="text-destructive">*</span></Label>
                 <Input value={label} onChange={(e) => setLabel(e.target.value)} className="h-11" placeholder="e.g. Site Engineer" />
                 {!editing && label.trim() && (
-                  <p className="text-[11px] text-muted-foreground">System name: <span className="font-mono">{label.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_")}</span></p>
+                  <p className="text-[11px] text-foreground">System name: <span className="font-mono">{label.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_")}</span></p>
                 )}
                 {editing && (
-                  <p className="text-[11px] text-muted-foreground">System name <span className="font-mono">{editing.slug}</span> stays unchanged so existing assignments keep working.</p>
+                  <p className="text-[11px] text-foreground">System name <span className="font-mono">{editing.slug}</span> stays unchanged so existing assignments keep working.</p>
                 )}
               </div>
             </div>
@@ -195,7 +195,7 @@ export default function Roles({ roles, permissions }: any) {
                 <KeyRound className="h-4.5 w-4.5 text-accent" />
                 Permissions · {matrixRole.label}
               </div>
-              <button onClick={() => setMatrixRole(null)} className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              <button onClick={() => setMatrixRole(null)} className="h-8 w-8 rounded-lg flex items-center justify-center text-foreground hover:text-foreground hover:bg-muted transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -210,7 +210,7 @@ export default function Roles({ roles, permissions }: any) {
                       <span className="text-xs font-bold uppercase tracking-wider text-foreground/80">{group}</span>
                       <button onClick={() => toggleGroup(slugs)}
                         className={cn("text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border transition-all",
-                          allOn ? "bg-primary/10 border-primary/30 text-primary" : someOn ? "bg-warning/10 border-warning/30 text-warning" : "bg-background border-border/60 text-muted-foreground hover:border-primary/40")}>
+                          allOn ? "bg-foreground border-foreground text-background" : someOn ? "bg-warning/10 border-warning/30 text-warning" : "bg-background border-border/60 text-foreground hover:border-primary/40")}>
                         {allOn ? "All on" : someOn ? "Partial" : "All off"}
                       </button>
                     </div>
@@ -220,7 +220,7 @@ export default function Roles({ roles, permissions }: any) {
                         return (
                           <button key={p.slug} type="button" onClick={() => togglePerm(p.slug)} title={p.slug}
                             className={cn("px-3 py-1.5 text-[11px] font-semibold rounded-lg border transition-all duration-150 text-left",
-                              active ? "bg-primary/10 border-primary/30 text-primary" : "bg-background border-border/60 text-muted-foreground/70 hover:border-primary/40 hover:text-foreground")}>
+                              active ? "bg-foreground border-foreground text-background" : "bg-background border-border/60 text-foreground hover:border-primary/40 hover:text-foreground")}>
                             {p.label}
                           </button>
                         );
@@ -231,7 +231,7 @@ export default function Roles({ roles, permissions }: any) {
               })}
             </div>
             <div className="flex gap-2 justify-between items-center px-6 py-4 border-t border-border/40 bg-muted/10 shrink-0">
-              <span className="text-[11px] text-muted-foreground font-medium">{matrixPerms.length} permissions selected. Changes apply on next page load.</span>
+              <span className="text-[11px] text-foreground font-medium">{matrixPerms.length} permissions selected. Changes apply on next page load.</span>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setMatrixRole(null)}>Cancel</Button>
                 <Button onClick={saveMatrix} disabled={savingMatrix}>{savingMatrix ? "Saving..." : "Save permissions"}</Button>

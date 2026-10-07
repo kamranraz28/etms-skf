@@ -41,8 +41,8 @@ export default function ClaimHistory({ claims, vendors, filters }: any) {
       )
     },
     { key: "erp_code", label: "ERP Code", sortable: false, render: (r) => <span className="font-mono text-xs whitespace-nowrap bg-muted/60 px-2 py-0.5 rounded-md">{r.vendor?.erp_code ?? <span className="text-warning font-semibold">—</span>}</span> },
-    { key: "bill_number", label: "Bill Reference", sortable: true, render: (r) => <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">{r.bill_number ?? "—"}</span> },
-    { key: "po_number", label: "PO Reference", sortable: true, render: (r) => <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">{r.po_number}</span> },
+    { key: "bill_number", label: "Bill Reference", sortable: true, render: (r) => <span className="font-mono text-xs text-foreground whitespace-nowrap">{r.bill_number ?? "—"}</span> },
+    { key: "po_number", label: "PO Reference", sortable: true, render: (r) => <span className="font-mono text-xs text-foreground whitespace-nowrap">{r.po_number}</span> },
     { key: "title", label: "Claim Title", sortable: true, render: (r) => <span className="font-medium text-foreground max-w-40 truncate block">{r.title}</span> },
     {
       key: "amount",
@@ -56,7 +56,7 @@ export default function ClaimHistory({ claims, vendors, filters }: any) {
       label: "Submitted Date",
       sortable: true,
       render: (r) => (
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground whitespace-nowrap">
+        <div className="flex items-center gap-1.5 text-xs text-foreground whitespace-nowrap">
           <Calendar className="h-3.5 w-3.5" />
           <span>{new Date(r.submitted_at).toLocaleDateString()}</span>
         </div>

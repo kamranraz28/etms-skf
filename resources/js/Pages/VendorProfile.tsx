@@ -63,9 +63,9 @@ export default function VendorProfile({ vendor }: any) {
           <div className="space-y-1.5"><Label>About / capabilities</Label><Textarea rows={4} value={form.notes} disabled={locked} onChange={(e)=>setForm({...form, notes:e.target.value})} /></div>
           {vendor && (
             <div className="text-xs bg-gradient-to-r from-muted/30 to-muted/10 rounded-xl p-4 border border-border/40">
-              <div className="flex justify-between"><span className="text-muted-foreground">ERP Vendor Code</span>
+              <div className="flex justify-between"><span className="text-foreground">ERP Vendor Code</span>
                 <span className="font-mono font-semibold">{vendor.erp_code ?? <span className="text-warning">Not assigned yet</span>}</span></div>
-              <div className="flex justify-between mt-1.5"><span className="text-muted-foreground">Registered</span>
+              <div className="flex justify-between mt-1.5"><span className="text-foreground">Registered</span>
                 <span>{new Date(vendor.created_at).toLocaleDateString()}</span></div>
             </div>
           )}

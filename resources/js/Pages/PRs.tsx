@@ -80,7 +80,7 @@ export default function PRs({ prs }: any) {
       key: "department",
       label: "Department",
       sortable: true,
-      render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{r.department ?? "—"}</span>
+      render: (r) => <span className="text-xs text-foreground whitespace-nowrap">{r.department ?? "—"}</span>
     },
     {
       key: "items",
@@ -93,7 +93,7 @@ export default function PRs({ prs }: any) {
         const preview = raw.slice(0, 2).map((i: any) => `${i.name} ×${i.qty}`).join(", ");
         return (
           <div className="min-w-0 max-w-[240px]">
-            <div className="text-xs text-muted-foreground truncate block">
+            <div className="text-xs text-foreground truncate block">
               {preview}{raw.length > 2 && ` +${raw.length - 2} more`}
             </div>
             {assignedCount > 0 && (
@@ -118,7 +118,7 @@ export default function PRs({ prs }: any) {
       key: "created_at",
       label: "Synced",
       sortable: true,
-      render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</span>
+      render: (r) => <span className="text-xs text-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</span>
     },
     {
       key: "actions" as string,
@@ -196,7 +196,7 @@ export default function PRs({ prs }: any) {
                       {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
                     </div>
                     <div className="sm:col-span-2 space-y-1.5">
-                      <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Items <span className="text-destructive">*</span> <span className="text-[11px] text-muted-foreground lowercase normal-case">(Format: Name | Quantity | Unit - one per line)</span></Label>
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Items <span className="text-destructive">*</span> <span className="text-[11px] text-foreground lowercase normal-case">(Format: Name | Quantity | Unit - one per line)</span></Label>
                       <Textarea rows={4} className={errors.items && "border-destructive focus-visible:ring-destructive"} value={form.items} onChange={(e)=>setForm({...form, items:e.target.value})} placeholder="Dell Latitude 5440 | 15 | pcs&#10;Logitech Wireless Mouse | 20 | pcs" />
                       {errors.items && <p className="text-xs text-destructive">{errors.items}</p>}
                     </div>
@@ -217,7 +217,7 @@ export default function PRs({ prs }: any) {
         {summaryCards.map((card, i) => (
           <div key={i} className="relative bg-card border border-border/50 rounded-2xl p-4 overflow-hidden hover-lift">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{card.label}</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-foreground">{card.label}</span>
               <div className={`h-8 w-8 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center`}>
                 <card.icon className={`h-4 w-4 ${card.iconColor}`} />
               </div>

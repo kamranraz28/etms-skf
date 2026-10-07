@@ -53,7 +53,7 @@ export default function Settings({ login_alert_enabled, login_alert_email }: any
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-foreground">Login Alert</div>
-                  <div className="text-xs text-muted-foreground">Notify when an account is locked after 5 failed attempts</div>
+                  <div className="text-xs text-foreground">Notify when an account is locked after 5 failed attempts</div>
                 </div>
               </div>
 
@@ -62,7 +62,7 @@ export default function Settings({ login_alert_enabled, login_alert_email }: any
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-sm font-medium text-foreground">Enable login alert emails</div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-xs text-foreground mt-0.5">
                       When disabled, accounts lock normally but no email notification is sent.
                     </p>
                   </div>
@@ -90,7 +90,7 @@ export default function Settings({ login_alert_enabled, login_alert_email }: any
                     className="h-10"
                     disabled={!enabled}
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-foreground">
                     This email receives the lockout notification with an unlock link.
                   </p>
                 </div>

@@ -168,7 +168,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
       { key: "total_price", label: "Total Bid Value", sortable: true, className: "text-right", render: (r: any) => <span className="font-mono text-xs whitespace-nowrap font-bold text-foreground">৳ {Number(r.total_price).toLocaleString()}</span> },
       { key: "negotiations", label: "Negotiation Status", sortable: false, render: (r: any) => negotiationBadge(r) },
     ] : []),
-    { key: "submitted_at", label: "Submitted Date", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
+    { key: "submitted_at", label: "Submitted Date", sortable: true, render: (r) => <span className="text-xs text-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
     ...(!isSealed ? [{
       key: "actions" as string,
       label: "Actions",
@@ -207,7 +207,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
               </span>
             ))}
           </div>
-        ) : <span className="text-xs text-muted-foreground/50">No categories invited</span>;
+        ) : <span className="text-xs text-foreground/70">No categories invited</span>;
       },
     },
   ];
@@ -216,14 +216,14 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
     <AppShell>
       <Head title={`${tender.tender_number} - Tender Details`} />
       
-      <Button variant="ghost" size="sm" onClick={() => history.back()} className="mb-4 hover:bg-muted/80 gap-1 text-muted-foreground hover:text-foreground">
+      <Button variant="ghost" size="sm" onClick={() => history.back()} className="mb-4 hover:bg-muted/80 gap-1 text-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Back to Tenders
       </Button>
 
       <PageHeader
         title={tender.title}
         description={
-          <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground/80 mt-1">
+          <div className="flex items-center gap-2 flex-wrap text-xs text-foreground/80 mt-1">
             <span className="font-mono bg-muted/60 px-2.5 py-0.5 rounded-md text-foreground font-semibold">{tender.tender_number}</span>
             <span>·</span>
             {editingDeadline ? (
@@ -231,12 +231,12 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
                 <input type="datetime-local" value={deadlineVal} onChange={(e) => setDeadlineVal(e.target.value)}
                   className="h-6 rounded-md bg-transparent px-2 text-xs font-semibold focus:outline-none" />
                 <button onClick={saveDeadline} className="text-success hover:text-success/80 p-0.5"><Check className="h-4 w-4" /></button>
-                <button onClick={() => setEditingDeadline(false)} className="text-muted-foreground hover:text-foreground p-0.5"><X className="h-4 w-4" /></button>
+                <button onClick={() => setEditingDeadline(false)} className="text-foreground hover:text-foreground p-0.5"><X className="h-4 w-4" /></button>
               </span>
             ) : (
               <span className="flex items-center gap-1 font-medium text-foreground/70">
                 Deadline: {new Date(tender.deadline).toLocaleString()}
-                {tender.status === "open" && canManage && <button onClick={startEditDeadline} className="text-muted-foreground hover:text-accent ml-1 p-0.5 hover:bg-muted rounded transition-colors"><Edit3 className="h-3 w-3" /></button>}
+                {tender.status === "open" && canManage && <button onClick={startEditDeadline} className="text-foreground hover:text-accent ml-1 p-0.5 hover:bg-muted rounded transition-colors"><Edit3 className="h-3 w-3" /></button>}
               </span>
             )}
           </div>
@@ -337,21 +337,21 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
             </div>
             <ul className="divide-y divide-border/30 overflow-y-auto no-scrollbar">
               {vendors.length === 0 && (
-                <li className="px-5 py-8 text-center text-xs text-muted-foreground">No vendors invited.</li>
+                <li className="px-5 py-8 text-center text-xs text-foreground">No vendors invited.</li>
               )}
               {vendors.map((v: any) => (
                 <li key={v.id} className="px-5 py-4 hover:bg-muted/10 transition-colors">
                   <div className="text-sm font-semibold text-foreground truncate">{v.name}</div>
-                  <div className="text-xs text-muted-foreground truncate">{v.email}</div>
+                  <div className="text-xs text-foreground truncate">{v.email}</div>
                   <div className="mt-2.5 flex items-center gap-2 flex-wrap">
                     <StatusBadge status={v.status} className="text-[9px]" />
                     {(v.categories ?? []).map((c: any) => (
-                      <span key={c.id} className="text-[10px] bg-muted/60 text-muted-foreground px-2 py-0.5 rounded-full font-medium">
+                      <span key={c.id} className="text-[10px] bg-muted/60 text-foreground px-2 py-0.5 rounded-full font-medium">
                         {c.name}
                       </span>
                     ))}
                     {v.erp_code ? (
-                      <span className="text-[10px] font-mono text-muted-foreground/60">ERP: {v.erp_code}</span>
+                      <span className="text-[10px] font-mono text-foreground/70">ERP: {v.erp_code}</span>
                     ) : (
                       <span className="text-[10px] text-warning font-semibold bg-warning/10 px-2 py-0.5 rounded-md">No ERP Code</span>
                     )}
@@ -370,7 +370,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
                 </div>
               </div>
               <div className="p-5">
-                <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">{tender.description}</p>
+                <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{tender.description}</p>
               </div>
             </div>
           )}
@@ -385,7 +385,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
               <div className="flex items-center gap-2.5 font-bold text-sm text-foreground">
                 <FileText className="h-4.5 w-4.5 text-accent" /> Bid Details · {viewBidItems.vendor?.name}
               </div>
-              <button onClick={() => setViewBidItems(null)} className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              <button onClick={() => setViewBidItems(null)} className="h-8 w-8 rounded-lg flex items-center justify-center text-foreground hover:text-foreground hover:bg-muted transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -393,11 +393,11 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gradient-to-r from-muted/40 to-muted/20 border-b border-border/40">
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Item</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 w-24">Qty</th>
-                    <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 w-36">Unit price</th>
-                    <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 w-36">Line total</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Remarks</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Item</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80 w-24">Qty</th>
+                    <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-foreground/80 w-36">Unit price</th>
+                    <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-foreground/80 w-36">Line total</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Remarks</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/30">
@@ -405,19 +405,19 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
                     <tr key={i} className="hover:bg-muted/10 transition-colors">
                       <td className="px-5 py-4 font-semibold text-foreground">{it.name}</td>
                       <td className="px-5 py-4 whitespace-nowrap">
-                        <span className="text-xs font-semibold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md">
+                        <span className="text-xs font-semibold text-foreground bg-muted/60 px-2 py-0.5 rounded-md">
                           {it.qty} {it.unit}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-right font-mono text-xs font-bold text-foreground">৳ {Number(it.unit_price).toLocaleString()}</td>
                       <td className="px-5 py-4 text-right font-mono text-xs font-bold text-foreground">৳ {(Number(it.unit_price) * Number(it.qty)).toLocaleString()}</td>
-                      <td className="px-5 py-4 text-xs text-muted-foreground italic max-w-[200px] truncate" title={it.remarks}>{it.remarks || "—"}</td>
+                      <td className="px-5 py-4 text-xs text-foreground italic max-w-[200px] truncate" title={it.remarks}>{it.remarks || "—"}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr className="font-bold bg-gradient-to-r from-muted/30 to-muted/10">
-                    <td colSpan={3} className="text-right px-5 py-4 text-xs uppercase text-muted-foreground">Grand Total Bid Value</td>
+                    <td colSpan={3} className="text-right px-5 py-4 text-xs uppercase text-foreground">Grand Total Bid Value</td>
                     <td className="text-right font-mono text-sm px-5 py-4 text-foreground font-black">৳ {Number(viewBidItems.total_price).toLocaleString()}</td>
                     <td></td>
                   </tr>
@@ -436,7 +436,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
               <div className="flex items-center gap-2 font-bold text-sm text-foreground">
                 <UserPlus className="h-4.5 w-4.5 text-accent animate-pulse-soft" /> Invite Vendors by Item Category
               </div>
-              <button onClick={() => setInviteModal(false)} className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              <button onClick={() => setInviteModal(false)} className="h-8 w-8 rounded-lg flex items-center justify-center text-foreground hover:text-foreground hover:bg-muted transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -445,13 +445,13 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
                 <div key={idx} className="border border-border/40 rounded-xl p-4 bg-gradient-to-br from-card to-muted/5">
                   <div className="text-xs font-bold text-foreground mb-3 flex items-center justify-between">
                     <span>Item {idx+1}: {item.name}</span>
-                    <span className="bg-muted px-2 py-0.5 rounded-md font-semibold text-[10px] text-muted-foreground">{item.qty} {item.unit}</span>
+                    <span className="bg-muted px-2 py-0.5 rounded-md font-semibold text-[10px] text-foreground">{item.qty} {item.unit}</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {categories.map((cat: any) => {
                       const selected = (inviteItemCats[idx] ?? []).includes(cat.id);
                       return (
-                        <label key={cat.id} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs cursor-pointer border transition-all duration-150 ${selected ? "bg-primary/10 border-primary/30 text-primary font-bold" : "bg-card border-border hover:border-primary/30 text-muted-foreground hover:text-foreground"}`}>
+                        <label key={cat.id} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs cursor-pointer border transition-all duration-150 ${selected ? "bg-primary/10 border-primary/30 text-primary font-bold" : "bg-card border-border hover:border-primary/30 text-foreground hover:text-foreground"}`}>
                           <input type="checkbox" checked={selected} onChange={() => toggleInviteCat(idx, cat.id)} className="sr-only" />
                           {cat.name}
                         </label>
@@ -461,11 +461,11 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
                 </div>
               ))}
               {Object.values(inviteItemCats).every((ids) => ids.length === 0) && (
-                <p className="text-xs text-muted-foreground text-center py-6">Please select at least one vendor category above to invite.</p>
+                <p className="text-xs text-foreground text-center py-6">Please select at least one vendor category above to invite.</p>
               )}
             </div>
             <div className="flex gap-2 justify-between items-center px-6 py-4 border-t border-border/40 bg-muted/10 shrink-0">
-              <span className="text-[11px] text-muted-foreground font-medium">Matching vendor accounts will receive access instantly.</span>
+              <span className="text-[11px] text-foreground font-medium">Matching vendor accounts will receive access instantly.</span>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => setInviteModal(false)}>Cancel</Button>
                 <Button size="sm" onClick={sendInvites} className="gap-1"><UserPlus className="h-3.5 w-3.5" /> Send Invitations</Button>
@@ -483,7 +483,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
               <div className="flex items-center gap-2.5 font-bold text-sm text-foreground">
                 <Handshake className="h-4.5 w-4.5 text-accent animate-pulse-soft" /> Settle Price · {settleBid.vendor?.name}
               </div>
-              <button onClick={() => setSettleBid(null)} className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              <button onClick={() => setSettleBid(null)} className="h-8 w-8 rounded-lg flex items-center justify-center text-foreground hover:text-foreground hover:bg-muted transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -491,10 +491,10 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gradient-to-r from-muted/40 to-muted/20 border-b border-border/40">
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Item</th>
-                    <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 w-36">Current Bid Price</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Vendor Response</th>
-                    <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 w-44">Target Settle Price (BDT)</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Item</th>
+                    <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-foreground/80 w-36">Current Bid Price</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Vendor Response</th>
+                    <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-foreground/80 w-44">Target Settle Price (BDT)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/30">
@@ -506,12 +506,12 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
                       <tr key={i} className="hover:bg-muted/10 transition-colors">
                         <td className="px-5 py-4">
                           <div className="font-bold text-foreground text-sm">{it.name}</div>
-                          <div className="text-[11px] text-muted-foreground mt-0.5">{it.qty} {it.unit}</div>
+                          <div className="text-[11px] text-foreground mt-0.5">{it.qty} {it.unit}</div>
                         </td>
                         <td className="px-5 py-4 text-right font-mono text-xs font-bold text-foreground">৳ {Number(it.unit_price).toLocaleString()}</td>
                         <td className="px-5 py-4 text-xs font-medium">
                           {!last ? (
-                            <span className="text-muted-foreground/50">No negotiation history</span>
+                            <span className="text-foreground/70">No negotiation history</span>
                           ) : status === "pending" ? (
                             <span className="inline-flex items-center gap-1 text-warning bg-warning/10 px-2 py-0.5 rounded-md font-semibold">
                               <span className="h-1.5 w-1.5 rounded-full bg-warning animate-pulse-soft" /> Offered ৳ {Number(last.offered_price).toLocaleString()}
@@ -530,7 +530,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
                         </td>
                         <td className="px-5 py-4 text-right">
                           <div className="relative inline-flex items-center">
-                            <span className="absolute left-2.5 text-xs text-muted-foreground/60 font-semibold font-mono">৳</span>
+                            <span className="absolute left-2.5 text-xs text-foreground/70 font-semibold font-mono">৳</span>
                             <input type="number" min="0" step="0.01" className="h-9 w-32 rounded-lg border border-border/80 bg-background pl-6 pr-2.5 text-xs font-mono text-right focus:outline-none focus:ring-2 focus:ring-accent/20"
                               value={offerInputs[it.name] ?? ""}
                               onChange={(e) => setOfferInputs({ ...offerInputs, [it.name]: e.target.value })} placeholder="Target price" />
@@ -543,7 +543,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
               </table>
             </div>
             <div className="flex gap-2 justify-between items-center px-6 py-4 border-t border-border/40 bg-muted/10 shrink-0">
-              <span className="text-[11px] text-muted-foreground font-medium">Vendor will be notified. They can accept, counter, or reject target prices.</span>
+              <span className="text-[11px] text-foreground font-medium">Vendor will be notified. They can accept, counter, or reject target prices.</span>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => setSettleBid(null)}>Cancel</Button>
                 <Button size="sm" onClick={sendOffers} disabled={sendingOffers} className="gap-1"><Handshake className="h-3.5 w-3.5" /> {sendingOffers ? "Sending Offer…" : "Send Offer"}</Button>

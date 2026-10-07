@@ -90,13 +90,13 @@ export default function POs({ pos }: any) {
       key: "vendor_erp_code",
       label: "Vendor ERP",
       sortable: true,
-      render: (r) => <span className="font-mono text-xs text-muted-foreground">{r.vendor_erp_code ?? "—"}</span>
+      render: (r) => <span className="font-mono text-xs text-foreground">{r.vendor_erp_code ?? "—"}</span>
     },
     {
       key: "po_date",
       label: "PO Date",
       sortable: true,
-      render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{r.po_date ?? "—"}</span>
+      render: (r) => <span className="text-xs text-foreground whitespace-nowrap">{r.po_date ?? "—"}</span>
     },
     {
       key: "items",
@@ -108,7 +108,7 @@ export default function POs({ pos }: any) {
         const preview = raw.slice(0, 2).map((i: any) => `${i.name} ×${i.qty}`).join(", ");
         return (
           <div className="min-w-0 max-w-[250px]">
-            <div className="text-xs text-muted-foreground truncate font-medium">
+            <div className="text-xs text-foreground truncate font-medium">
               {preview}{raw.length > 2 && ` +${raw.length - 2} more`}
             </div>
             <div className="text-xs font-bold text-foreground mt-0.5">
@@ -128,7 +128,7 @@ export default function POs({ pos }: any) {
       key: "created_at",
       label: "Synced",
       sortable: true,
-      render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</span>
+      render: (r) => <span className="text-xs text-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</span>
     },
     {
       key: "actions" as string,
@@ -194,7 +194,7 @@ export default function POs({ pos }: any) {
                       {errors.po_date && <p className="text-xs text-destructive">{errors.po_date}</p>}
                     </div>
                     <div className="sm:col-span-2 space-y-1.5">
-                      <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Items <span className="text-destructive">*</span> <span className="text-[11px] text-muted-foreground lowercase normal-case">(Format: Name | Quantity | Unit Price - one per line)</span></Label>
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Items <span className="text-destructive">*</span> <span className="text-[11px] text-foreground lowercase normal-case">(Format: Name | Quantity | Unit Price - one per line)</span></Label>
                       <Textarea rows={4} className={errors.items && "border-destructive focus-visible:ring-destructive"} value={form.items} onChange={(e)=>setForm({...form, items:e.target.value})} placeholder="Cisco Switch | 6 | 25000&#10;Ethernet Cable Roll | 10 | 4500" />
                       {errors.items && <p className="text-xs text-destructive">{errors.items}</p>}
                     </div>
@@ -215,7 +215,7 @@ export default function POs({ pos }: any) {
         {summaryCards.map((card, i) => (
           <div key={i} className="relative bg-card border border-border/50 rounded-2xl p-4 overflow-hidden hover-lift">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{card.label}</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-foreground">{card.label}</span>
               <div className={`h-8 w-8 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center`}>
                 <card.icon className={`h-4 w-4 ${card.iconColor}`} />
               </div>

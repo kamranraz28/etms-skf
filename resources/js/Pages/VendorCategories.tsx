@@ -66,7 +66,7 @@ export default function VendorCategories({ categories }: any) {
       label: "Created Date",
       sortable: true,
       render: (r) => (
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-xs text-foreground">
           <Calendar className="h-3.5 w-3.5" />
           <span>{new Date(r.created_at).toLocaleDateString()}</span>
         </div>

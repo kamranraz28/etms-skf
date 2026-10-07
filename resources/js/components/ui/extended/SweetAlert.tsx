@@ -75,7 +75,7 @@ export function SweetAlert({
           </div>
           <h2 className="text-xl font-bold text-foreground tracking-tight">{title}</h2>
           {description && (
-            <div className="text-sm text-muted-foreground mt-2.5 leading-relaxed max-w-sm">
+            <div className="text-sm text-foreground mt-2.5 leading-relaxed max-w-sm">
               {description}
             </div>
           )}

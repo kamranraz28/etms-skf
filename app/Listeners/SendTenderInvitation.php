@@ -14,6 +14,9 @@ class SendTenderInvitation
         $vendors = $tender->vendors;
 
         foreach ($vendors as $vendor) {
+            if ($vendor->status !== 'active') {
+                continue;
+            }
             if (!filter_var($vendor->email, FILTER_VALIDATE_EMAIL)) {
                 continue;
             }

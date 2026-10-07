@@ -26,7 +26,7 @@ export default function Dashboard({ stats, recentTenders, recentVendors }: any) 
     },
     {
       key: "deadline", label: "Deadline", sortable: true,
-      render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.deadline).toLocaleDateString()}</span>,
+      render: (r) => <span className="text-xs text-foreground whitespace-nowrap">{new Date(r.deadline).toLocaleDateString()}</span>,
     },
     { key: "status", label: "Status", sortable: true, render: (r) => <StatusBadge status={r.status} /> },
   ];
@@ -41,7 +41,7 @@ export default function Dashboard({ stats, recentTenders, recentVendors }: any) 
           </div>
           <div>
             <div className="font-medium text-sm truncate max-w-[120px]">{r.name}</div>
-            <div className="text-xs text-muted-foreground truncate max-w-[120px]">{r.email}</div>
+            <div className="text-xs text-foreground truncate max-w-[120px]">{r.email}</div>
           </div>
         </div>
       ),
@@ -132,9 +132,9 @@ export default function Dashboard({ stats, recentTenders, recentVendors }: any) 
               </div>
               <div className="min-w-0 flex-1">
                 <div className="font-semibold text-foreground">{card.title}</div>
-                <div className="text-sm text-muted-foreground mt-1">{card.subtitle}</div>
+                <div className="text-sm text-foreground mt-1">{card.subtitle}</div>
               </div>
-              <ArrowUpRight className="h-4 w-4 text-muted-foreground/30 shrink-0 group-hover:text-primary group-hover:scale-110 transition-all duration-300" />
+              <ArrowUpRight className="h-4 w-4 text-foreground/60 shrink-0 group-hover:text-primary group-hover:scale-110 transition-all duration-300" />
             </Link>
           ))}
         </div>
