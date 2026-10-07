@@ -29,7 +29,16 @@ export default function Vendors({ vendors, categories }: any) {
   const openEdit = (v: any) => { setEditing(v); setForm({ name:v.name,email:v.email,phone:v.phone??"",notes:v.notes??"",status:v.status,vendor_category_ids:v.categories?.map((c:any)=>c.id)??[] }); setOpen(true); };
 
   const save = async () => {
-    if (saving) return; setSaving(true);
+    if (saving) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      sa.alert("Invalid email", "Enter a valid email address (e.g. vendor@company.com).", "error");
+      return;
+    }
+    if (!/^\+?[0-9\s\-()]{7,20}$/.test(form.phone.trim())) {
+      sa.alert("Invalid phone", "Enter a valid phone number (digits, spaces, +, - only).", "error");
+      return;
+    }
+    setSaving(true);
     const confirmed = await sa.confirmAction(editing ? "Update vendor?" : "Create vendor?", `Save vendor "${form.name}"?`, "Save");
     if (!confirmed) { setSaving(false); return; }
     if (editing) router.put(`/app/vendors/${editing.id}`, form, {
@@ -46,8 +55,9 @@ export default function Vendors({ vendors, categories }: any) {
     const label = status === "active" ? "activate" : "blacklist";
     const ok = await sa.confirmAction(`${status === "active" ? "Activate" : "Blacklist"} vendor?`, `Are you sure you want to ${label} "${v.name}"?`, status === "active" ? "Activate" : "Blacklist");
     if (!ok) return;
-    router.put(`/app/vendors/${v.id}`, { ...v, status }, {
+    router.put(`/app/vendors/${v.id}`, { ...v, vendor_category_ids: (v.categories ?? []).map((c: any) => c.id), status }, {
       onSuccess: () => sa.alert("Status updated", `"${v.name}" is now ${status}.`, status === "active" ? "success" : "warning"),
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
     });
   };
 
@@ -154,7 +164,7 @@ export default function Vendors({ vendors, categories }: any) {
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Phone <span className="text-destructive">*</span></Label>
-                    <Input className={errors.phone && "border-destructive"} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+880..." />
+                    <Input inputMode="tel" className={errors.phone && "border-destructive"} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+880..." />
                     {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
                   </div>
                   <div className="space-y-1.5">

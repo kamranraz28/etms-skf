@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { ReactNode, useState } from "react";
 
-export type AlertVariant = "default" | "destructive" | "success" | "warning" | "info";
+export type AlertVariant = "default" | "destructive" | "success" | "warning" | "info" | "error";
 
 interface SweetAlertOptions {
   open: boolean;
@@ -29,6 +29,12 @@ const variantConfig = {
     confirm: "",
   },
   destructive: {
+    icon: <AlertCircle className="h-7 w-7 text-destructive" />,
+    bg: "bg-gradient-to-br from-destructive/10 to-destructive/5",
+    border: "border-destructive/20",
+    confirm: "destructive",
+  },
+  error: {
     icon: <AlertCircle className="h-7 w-7 text-destructive" />,
     bg: "bg-gradient-to-br from-destructive/10 to-destructive/5",
     border: "border-destructive/20",
@@ -59,7 +65,7 @@ export function SweetAlert({
   icon, confirmText = "Confirm", cancelText = "Cancel",
   onConfirm, onCancel, showCancel = true, loading = false,
 }: SweetAlertOptions) {
-  const cfg = variantConfig[variant];
+  const cfg = variantConfig[variant] ?? variantConfig.default;
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o && !loading) onClose(); }}>
       <DialogContent className="sm:max-w-md gap-0 p-0 overflow-hidden">

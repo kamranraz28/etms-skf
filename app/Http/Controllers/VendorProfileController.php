@@ -15,8 +15,10 @@ class VendorProfileController extends Controller {
         $data = $r->validate([
             'name' => 'required|string',
             'email' => 'required|email',
-            'phone' => 'nullable|string',
+            'phone' => ['nullable', 'regex:/^\+?[0-9\s\-()]{7,20}$/'],
             'notes' => 'nullable|string',
+        ], [
+            'phone.regex' => 'Enter a valid phone number.',
         ]);
         $data['email'] = strtolower($data['email']);
         $vendor = Vendor::where('user_id', $r->user()->id)->first();

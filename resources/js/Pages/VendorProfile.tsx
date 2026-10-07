@@ -21,7 +21,20 @@ export default function VendorProfile({ vendor }: any) {
   const [pw, setPw] = useState({ current_password: "", new_password: "", new_password_confirmation: "" });
   const [pwOpen, setPwOpen] = useState(false);
   const locked = vendor && vendor.status !== "pending";
-  const save = () => router.post("/app/profile", form, { onSuccess: () => sa.alert("Profile updated", "Your vendor profile has been saved.", "success") });
+  const save = () => {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      sa.alert("Invalid email", "Enter a valid email address (e.g. vendor@company.com).", "error");
+      return;
+    }
+    if (form.phone.trim() && !/^\+?[0-9\s\-()]{7,20}$/.test(form.phone.trim())) {
+      sa.alert("Invalid phone", "Enter a valid phone number (digits, spaces, +, - only).", "error");
+      return;
+    }
+    router.post("/app/profile", form, {
+      onSuccess: () => sa.alert("Profile updated", "Your vendor profile has been saved.", "success"),
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+    });
+  };
   const changePw = () => {
     router.post("/app/profile/password", pw, {
       onSuccess: () => { setPw({ current_password: "", new_password: "", new_password_confirmation: "" }); setPwOpen(false); },
@@ -43,7 +56,7 @@ export default function VendorProfile({ vendor }: any) {
           </div>
           <div className="space-y-1.5"><Label>Company name</Label><Input value={form.name} disabled={locked} onChange={(e)=>setForm({...form, name:e.target.value})} /></div>
           <div className="space-y-1.5"><Label>Email</Label><Input type="email" value={form.email} disabled={locked} onChange={(e)=>setForm({...form, email:e.target.value})} /></div>
-          <div className="space-y-1.5"><Label>Phone</Label><Input value={form.phone} disabled={locked} onChange={(e)=>setForm({...form, phone:e.target.value})} /></div>
+          <div className="space-y-1.5"><Label>Phone</Label><Input inputMode="tel" value={form.phone} disabled={locked} onChange={(e)=>setForm({...form, phone:e.target.value})} /></div>
           <div className="space-y-1.5"><Label>About / capabilities</Label><Textarea rows={4} value={form.notes} disabled={locked} onChange={(e)=>setForm({...form, notes:e.target.value})} /></div>
           {vendor && (
             <div className="text-xs bg-gradient-to-r from-muted/30 to-muted/10 rounded-xl p-4 border border-border/40">

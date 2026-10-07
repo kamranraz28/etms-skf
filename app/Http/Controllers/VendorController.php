@@ -23,12 +23,14 @@ class VendorController extends Controller
         $data = $r->validate([
             'name' => 'required|string',
             'email' => 'required|email',
-            'phone' => 'required|string',
+            'phone' => ['required', 'regex:/^\+?[0-9\s\-()]{7,20}$/'],
             'erp_code' => 'nullable|string',
             'status' => 'required|in:pending,active,inactive,blacklisted',
             'notes' => 'nullable|string',
             'vendor_category_ids' => 'required|array|min:1',
             'vendor_category_ids.*' => 'exists:vendor_categories,id',
+        ], [
+            'phone.regex' => 'Enter a valid phone number.',
         ]);
         $data['email'] = strtolower($data['email']);
 
@@ -76,12 +78,14 @@ class VendorController extends Controller
         $data = $r->validate([
             'name' => 'required|string',
             'email' => 'required|email',
-            'phone' => 'required|string',
+            'phone' => ['required', 'regex:/^\+?[0-9\s\-()]{7,20}$/'],
             'erp_code' => 'nullable|string',
             'status' => 'required|in:pending,active,inactive,blacklisted',
             'notes' => 'nullable|string',
             'vendor_category_ids' => 'required|array|min:1',
             'vendor_category_ids.*' => 'exists:vendor_categories,id',
+        ], [
+            'phone.regex' => 'Enter a valid phone number.',
         ]);
         $data['email'] = strtolower($data['email']);
         $vendor->update($data);
