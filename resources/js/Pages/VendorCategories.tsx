@@ -25,22 +25,26 @@ export default function VendorCategories({ categories }: any) {
   const openEdit = (c: any) => { setEditing(c); setForm({ name: c.name }); setOpen(true); };
 
   const save = async () => {
+    if (!form.name.trim()) { sa.alert("Name required", "Enter a category name.", "error"); return; }
     const ok = await sa.confirmAction(editing ? "Update category?" : "Create category?", `Save category "${form.name}"?`, "Save");
     if (!ok) return;
     if (editing) router.put(`/app/vendor-categories/${editing.id}`, form, {
       onSuccess: () => { setOpen(false); sa.alert("Category updated", `"${form.name}" has been updated.`, "success"); },
-      onError: () => {},
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
     });
     else router.post(`/app/vendor-categories`, form, {
       onSuccess: () => { setOpen(false); sa.alert("Category created", `"${form.name}" has been created.`, "success"); },
-      onError: () => {},
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
     });
   };
 
   const remove = async (c: any) => {
     const ok = await sa.confirmDelete(c.name);
     if (!ok) return;
-    router.delete(`/app/vendor-categories/${c.id}`, { onSuccess: () => sa.alert("Category deleted", `"${c.name}" has been removed.`, "success") });
+    router.delete(`/app/vendor-categories/${c.id}`, {
+      onSuccess: () => sa.alert("Category deleted", `"${c.name}" has been removed.`, "success"),
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+    });
   };
 
   const columns: Column[] = [

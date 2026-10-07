@@ -108,6 +108,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
     sa.confirmAction("Invite vendors?", "Vendors matching selected categories will be added.", "Invite").then((ok) => {
       if (ok) router.post(`/app/tenders/${tender.id}/invite`, { item_categories: itemCategories }, {
         onSuccess: () => { setInviteModal(false); sa.alert("Invited", "Vendors added to tender.", "success"); },
+        onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
       });
     });
   };
@@ -120,6 +121,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
     if (!deadlineVal) return;
     router.post(`/app/tenders/${tender.id}/deadline`, { deadline: deadlineVal }, {
       onSuccess: () => setEditingDeadline(false),
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
     });
   };
   const closeTender = async () => {
@@ -127,6 +129,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
     if (confirmed) {
       router.post(`/app/tenders/${tender.id}/close`, {}, {
         onSuccess: () => sa.alert("Tender closed", "Tender has been closed successfully.", "success"),
+        onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
       });
     }
   };
@@ -137,6 +140,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
       setGeneratingCs(true);
       router.post(`/app/tenders/${tender.id}/generate-cs`, {}, {
         onSuccess: () => sa.alert("CS generated", "Comparison statement has been generated.", "success"),
+        onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
         onFinish: () => setGeneratingCs(false),
       });
     }

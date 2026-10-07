@@ -33,7 +33,7 @@ export default function PrShow({ pr, approvedCsList }: any) {
         setAssigning(false);
         sa.alert("CS assigned", "CS record has been linked to this item.", "success");
       },
-      onError: () => setAssigning(false),
+      onError: (e) => { setAssigning(false); sa.alert("Error", Object.values(e).join(", "), "error"); },
     });
   };
 

@@ -36,8 +36,11 @@ export default function VendorProfile({ vendor }: any) {
     });
   };
   const changePw = () => {
+    if (pw.new_password.length < 6) { sa.alert("Weak password", "New password must be at least 6 characters.", "error"); return; }
+    if (pw.new_password !== pw.new_password_confirmation) { sa.alert("Mismatch", "New password and confirmation do not match.", "error"); return; }
     router.post("/app/profile/password", pw, {
-      onSuccess: () => { setPw({ current_password: "", new_password: "", new_password_confirmation: "" }); setPwOpen(false); },
+      onSuccess: () => { setPw({ current_password: "", new_password: "", new_password_confirmation: "" }); setPwOpen(false); sa.alert("Password changed", "Your password has been updated.", "success"); },
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
     });
   };
 

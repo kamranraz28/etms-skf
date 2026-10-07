@@ -70,14 +70,20 @@ export default function TenderNew({ prs, categories, preselect_pr }: any) {
   const hasSelection = Object.values(itemCategoryMap).some(s => s.size > 0);
 
   const submit = () => {
-    if (!hasSelection) return;
+    const missing: string[] = [];
+    if (!tenderNumber.trim()) missing.push("tender number");
+    if (!prId) missing.push("purchase requisition");
+    if (!title.trim()) missing.push("title");
+    if (!deadline) missing.push("deadline");
+    if (!hasSelection) missing.push("vendor categories for at least one item");
+    if (missing.length > 0) { sa.alert("Incomplete tender", "Please provide: " + missing.join(", ") + ".", "error"); return; }
     setSaving(true);
     const itemCategories = Object.entries(itemCategoryMap)
       .filter(([, cats]) => cats.size > 0)
       .map(([idx, cats]) => ({ item_index: Number(idx), category_ids: Array.from(cats).map(Number) }));
     router.post("/app/tenders", { tender_number: tenderNumber, pr_id: prId, title, description, deadline, item_categories: itemCategories }, {
       onSuccess: () => { sa.alert("Tender created", "Tender has been created successfully.", "success"); setSaving(false); },
-      onError: () => setSaving(false),
+      onError: (e) => { setSaving(false); sa.alert("Error", Object.values(e).join(", "), "error"); },
     });
   };
 

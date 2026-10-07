@@ -80,6 +80,7 @@ export default function CSShow({
     setSavingAwards(prev => ({ ...prev, [itemIdx]: true }));
     router.post(`/app/cs/${cs.id}/award`, { item_index: itemIdx, awards }, {
       preserveScroll: true,
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
       onFinish: () => setSavingAwards(prev => ({ ...prev, [itemIdx]: false })),
     });
   };
@@ -112,7 +113,10 @@ export default function CSShow({
 
   const sendToErp = () =>
     sa.confirmAction("Send to ERP?", "This will push the award to the ERP system.", "Send").then((ok) => {
-      if (ok) router.post(`/app/cs/${cs.id}/erp`, {}, { onSuccess: () => sa.alert("Sent to ERP", "The award has been pushed to the ERP system.", "success") });
+      if (ok) router.post(`/app/cs/${cs.id}/erp`, {}, {
+        onSuccess: () => sa.alert("Sent to ERP", "The award has been pushed to the ERP system.", "success"),
+        onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+      });
     });
 
   const lowestBidDetails = items[0];

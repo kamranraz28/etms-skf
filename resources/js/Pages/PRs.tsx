@@ -23,10 +23,16 @@ export default function PRs({ prs }: any) {
   const sync = async () => {
     const ok = await sa.confirmAction("Sync from ERP?", "Fetch latest purchase requisitions from the ERP system.", "Sync");
     if (!ok) return;
-    router.post("/app/prs/sync", {}, { onSuccess: () => sa.alert("PRs synced", "Latest purchase requisitions have been synced.", "success") });
+    router.post("/app/prs/sync", {}, {
+      onSuccess: () => sa.alert("PRs synced", "Latest purchase requisitions have been synced.", "success"),
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+    });
   };
 
   const createManual = async () => {
+    if (!form.pr_number.trim()) { sa.alert("PR number required", "Enter a PR number.", "error"); return; }
+    if (!form.title.trim()) { sa.alert("Title required", "Enter a PR title.", "error"); return; }
+    if (!form.items.trim()) { sa.alert("Items required", "Add at least one item (one per line: name | qty | unit).", "error"); return; }
     const ok = await sa.confirmAction("Create PR?", `Create PR "${form.pr_number}"?`, "Create");
     if (!ok) return;
     const items = form.items.split("\n").map((l) => l.trim()).filter(Boolean).map((line) => {
@@ -35,14 +41,17 @@ export default function PRs({ prs }: any) {
     });
     router.post("/app/prs", { ...form, items }, {
       onSuccess: () => { setOpen(false); setForm({ pr_number:"",title:"",department:"",items:"" }); sa.alert("PR created", `"${form.pr_number}" has been created.`, "success"); },
-      onError: () => {},
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
     });
   };
 
   const remove = async (pr: any) => {
     const ok = await sa.confirmDelete(pr.pr_number);
     if (!ok) return;
-    router.delete(`/app/prs/${pr.id}`, { onSuccess: () => sa.alert("PR deleted", `"${pr.pr_number}" has been removed.`, "success") });
+    router.delete(`/app/prs/${pr.id}`, {
+      onSuccess: () => sa.alert("PR deleted", `"${pr.pr_number}" has been removed.`, "success"),
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+    });
   };
 
   // Summary stats calculations

@@ -50,6 +50,9 @@ export default function SubmitBid({ tender, vendor }: any) {
     );
 
   const submit = () => {
+    const missingPrices = items.filter((it, i) => !prices[`${it.name}_${i}`] || Number(prices[`${it.name}_${i}`]) < 0);
+    if (missingPrices.length > 0) { sa.alert("Prices required", "Enter a unit price (0 or more) for every item.", "error"); return; }
+    if (total <= 0) { sa.alert("Empty bid", "Your total bid value must be greater than zero.", "error"); return; }
     setSubmitting(true);
     const fd = new FormData();
     items.forEach((it, i) => {
@@ -63,6 +66,7 @@ export default function SubmitBid({ tender, vendor }: any) {
     if (file) fd.append("document", file);
     router.post(`/app/my-tenders/${tender.id}/bid`, fd, {
       onSuccess: () => sa.alert("Bid submitted", "Your bid has been submitted successfully.", "success"),
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
       onFinish: () => setSubmitting(false),
       forceFormData: true,
     });

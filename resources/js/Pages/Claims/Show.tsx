@@ -44,6 +44,7 @@ export default function ClaimsShow({ claim = {} as any }: any) {
     sa.confirmAction(title, desc, decision === "approved" ? "Approve" : "Reject").then(ok => {
       if (ok) router.post(`/app/claims/${claim.id}/decide`, { decision, comment }, {
         onSuccess: () => { setComment(""); sa.alert(decision === "approved" ? "Claim approved" : "Claim rejected", "Your decision has been logged successfully.", decision === "approved" ? "success" : "warning"); },
+        onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
       });
     });
   };

@@ -6,13 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, Bell, Save, Settings2 } from "lucide-react";
+import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 
 export default function Settings({ login_alert_enabled, login_alert_email }: any) {
+  const sa = useSweetAlert();
   const [enabled, setEnabled] = useState(login_alert_enabled);
   const [email, setEmail] = useState(login_alert_email);
 
   const save = () => {
-    router.put("/app/settings", { login_alert_enabled: enabled, login_alert_email: email });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      sa.alert("Invalid email", "Enter a valid alert email address.", "error");
+      return;
+    }
+    router.put("/app/settings", { login_alert_enabled: enabled, login_alert_email: email.trim() }, {
+      onSuccess: () => sa.alert("Settings saved", "Application settings have been updated.", "success"),
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+    });
   };
 
   return (
@@ -98,6 +107,7 @@ export default function Settings({ login_alert_enabled, login_alert_email }: any
           </div>
         </div>
       </div>
+      {sa.SweetAlert}
     </AppShell>
   );
 }

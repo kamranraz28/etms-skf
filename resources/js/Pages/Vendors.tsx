@@ -43,11 +43,11 @@ export default function Vendors({ vendors, categories }: any) {
     if (!confirmed) { setSaving(false); return; }
     if (editing) router.put(`/app/vendors/${editing.id}`, form, {
       onSuccess: () => { setOpen(false); setSaving(false); sa.alert("Vendor updated", `"${form.name}" has been updated.`, "success"); },
-      onError: () => setSaving(false),
+      onError: (e) => { setSaving(false); sa.alert("Error", Object.values(e).join(", "), "error"); },
     });
     else router.post(`/app/vendors`, form, {
       onSuccess: () => { setOpen(false); setSaving(false); sa.alert("Vendor created", `"${form.name}" has been created.`, "success"); },
-      onError: () => setSaving(false),
+      onError: (e) => { setSaving(false); sa.alert("Error", Object.values(e).join(", "), "error"); },
     });
   };
 

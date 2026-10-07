@@ -26,7 +26,11 @@ const roleStyles: Record<string, string> = {
 
 export default function Users({ rows, roles }: any) {
   const sa = useSweetAlert();
-  const toggle = (uid: string, r: AppRole) => sa.confirmAction("Toggle role?", `Change this user's assignment for '${r.replace(/_/g, " ")}'?`, "Toggle").then(ok => { if (ok) router.post(`/app/users/${uid}/roles/${r}`); });
+  const toggle = (uid: string, r: AppRole) => sa.confirmAction("Toggle role?", `Change this user's assignment for '${r.replace(/_/g, " ")}'?`, "Toggle").then(ok => {
+    if (ok) router.post(`/app/users/${uid}/roles/${r}`, {}, {
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+    });
+  });
 
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<any>(null);

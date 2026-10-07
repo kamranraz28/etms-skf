@@ -44,7 +44,15 @@ export default function NewClaim({ vendor, pos = [], billTypes = [] }: any) {
   const setDocFile = (i: number, file: File | null) => { const copy = [...documents]; copy[i].file = file; setDocuments(copy); };
 
   const submit = () => {
-    if (!billNumber || !billDate || !billType || !poNumber || !title || !amount || documents.every((d) => !d.file)) return;
+    const missing: string[] = [];
+    if (!billNumber.trim()) missing.push("bill number");
+    if (!billDate) missing.push("bill date");
+    if (!billType) missing.push("bill type");
+    if (!poNumber) missing.push("PO number");
+    if (!title.trim()) missing.push("title");
+    if (!amount || Number(amount) <= 0) missing.push("valid amount");
+    if (documents.every((d) => !d.file)) missing.push("at least one document");
+    if (missing.length > 0) { sa.alert("Incomplete claim", "Please provide: " + missing.join(", ") + ".", "error"); return; }
     setSubmitting(true);
     const fd = new FormData();
     fd.append("bill_number", billNumber);
@@ -59,7 +67,7 @@ export default function NewClaim({ vendor, pos = [], billTypes = [] }: any) {
     });
     router.post("/app/claims", fd, { 
       onSuccess: () => sa.alert("Claim created", "Your claim has been submitted successfully.", "success"), 
-      onError: () => {}, 
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"), 
       onFinish: () => setSubmitting(false), 
       forceFormData: true 
     });

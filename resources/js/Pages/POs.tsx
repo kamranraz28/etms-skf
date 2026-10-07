@@ -23,10 +23,17 @@ export default function POs({ pos }: any) {
   const sync = async () => {
     const ok = await sa.confirmAction("Sync from ERP?", "Fetch latest purchase orders from the ERP system.", "Sync");
     if (!ok) return;
-    router.post("/app/pos/sync", {}, { onSuccess: () => sa.alert("POs synced", "Latest purchase orders have been synced.", "success") });
+    router.post("/app/pos/sync", {}, {
+      onSuccess: () => sa.alert("POs synced", "Latest purchase orders have been synced.", "success"),
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+    });
   };
 
   const createManual = async () => {
+    if (!form.po_number.trim()) { sa.alert("PO number required", "Enter a PO number.", "error"); return; }
+    if (!form.vendor_erp_code.trim()) { sa.alert("Vendor ERP code required", "Enter the vendor ERP code.", "error"); return; }
+    if (!form.po_date) { sa.alert("PO date required", "Select a PO date.", "error"); return; }
+    if (!form.items.trim()) { sa.alert("Items required", "Add at least one item (one per line: name | qty | unit price).", "error"); return; }
     const ok = await sa.confirmAction("Create PO?", `Create PO "${form.po_number}"?`, "Create");
     if (!ok) return;
     const items = form.items.split("\n").map((l) => l.trim()).filter(Boolean).map((line) => {
@@ -37,14 +44,17 @@ export default function POs({ pos }: any) {
     });
     router.post("/app/pos", { ...form, items }, {
       onSuccess: () => { setOpen(false); setForm({ po_number:"",vendor_erp_code:"",po_date:"",items:"" }); sa.alert("PO created", `"${form.po_number}" has been created.`, "success"); },
-      onError: () => {},
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
     });
   };
 
   const remove = async (po: any) => {
     const ok = await sa.confirmDelete(po.po_number);
     if (!ok) return;
-    router.delete(`/app/pos/${po.id}`, { onSuccess: () => sa.alert("PO deleted", `"${po.po_number}" has been removed.`, "success") });
+    router.delete(`/app/pos/${po.id}`, {
+      onSuccess: () => sa.alert("PO deleted", `"${po.po_number}" has been removed.`, "success"),
+      onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
+    });
   };
 
   // Summary stats
