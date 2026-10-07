@@ -1,4 +1,4 @@
-export type AppRole = "admin" | "procurement" | "approver" | "department_head" | "executive_director" | "counter_ed" | "scm_head" | "finance_head" | "line_manager" | "vendor";
+export type AppRole = string;
 export type VendorStatus = "pending" | "active" | "inactive" | "blacklisted";
 export type TenderStatus = "open" | "closed" | "awarded";
 export type PRStatus = "new" | "tendered";
@@ -8,7 +8,7 @@ export interface BidItemPrice { name: string; qty: number; unit: string; unit_pr
 
 export interface AuthUser {
   id: string; email: string; full_name: string;
-  roles: AppRole[]; primary_role: AppRole | null;
+  roles: AppRole[]; primary_role: AppRole | null; permissions: string[];
 }
 export interface AppNotification {
   id: string;

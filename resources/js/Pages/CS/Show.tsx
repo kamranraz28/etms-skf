@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import { PageSharedProps } from "@/lib/types";
+import { usePermissions } from "@/lib/permissions";
 import { Head, router, usePage } from "@inertiajs/react";
 import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle, Scale, FileText, UserCheck, Workflow, RefreshCw, Wand2, Save, Monitor, ShieldCheck, HelpCircle } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -14,10 +16,10 @@ export default function CSShow({
   cs, items, selections, approvals, erpLogs, prItems, workflowTypes,
 }: any) {
   const { props } = usePage<PageSharedProps>();
-  const primary = props.auth.user?.primary_role;
+  const permissions = usePermissions();
   const userRoles = props.auth.user?.roles ?? [];
-  const isProc = primary === "procurement" || primary === "admin";
-  const isAdmin = primary === "admin";
+  const canManage = permissions.includes("cs.manage");
+  const canErp = permissions.includes("cs.erp");
   const [comment, setComment] = useState("");
   const [selectedWf, setSelectedWf] = useState("");
   const [savingAwards, setSavingAwards] = useState<Record<number, boolean>>({});
@@ -203,7 +205,7 @@ export default function CSShow({
                     {vendorsInCs.map((v) => (
                       <th key={v.id} className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 border-l border-border/30" colSpan={2}>{v.name}</th>
                     ))}
-                    {cs.status === "draft" && <th className="px-3 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 w-24">Actions</th>}
+                    {cs.status === "draft" && canManage && <th className="px-3 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 w-24">Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/25">
@@ -251,7 +253,7 @@ export default function CSShow({
                                   ৳ {unitPrice.toLocaleString()}
                                 </div>
                                 <div className="text-[9px] uppercase font-semibold text-muted-foreground/50 mt-0.5">/ {pr.unit}</div>
-                                {cs.status === "draft" ? (
+                                {cs.status === "draft" && canManage ? (
                                   <div className="mt-2.5 space-y-1.5">
                                     <input type="number" min={0} max={requestedQty} value={qty}
                                       onChange={(e) => updateQty(idx, s.vendor_id, e.target.value)}
@@ -268,7 +270,7 @@ export default function CSShow({
                             </td>
                           );
                         })}
-                        {cs.status === "draft" && (
+                        {cs.status === "draft" && canManage && (
                           <td className="px-3 py-4 align-middle">
                             <div className="flex flex-col items-center gap-1.5">
                               <button onClick={() => autoFill(idx)} title="Auto fill to lowest bidder"
@@ -469,7 +471,7 @@ export default function CSShow({
               <Workflow className="h-4.5 w-4.5 text-accent" /> Control Center
             </div>
             <div className="p-4 space-y-4">
-              {cs.status === "draft" && isProc && (
+              {cs.status === "draft" && canManage && (
                 <>
                   <div className="space-y-1.5">
                     <label className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-bold">Select Approval Flow</label>
@@ -522,7 +524,7 @@ export default function CSShow({
               
               {cs.status === "approved" && (
                 <>
-                  {isAdmin && !erpDone && (
+                  {canErp && !erpDone && (
                     <Button className="w-full h-10 text-xs font-semibold" onClick={sendToErp}>
                       <Upload className="h-4 w-4 mr-1.5" /> Push Awards to ERP
                     </Button>

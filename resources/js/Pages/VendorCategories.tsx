@@ -8,13 +8,14 @@ import { Label } from "@/components/ui/label";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { cn } from "@/lib/utils";
 import { Head, router, usePage } from "@inertiajs/react";
+import { usePermissions } from "@/lib/permissions";
 import { Pencil, Plus, Trash2, Tag, Calendar } from "lucide-react";
 import { useState } from "react";
 
 export default function VendorCategories({ categories }: any) {
   const { props } = usePage<any>();
   const errors = props.errors || {};
-  const isAdmin = !!props.auth.user?.roles.includes("admin");
+  const isAdmin = usePermissions().includes("vendor_categories.manage");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ name: "" });

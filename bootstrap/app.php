@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\EnsureUserHasPermission;
 use App\Http\Middleware\Authenticate;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(fn() => route('app.dashboard'));
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
+            'permission' => EnsureUserHasPermission::class,
             'auth' => Authenticate::class,
         ]);
         $middleware->trustProxies(at: '*');

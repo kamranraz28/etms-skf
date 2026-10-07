@@ -164,7 +164,7 @@ class ClaimController extends Controller
 
         // Filter claims where user's role matches the current step's role_name
         $userRoles = $user->roles()->pluck('role')->all();
-        if (!$user->hasRole('admin')) {
+        if (!$user->hasPermission('claims.view_all')) {
             $query->whereIn('status', ['submitted'])
                 ->whereHas('currentStep', function ($q) use ($userRoles) {
                     $q->whereIn('role_name', $userRoles);
@@ -172,14 +172,14 @@ class ClaimController extends Controller
         }
 
         if ($r->filled('status')) {
-            if ($user->hasRole('admin')) {
+            if ($user->hasPermission('claims.view_all')) {
                 $query->where('status', $r->status);
             }
         }
 
         $rows = $query->orderByDesc('created_at')->get();
 
-        if ($user->hasRole('admin')) {
+        if ($user->hasPermission('claims.view_all')) {
             $vendors = Vendor::where('status', 'active')->get(['id', 'name', 'erp_code']);
             return Inertia::render('Claims/Index', [
                 'rows' => $rows,

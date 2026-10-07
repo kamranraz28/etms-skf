@@ -112,6 +112,9 @@ class BidController extends Controller {
     }
 
     public function document(Bid $bid) {
+        if ($bid->tender && $bid->tender->status === 'open') {
+            abort(403, 'Bid documents are sealed until the tender is closed.');
+        }
         abort_unless($bid->document_path && Storage::disk('public')->exists($bid->document_path), 404);
         return Storage::disk('public')->download($bid->document_path);
     }

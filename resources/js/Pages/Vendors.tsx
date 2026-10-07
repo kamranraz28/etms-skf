@@ -11,13 +11,14 @@ import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { PageSharedProps, VendorStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Head, router, usePage } from "@inertiajs/react";
+import { usePermissions } from "@/lib/permissions";
 import { Pencil, Plus, ShieldCheck, ShieldOff, Trash2, Building2, Users, Clock, Ban, Tag } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export default function Vendors({ vendors, categories }: any) {
   const { props } = usePage<PageSharedProps>();
   const errors = (props as any).errors || {};
-  const isAdmin = !!props.auth.user?.roles.includes("admin");
+  const isAdmin = usePermissions().includes("vendors.manage");
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<any>(null);

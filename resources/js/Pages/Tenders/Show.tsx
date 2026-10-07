@@ -4,6 +4,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { PageSharedProps } from "@/lib/types";
+import { usePermissions } from "@/lib/permissions";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { ArrowLeft, ExternalLink, Lock, Scale, Gavel, Users, FileText, UserPlus, X, Edit3, Check, Handshake, MessageSquare, Calendar, Layers, ShieldCheck, Mail, DollarSign } from "lucide-react";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
@@ -12,8 +13,11 @@ import { useMemo, useState } from "react";
 export default function TenderShow({ tender, vendors, bids, cs, categories }: any) {
   const { props } = usePage<PageSharedProps>();
   const sa = useSweetAlert();
-  const primary = props.auth.user?.primary_role;
+  const permissions = usePermissions();
+  const canManage = permissions.includes("tenders.manage");
+  const canNegotiate = permissions.includes("tenders.negotiate");
   const lowest = bids[0];
+  const isSealed = tender.status === "open";
   const [inviteModal, setInviteModal] = useState(false);
   const [viewBidItems, setViewBidItems] = useState<any>(null);
   const [editingDeadline, setEditingDeadline] = useState(false);
@@ -21,6 +25,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
   const [settleBid, setSettleBid] = useState<any>(null);
   const [offerInputs, setOfferInputs] = useState<Record<string, string>>({});
   const [sendingOffers, setSendingOffers] = useState(false);
+  const [generatingCs, setGeneratingCs] = useState(false);
 
   const openSettle = (bid: any) => {
     setSettleBid(bid);
@@ -126,10 +131,13 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
     }
   };
   const generateCS = async () => {
+    if (generatingCs) return;
     const confirmed = await sa.confirmAction("Generate Comparison Statement?", "Create CS from winning bid?", "Generate");
     if (confirmed) {
+      setGeneratingCs(true);
       router.post(`/app/tenders/${tender.id}/generate-cs`, {}, {
         onSuccess: () => sa.alert("CS generated", "Comparison statement has been generated.", "success"),
+        onFinish: () => setGeneratingCs(false),
       });
     }
   };
@@ -152,17 +160,19 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
       ),
     },
     { key: "erp_code", label: "ERP Code", sortable: false, render: (r: any) => <span className="font-mono text-xs whitespace-nowrap bg-muted/60 px-2 py-0.5 rounded-md">{r.vendor?.erp_code ?? <span className="text-warning font-semibold">Not mapped</span>}</span> },
-    { key: "total_price", label: "Total Bid Value", sortable: true, className: "text-right", render: (r) => <span className="font-mono text-xs whitespace-nowrap font-bold text-foreground">৳ {Number(r.total_price).toLocaleString()}</span> },
-    { key: "negotiations", label: "Negotiation Status", sortable: false, render: (r: any) => negotiationBadge(r) },
+    ...(!isSealed ? [
+      { key: "total_price", label: "Total Bid Value", sortable: true, className: "text-right", render: (r: any) => <span className="font-mono text-xs whitespace-nowrap font-bold text-foreground">৳ {Number(r.total_price).toLocaleString()}</span> },
+      { key: "negotiations", label: "Negotiation Status", sortable: false, render: (r: any) => negotiationBadge(r) },
+    ] : []),
     { key: "submitted_at", label: "Submitted Date", sortable: true, render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</span> },
-    {
+    ...(!isSealed ? [{
       key: "actions" as string,
       label: "Actions",
       className: "text-right",
       exportable: false,
       render: (r: any) => (
         <div className="flex items-center justify-end gap-1.5">
-          {tender.status !== "awarded" && (primary === "admin" || primary === "procurement") && (
+          {tender.status === "closed" && canNegotiate && (
             <Button size="sm" variant="outline" className="h-8 py-0 px-2.5 text-xs gap-1" onClick={(e) => { e.stopPropagation(); openSettle(r); }}>
               <Handshake className="h-3.5 w-3.5" /> Settle Price
             </Button>
@@ -172,7 +182,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
           </Button>
         </div>
       ),
-    },
+    }] : []),
   ];
 
   const itemColumns: Column[] = [
@@ -222,7 +232,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
             ) : (
               <span className="flex items-center gap-1 font-medium text-foreground/70">
                 Deadline: {new Date(tender.deadline).toLocaleString()}
-                {tender.status === "open" && <button onClick={startEditDeadline} className="text-muted-foreground hover:text-accent ml-1 p-0.5 hover:bg-muted rounded transition-colors"><Edit3 className="h-3 w-3" /></button>}
+                {tender.status === "open" && canManage && <button onClick={startEditDeadline} className="text-muted-foreground hover:text-accent ml-1 p-0.5 hover:bg-muted rounded transition-colors"><Edit3 className="h-3 w-3" /></button>}
               </span>
             )}
           </div>
@@ -230,14 +240,14 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
         actions={
           <div className="flex gap-2 items-center flex-wrap">
             <StatusBadge status={tender.status} />
-            {tender.status === "open" && (
+            {tender.status === "open" && canManage && (
               <Button variant="outline" size="sm" className="gap-1.5 h-9" onClick={closeTender}>
                 <Lock className="h-4 w-4" /> Close Tender
               </Button>
             )}
-            {tender.status !== "open" && bids.length > 0 && !cs && (primary === "admin" || primary === "procurement") && (
-              <Button size="sm" className="gap-1.5 h-9" onClick={generateCS}>
-                <Scale className="h-4 w-4" /> Generate CS
+            {tender.status !== "open" && bids.length > 0 && !cs && canManage && (
+              <Button size="sm" className="gap-1.5 h-9" onClick={generateCS} disabled={generatingCs}>
+                <Scale className="h-4 w-4" /> {generatingCs ? "Generating..." : "Generate CS"}
               </Button>
             )}
             {cs && (
@@ -263,6 +273,9 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
                 </div>
                 Bids Received ({bids.length})
               </div>
+              {isSealed && (
+                <span className="text-[10px] font-bold uppercase tracking-wider text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/15">Sealed · prices hidden until close</span>
+              )}
             </div>
             <DataTable
               columns={bidColumns}
@@ -312,7 +325,7 @@ export default function TenderShow({ tender, vendors, bids, cs, categories }: an
                 </div>
                 Invited Vendors ({vendors.length})
               </div>
-              {tender.status === "open" && (
+              {tender.status === "open" && canManage && (
                 <Button size="sm" variant="outline" className="gap-1 h-8" onClick={openInvite}>
                   <UserPlus className="h-3.5 w-3.5" /> Invite
                   </Button>

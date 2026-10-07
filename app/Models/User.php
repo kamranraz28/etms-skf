@@ -31,4 +31,22 @@ class User extends Authenticatable
     {
         return $this->roles()->where('role', $r)->exists();
     }
+
+    /** All permission slugs granted through the user's roles. */
+    public function permissions(): array
+    {
+        // The `admin` role is the system superuser and implicitly holds everything.
+        if ($this->hasRole('admin')) {
+            return Permission::pluck('slug')->all();
+        }
+        $slugs = $this->roles()->pluck('role')->all();
+        if (empty($slugs)) return [];
+        return Permission::whereHas('roles', fn ($q) => $q->whereIn('slug', $slugs))
+            ->pluck('slug')->all();
+    }
+
+    public function hasPermission(string $slug): bool
+    {
+        return in_array($slug, $this->permissions(), true);
+    }
 }

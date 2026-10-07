@@ -19,6 +19,7 @@ import {
     Scale,
     Settings,
     ShieldCheck,
+    KeyRound,
     Tag,
     Users,
     Workflow,
@@ -34,24 +35,24 @@ interface NavItem {
   href: string;
   label: string;
   icon: ReactNode;
-  roles: AppRole[];
+  /** Staff items: required permission slug. Vendor items: role slugs. */
+  permission?: string;
+  roles?: AppRole[];
   group?: string;
 }
 
-const APPROVER_ROLES = ["admin", "procurement", "approver", "department_head", "executive_director", "counter_ed", "scm_head", "finance_head", "line_manager", "user", "unit_head", "scm_user"] as AppRole[];
-
 const NAV: NavItem[] = [
   // Main
-  { href: "/app", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" />, roles: [...APPROVER_ROLES, "vendor"], group: "main" },
+  { href: "/app", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" />, group: "main" },
   // Procurement
-  { href: "/app/prs", label: "Purchase Requisitions", icon: <FileStack className="h-4 w-4" />, roles: APPROVER_ROLES, group: "procurement" },
-  { href: "/app/pos", label: "Purchase Orders", icon: <ClipboardList className="h-4 w-4" />, roles: APPROVER_ROLES, group: "procurement" },
-  { href: "/app/tenders", label: "Tenders", icon: <Gavel className="h-4 w-4" />, roles: APPROVER_ROLES, group: "procurement" },
-  { href: "/app/cs", label: "Comparative Statements", icon: <Scale className="h-4 w-4" />, roles: APPROVER_ROLES, group: "procurement" },
-  { href: "/app/claims", label: "Claims", icon: <Receipt className="h-4 w-4" />, roles: APPROVER_ROLES, group: "procurement" },
+  { href: "/app/prs", label: "Purchase Requisitions", icon: <FileStack className="h-4 w-4" />, permission: "prs.view", group: "procurement" },
+  { href: "/app/pos", label: "Purchase Orders", icon: <ClipboardList className="h-4 w-4" />, permission: "pos.view", group: "procurement" },
+  { href: "/app/tenders", label: "Tenders", icon: <Gavel className="h-4 w-4" />, permission: "tenders.view", group: "procurement" },
+  { href: "/app/cs", label: "Comparative Statements", icon: <Scale className="h-4 w-4" />, permission: "cs.view", group: "procurement" },
+  { href: "/app/claims", label: "Claims", icon: <Receipt className="h-4 w-4" />, permission: "claims.view", group: "procurement" },
   // Master Data
-  { href: "/app/vendors", label: "Vendors", icon: <Building2 className="h-4 w-4" />, roles: APPROVER_ROLES, group: "masterdata" },
-  { href: "/app/vendor-categories", label: "Vendor Categories", icon: <Tag className="h-4 w-4" />, roles: APPROVER_ROLES, group: "masterdata" },
+  { href: "/app/vendors", label: "Vendors", icon: <Building2 className="h-4 w-4" />, permission: "vendors.view", group: "masterdata" },
+  { href: "/app/vendor-categories", label: "Vendor Categories", icon: <Tag className="h-4 w-4" />, permission: "vendor_categories.view", group: "masterdata" },
   // Vendor Portal
   { href: "/app", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" />, roles: ["vendor"], group: "portal" },
   { href: "/app/my-tenders", label: "My Tenders", icon: <Gavel className="h-4 w-4" />, roles: ["vendor"], group: "portal" },
@@ -59,9 +60,10 @@ const NAV: NavItem[] = [
   { href: "/app/my-claims", label: "My Claims", icon: <Receipt className="h-4 w-4" />, roles: ["vendor"], group: "portal" },
   { href: "/app/profile", label: "Vendor Profile", icon: <Boxes className="h-4 w-4" />, roles: ["vendor"], group: "portal" },
   // Admin
-  { href: "/app/users", label: "Users & Roles", icon: <ShieldCheck className="h-4 w-4" />, roles: ["admin"], group: "admin" },
-  { href: "/app/workflow-types", label: "Workflow Types", icon: <Workflow className="h-4 w-4" />, roles: ["admin"], group: "admin" },
-  { href: "/app/settings", label: "Settings", icon: <Settings className="h-4 w-4" />, roles: ["admin"], group: "admin" },
+  { href: "/app/users", label: "Users & Roles", icon: <ShieldCheck className="h-4 w-4" />, permission: "users.manage", group: "admin" },
+  { href: "/app/roles", label: "Roles & Permissions", icon: <KeyRound className="h-4 w-4" />, permission: "roles.manage", group: "admin" },
+  { href: "/app/workflow-types", label: "Workflow Types", icon: <Workflow className="h-4 w-4" />, permission: "workflow.manage", group: "admin" },
+  { href: "/app/settings", label: "Settings", icon: <Settings className="h-4 w-4" />, permission: "settings.manage", group: "admin" },
 ];
 
 const GROUP_LABELS: Record<string, string> = {
@@ -168,9 +170,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   const items = useMemo(() => {
-    if (!primary) return [];
-    return NAV.filter((n) => n.roles.includes(primary));
-  }, [primary]);
+    if (!user) return [];
+    const perms = user.permissions ?? [];
+    const roles = user.roles ?? [];
+    return NAV.filter((n) => {
+      if (n.roles) return n.roles.some((r) => roles.includes(r));
+      if (n.permission) return perms.includes(n.permission);
+      return true;
+    });
+  }, [user]);
 
   // Group items
   const grouped = useMemo(() => {

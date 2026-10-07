@@ -108,14 +108,16 @@ export function DataTable<T extends Record<string, any>>({
   const filtered = useMemo(() => {
     if (!search.trim()) return data;
     const q = search.toLowerCase();
-    return data.filter((row) =>
-      columns.some((col) => {
-        const val = row[col.key];
-        if (val == null) return false;
-        return String(val).toLowerCase().includes(q);
-      }),
-    );
-  }, [data, search, columns]);
+    const haystack = (v: any): string => {
+      if (v == null) return "";
+      if (Array.isArray(v)) return v.map(haystack).join(" ");
+      if (typeof v === "object") return Object.values(v).map(haystack).join(" ");
+      return String(v);
+    };
+    // Match against the whole row (not just visible columns) so related
+    // fields like email are searchable too.
+    return data.filter((row) => haystack(row).toLowerCase().includes(q));
+  }, [data, search]);
 
   const sorted = useMemo(() => {
     if (!sortKey) return filtered;
@@ -275,6 +277,12 @@ export function DataTable<T extends Record<string, any>>({
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
               <Input
+                type="search"
+                name="datatable-search"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);

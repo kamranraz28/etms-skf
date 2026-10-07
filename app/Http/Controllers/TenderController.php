@@ -114,6 +114,20 @@ class TenderController extends Controller {
         $bids = Bid::with('vendor:id,name,erp_code', 'negotiations')
             ->where('tender_id', $tender->id)
             ->orderBy('total_price')->get();
+        if ($tender->status === 'open') {
+            // Sealed-bid: staff see who bid and when, but no prices, no
+            // negotiation history, and no bid documents until the tender closes.
+            $bids->each(function ($bid) {
+                $bid->total_price = null;
+                $bid->item_prices = collect($bid->item_prices ?? [])->map(fn ($it) => [
+                    'name' => $it['name'] ?? null,
+                    'qty' => $it['qty'] ?? null,
+                    'unit' => $it['unit'] ?? null,
+                ])->all();
+                $bid->setRelation('negotiations', collect());
+                $bid->document_path = null;
+            });
+        }
         $cs = $tender->cs;
         $categories = VendorCategory::with('vendors:id,name,email,erp_code,status')
             ->orderBy('name')->get();
@@ -173,6 +187,13 @@ class TenderController extends Controller {
     }
 
     public function generateCs(Tender $tender, CsGenerator $gen) {
+        if ($tender->status === 'open') {
+            return back()->with('error', 'Close the tender before generating the CS.');
+        }
+        if ($tender->cs) {
+            return redirect()->route('app.cs.show', $tender->cs)
+                ->with('error', 'A comparative statement already exists for this tender.');
+        }
         $cs = $gen->generate($tender);
         return redirect()->route('app.cs.show', $cs)->with('success', 'CS generated');
     }

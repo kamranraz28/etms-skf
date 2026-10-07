@@ -6,6 +6,7 @@ use App\Models\Bid;
 use App\Models\BidPriceNegotiation;
 use App\Models\CsItem;
 use App\Models\CsItemSelection;
+use App\Models\Role;
 use App\Models\Tender;
 use App\Models\User;
 use App\Notifications\PriceOfferResponded;
@@ -16,8 +17,8 @@ class NegotiationController extends Controller
 {
     public function offer(Request $r, Tender $tender, Bid $bid)
     {
-        if ($tender->status === 'awarded') {
-            return back()->with('error', 'Tender is already awarded.');
+        if ($tender->status !== 'closed') {
+            return back()->with('error', 'Close the tender before settling prices.');
         }
         if ($bid->tender_id !== $tender->id) {
             return back()->with('error', 'Bid does not belong to this tender.');
@@ -172,7 +173,9 @@ class NegotiationController extends Controller
 
     protected function notifyStaff(BidPriceNegotiation $negotiation): void
     {
-        $staff = User::whereHas('roles', fn ($q) => $q->whereIn('role', ['admin', 'procurement']))
+        $staffSlugs = Role::whereHas('permissions', fn ($q) => $q->where('slug', 'tenders.negotiate'))
+            ->pluck('slug')->all();
+        $staff = User::whereHas('roles', fn ($q) => $q->whereIn('role', $staffSlugs))
             ->get();
         foreach ($staff as $user) {
             $user->notify(new PriceOfferResponded($negotiation));
