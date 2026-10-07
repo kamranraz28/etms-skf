@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { cn, currencySymbol } from "@/lib/utils";
 import { PageSharedProps } from "@/lib/types";
 import { usePermissions } from "@/lib/permissions";
 import { Head, router, usePage } from "@inertiajs/react";
-import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle, Scale, FileText, UserCheck, Workflow, RefreshCw, Wand2, Save, Monitor, ShieldCheck, HelpCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Download, Send, Upload, XCircle, Scale, FileText, UserCheck, Workflow, RefreshCw, Wand2, Save, Monitor, ShieldCheck, HelpCircle, TriangleAlert } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export default function CSShow({
@@ -133,6 +133,21 @@ export default function CSShow({
   const totalItems = prItems.length;
   const totalVendors = vendorsInCs.length;
   const lowestBid = Number(lowestBidDetails?.total_price ?? 0);
+  // Per-item budget check: an item is over budget when its lowest quoted
+  // unit price exceeds the PR item's approximate price (same currency).
+  const overBudgetIdx: Record<number, boolean> = {};
+  prItems.forEach((pr: any, idx: number) => {
+    const est = Number(pr.approximate_price ?? 0);
+    if (!(est > 0)) return;
+    const row = matrix[idx] ?? [];
+    if (row.length === 0) return;
+    const lowestUnit = Math.min(...row.map((r: any) => Number(r.unit_price)));
+    if (lowestUnit > est) overBudgetIdx[idx] = true;
+  });
+  const overBudgetCount = Object.keys(overBudgetIdx).length;
+  const budgetCurrencies = [...new Set(prItems.filter((p: any) => p.approximate_price != null).map((p: any) => p.currency || "BDT"))];
+  const budgetHint = budgetCurrencies.length === 0 ? null
+    : `Est. ${budgetCurrencies.map((c) => `${currencySymbol(c)}${prItems.filter((p: any) => (p.currency || "BDT") === c).reduce((s: number, p: any) => s + Number(p.approximate_price), 0).toLocaleString()}`).join(" + ")}`;
   const fullyAwardedItems = prItems.filter((pr: any, idx: number) => {
     const row = matrix[idx] ?? [];
     const total = row.reduce((s: number, r: any) => s + Number(draftQtys[`${idx}-${r.vendor_id}`] ?? r.qty ?? 0), 0);
@@ -167,7 +182,7 @@ export default function CSShow({
         {[
           { label: "Items", value: totalItems, icon: FileText, color: "text-primary bg-primary/10" },
           { label: "Vendors Evaluated", value: totalVendors, icon: Scale, color: "text-accent bg-accent/15" },
-          { label: "Lowest Bid Value", value: `৳${lowestBid.toLocaleString()}`, icon: FileText, color: "text-success bg-success/10" },
+          { label: "Lowest Bid Value", value: `৳${lowestBid.toLocaleString()}`, icon: FileText, color: "text-success bg-success/10", badge: overBudgetCount > 0 ? "High price" : null, hint: overBudgetCount > 0 ? `${overBudgetCount} item(s) over budget` : budgetHint },
           { label: "Items Awarded", value: `${fullyAwardedItems}/${totalItems} items`, icon: CheckCircle2, color: fullyAwardedItems === totalItems ? "text-success bg-success/10" : "text-warning bg-warning/10" },
         ].map((stat, i) => (
           <div key={i} className="bg-card border border-border/60 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm">
@@ -177,6 +192,14 @@ export default function CSShow({
             <div className="min-w-0">
               <div className="text-lg font-bold text-foreground leading-tight truncate">{stat.value}</div>
               <div className="text-[10px] uppercase font-bold tracking-wider text-foreground/70 mt-0.5">{stat.label}</div>
+              {(stat as any).badge && (
+                <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-destructive bg-destructive/10 px-2 py-0.5 rounded-full border border-destructive/20">
+                  <TriangleAlert className="h-3 w-3" /> {(stat as any).badge}
+                </div>
+              )}
+              {(stat as any).hint && (
+                <div className="text-[10px] font-mono text-foreground/70 mt-1">{(stat as any).hint}</div>
+              )}
             </div>
           </div>
         ))}
@@ -256,6 +279,11 @@ export default function CSShow({
                                 <div className={cn("font-mono text-xs font-bold", isLow ? "text-success" : "text-foreground")}>
                                   ৳ {unitPrice.toLocaleString()}
                                 </div>
+                                {isLow && overBudgetIdx[idx] && (
+                                  <div className="mt-1 inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full border border-destructive/20">
+                                    High
+                                  </div>
+                                )}
                                 <div className="text-[9px] uppercase font-semibold text-foreground/70 mt-0.5">/ {pr.unit}</div>
                                 {cs.status === "draft" && canManage ? (
                                   <div className="mt-2.5 space-y-1.5">

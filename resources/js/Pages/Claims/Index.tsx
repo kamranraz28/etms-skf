@@ -5,9 +5,24 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { ChevronRight, Receipt, DollarSign, Clock, CheckCircle } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export default function ClaimsIndex({ rows = [] }: any) {
+  const [statusFilter, setStatusFilter] = useState("");
+  const [vendorFilter, setVendorFilter] = useState("");
+
+  const statuses = useMemo(() => [...new Set(rows.map((r: any) => r.status).filter(Boolean))].sort(), [rows]);
+  const vendors = useMemo(() => {
+    const seen = new Map<string, string>();
+    rows.forEach((r: any) => { if (r.vendor?.name && !seen.has(r.vendor.name)) seen.set(r.vendor.name, r.vendor.name); });
+    return [...seen.keys()].sort();
+  }, [rows]);
+
+  const filteredRows = useMemo(() => rows.filter((r: any) => {
+    if (statusFilter && r.status !== statusFilter) return false;
+    if (vendorFilter && r.vendor?.name !== vendorFilter) return false;
+    return true;
+  }), [rows, statusFilter, vendorFilter]);
   // Claims summary stats
   const stats = useMemo(() => {
     const totalCount = rows.length;
@@ -92,7 +107,30 @@ export default function ClaimsIndex({ rows = [] }: any) {
         ))}
       </div>
 
-      <DataTable columns={columns} data={rows} exportFilename="claims" emptyMessage="No billing claims found." searchPlaceholder="Search claims..." />
+      <DataTable columns={columns} data={filteredRows} exportFilename="claims" emptyMessage="No claims match the current search / filters." searchPlaceholder="Search claims..."
+        filterable
+        filters={
+          <div className="flex flex-col sm:flex-row items-end gap-3.5">
+            <div className="w-full sm:flex-1 space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Status</label>
+              <select className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/25 transition-all" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                <option value="">All statuses</option>
+                {statuses.map((s: any) => <option key={s} value={s}>{String(s).replace(/_/g, " ").toUpperCase()}</option>)}
+              </select>
+            </div>
+            <div className="w-full sm:flex-1 space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Vendor</label>
+              <select className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/25 transition-all" value={vendorFilter} onChange={(e) => setVendorFilter(e.target.value)}>
+                <option value="">All vendors</option>
+                {vendors.map((v: string) => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+            {(statusFilter || vendorFilter) && (
+              <Button variant="outline" onClick={() => { setStatusFilter(""); setVendorFilter(""); }} className="w-full sm:w-auto h-10 px-5 shrink-0">Clear</Button>
+            )}
+          </div>
+        }
+      />
     </AppShell>
   );
 }

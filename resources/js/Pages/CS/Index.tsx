@@ -3,11 +3,13 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Scale, ArrowUpRight, Workflow, Hash, Calendar, Layers } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ExternalLink, Scale, ArrowUpRight, Workflow, Hash, Calendar, Layers, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export default function CsIndex({ rows = [] }: any) {
   const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
 
   const stats = useMemo(() => {
     const total = rows.length;
@@ -18,12 +20,18 @@ export default function CsIndex({ rows = [] }: any) {
   }, [rows]);
 
   const filteredCS = useMemo(() => {
-    if (filter === "all") return rows;
-    if (filter === "pending") {
-      return rows.filter((r: any) => r.status?.toLowerCase() === "pending" || r.status?.toLowerCase().includes("review"));
-    }
-    return rows.filter((r: any) => r.status?.toLowerCase() === filter);
-  }, [rows, filter]);
+    const q = query.trim().toLowerCase();
+    const byTab = filter === "all" ? rows
+      : filter === "pending"
+        ? rows.filter((r: any) => r.status?.toLowerCase() === "pending" || r.status?.toLowerCase().includes("review"))
+        : rows.filter((r: any) => r.status?.toLowerCase() === filter);
+    if (!q) return byTab;
+    return byTab.filter((r: any) =>
+      [r.id, r.tender?.tender_number, r.tender?.title, r.status, r.workflow_type?.name]
+        .filter((v) => v !== null && v !== undefined)
+        .some((v: any) => String(v).toLowerCase().includes(q))
+    );
+  }, [rows, filter, query]);
 
   return (
     <AppShell>
@@ -83,6 +91,20 @@ export default function CsIndex({ rows = [] }: any) {
           </div>
           <div className="text-2xl font-bold text-foreground font-display">{stats.rejected}</div>
         </button>
+      </div>
+
+      {/* Search */}
+      <div className="relative max-w-sm mb-6">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/60" />
+        <Input
+          type="search"
+          name="cs-search"
+          autoComplete="off"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by CS no, tender, title, status..."
+          className="pl-9 h-10 text-sm bg-background/50 border-border/50 focus:bg-background transition-all duration-200"
+        />
       </div>
 
       {/* Grid List */}

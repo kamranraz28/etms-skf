@@ -18,7 +18,21 @@ export default function POs({ pos }: any) {
   const errors = (props as any).errors || {};
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ po_number: "", vendor_erp_code: "", po_date: "", items: "" });
+  const [statusFilter, setStatusFilter] = useState("");
+  const [vendorFilter, setVendorFilter] = useState("");
   const sa = useSweetAlert();
+
+  const poStatusOf = (po: any) => {
+    const s = po.status?.toLowerCase();
+    return (s === "pending" || s === "draft") ? "pending" : "completed";
+  };
+  const erpCodes = useMemo(() => [...new Set(pos.map((p: any) => p.vendor_erp_code).filter(Boolean))].sort(), [pos]);
+
+  const filteredPos = useMemo(() => pos.filter((p: any) => {
+    if (statusFilter && poStatusOf(p) !== statusFilter) return false;
+    if (vendorFilter && p.vendor_erp_code !== vendorFilter) return false;
+    return true;
+  }), [pos, statusFilter, vendorFilter]);
 
   const sync = async () => {
     const ok = await sa.confirmAction("Sync from ERP?", "Fetch latest purchase orders from the ERP system.", "Sync");
@@ -225,7 +239,31 @@ export default function POs({ pos }: any) {
         ))}
       </div>
 
-      <DataTable columns={columns} data={pos} exportFilename="purchase-orders" emptyMessage="No POs synced. Click 'Sync from ERP'." searchPlaceholder="Search POs..." />
+      <DataTable columns={columns} data={filteredPos} exportFilename="purchase-orders" emptyMessage="No POs match the current search / filters." searchPlaceholder="Search POs..."
+        filterable
+        filters={
+          <div className="flex flex-col sm:flex-row items-end gap-3.5">
+            <div className="w-full sm:flex-1 space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Status</label>
+              <select className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/25 transition-all" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                <option value="">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div className="w-full sm:flex-1 space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Vendor ERP</label>
+              <select className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/25 transition-all" value={vendorFilter} onChange={(e) => setVendorFilter(e.target.value)}>
+                <option value="">All vendors</option>
+                {erpCodes.map((c: any) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            {(statusFilter || vendorFilter) && (
+              <Button variant="outline" onClick={() => { setStatusFilter(""); setVendorFilter(""); }} className="w-full sm:w-auto h-10 px-5 shrink-0">Clear</Button>
+            )}
+          </div>
+        }
+      />
       {sa.SweetAlert}
     </AppShell>
   );

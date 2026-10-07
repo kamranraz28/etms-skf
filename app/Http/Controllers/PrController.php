@@ -61,6 +61,8 @@ class PrController extends Controller {
             'items.*.name' => 'required|string',
             'items.*.qty' => 'required|numeric|min:1',
             'items.*.unit' => 'required|string',
+            'items.*.approximate_price' => 'nullable|numeric|min:0',
+            'items.*.currency' => 'nullable|string|in:BDT,USD,EUR,GBP,INR',
         ]);
         $data['status'] = 'new';
         Pr::create($data);

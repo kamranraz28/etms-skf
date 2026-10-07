@@ -44,12 +44,28 @@ class BidController extends Controller {
             'tender.pr', 'vendor', 'negotiations',
             'csItems.cs:id,status',
         ]);
+        // Budget stays in-house: never expose per-item estimates to vendors
+        if ($bid->tender->pr) {
+            $bid->tender->pr->items = collect($bid->tender->pr->items ?? [])->map(fn ($it) => [
+                'name' => $it['name'] ?? null,
+                'qty' => $it['qty'] ?? null,
+                'unit' => $it['unit'] ?? null,
+            ])->all();
+        }
         return Inertia::render('MyBidDetail', ['bid' => $bid]);
     }
 
     public function create(Request $r, Tender $tender) {
         $vendor = Vendor::with('categories:id,name')->where('user_id', $r->user()->id)->first();
         $tender->load('pr', 'itemCategories.vendorCategory');
+        // Budget stays in-house: never expose per-item estimates to vendors
+        if ($tender->pr) {
+            $tender->pr->items = collect($tender->pr->items ?? [])->map(fn ($it) => [
+                'name' => $it['name'] ?? null,
+                'qty' => $it['qty'] ?? null,
+                'unit' => $it['unit'] ?? null,
+            ])->all();
+        }
         return Inertia::render('SubmitBid', compact('tender', 'vendor'));
     }
 

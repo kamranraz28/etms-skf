@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Head, Link } from "@inertiajs/react";
-import { ArrowUpRight, FileText, Gavel, Plus, Users, Calendar, AlertCircle, Award } from "lucide-react";
+import { ArrowUpRight, FileText, Gavel, Plus, Users, Calendar, AlertCircle, Award, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
 
 export default function TenderIndex({ tenders }: any) {
   const sa = useSweetAlert();
   const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
 
   // Calculate summary stats
   const stats = useMemo(() => {
@@ -20,11 +22,17 @@ export default function TenderIndex({ tenders }: any) {
     return { total, open, closed, awarded };
   }, [tenders]);
 
-  // Filter tenders based on tab selection
+  // Filter tenders based on tab selection + search query (number, title, status)
   const filteredTenders = useMemo(() => {
-    if (filter === "all") return tenders;
-    return tenders.filter((t: any) => t.status === filter);
-  }, [tenders, filter]);
+    const q = query.trim().toLowerCase();
+    return tenders.filter((t: any) => {
+      if (filter !== "all" && t.status !== filter) return false;
+      if (!q) return true;
+      return [t.tender_number, t.title, t.status]
+        .filter(Boolean)
+        .some((v: any) => String(v).toLowerCase().includes(q));
+    });
+  }, [tenders, filter, query]);
 
   return (
     <AppShell>
@@ -96,6 +104,20 @@ export default function TenderIndex({ tenders }: any) {
         </button>
       </div>
 
+      {/* Search */}
+      <div className="relative max-w-sm mb-6">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/60" />
+        <Input
+          type="search"
+          name="tender-search"
+          autoComplete="off"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by number, title, status..."
+          className="pl-9 h-10 text-sm bg-background/50 border-border/50 focus:bg-background transition-all duration-200"
+        />
+      </div>
+
       {/* Tender List */}
       <div className="card-grid stagger-children">
         {filteredTenders.length === 0 && (
@@ -103,9 +125,9 @@ export default function TenderIndex({ tenders }: any) {
             <Gavel className="h-10 w-10 mx-auto mb-3 text-foreground/60 animate-float" />
             <p className="font-semibold text-foreground text-sm">No tenders found</p>
             <p className="text-xs text-foreground mt-1">
-              {filter === "all"
+              {filter === "all" && !query.trim()
                 ? "Create a new tender from a Purchase Requisition to get started."
-                : `No tenders have a status of '${filter}' currently.`}
+                : `No tenders match the current search / filter.`}
             </p>
           </div>
         )}

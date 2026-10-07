@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { ArrowLeft, Gavel, Scale, ExternalLink, FileText, CheckCircle2, X, Building, Layers } from "lucide-react";
+import { currencySymbol } from "@/lib/utils";
 
 export default function PrShow({ pr, approvedCsList }: any) {
   const sa = useSweetAlert();
@@ -101,6 +102,7 @@ export default function PrShow({ pr, approvedCsList }: any) {
                   <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80 w-12">#</th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Item</th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80 w-24">Qty</th>
+                  <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-foreground/80 w-32">Est. Budget</th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80 w-32">Status</th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/80">Reference</th>
                   <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-foreground/80 w-44">Action</th>
@@ -119,6 +121,9 @@ export default function PrShow({ pr, approvedCsList }: any) {
                         <span className="text-xs font-bold bg-muted/60 text-foreground px-2 py-0.5 rounded-md">
                           {item.qty} {item.unit}
                         </span>
+                      </td>
+                      <td className="px-5 py-4 text-right font-mono text-xs font-bold text-foreground whitespace-nowrap">
+                        {item.approximate_price != null ? `${currencySymbol(item.currency)}${Number(item.approximate_price).toLocaleString()}` : "—"}
                       </td>
                       <td className="px-5 py-4">
                         <StatusBadge status={itemStatus} className="text-[10px]" />

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Vendor;
 use App\Models\VendorCategory;
+use App\Services\TenderInvitationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -68,10 +69,17 @@ class VendorController extends Controller
 
         $vendor->categories()->sync($data['vendor_category_ids']);
 
+        // Late-join backfill: invite an active vendor to open tenders of these categories
+        $lateInvites = TenderInvitationService::inviteVendorToOpenTenders($vendor->fresh('categories'));
+
         if ($vendor->wasRecentlyCreated) {
             event(new VendorCreated($vendor, 'password'));
         }
-        return back()->with('success', 'Vendor created');
+        $msg = 'Vendor created';
+        if ($lateInvites > 0) {
+            $msg .= " ({$lateInvites} open tender invitation(s) sent).";
+        }
+        return back()->with('success', $msg);
     }
     public function update(Request $r, Vendor $vendor)
     {
@@ -90,7 +98,13 @@ class VendorController extends Controller
         $data['email'] = strtolower($data['email']);
         $vendor->update($data);
         $vendor->categories()->sync($data['vendor_category_ids']);
-        return back()->with('success', 'Vendor updated');
+        // Late-join backfill: newly added categories or activation invite to open tenders
+        $lateInvites = TenderInvitationService::inviteVendorToOpenTenders($vendor->fresh('categories'));
+        $msg = 'Vendor updated';
+        if ($lateInvites > 0) {
+            $msg .= " ({$lateInvites} open tender invitation(s) sent).";
+        }
+        return back()->with('success', $msg);
     }
     public function destroy(Vendor $vendor)
     {

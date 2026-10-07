@@ -1,14 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Link, router, Head, usePage } from "@inertiajs/react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, currencySymbol } from "@/lib/utils";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useSweetAlert } from "@/components/ui/extended/SweetAlert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, RefreshCw, ChevronRight, Trash2, ExternalLink, FileStack, CheckCircle2, Clock, Activity } from "lucide-react";
@@ -17,8 +16,26 @@ export default function PRs({ prs }: any) {
   const { props } = usePage();
   const errors = (props as any).errors || {};
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ pr_number: "", title: "", department: "", items: "" });
+  const blankItem = () => ({ name: "", qty: "1", unit: "pcs", approximate_price: "", currency: "BDT" });
+  const [form, setForm] = useState({ pr_number: "", title: "", department: "", items: [blankItem()] });
+  const [statusFilter, setStatusFilter] = useState("");
+  const [deptFilter, setDeptFilter] = useState("");
   const sa = useSweetAlert();
+  const itemsScrollRef = useRef<HTMLDivElement>(null);
+
+  // Keep the newest item row visible when appended
+  useEffect(() => {
+    itemsScrollRef.current?.scrollTo({ top: itemsScrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [form.items.length]);
+
+  const departments = useMemo(() => [...new Set(prs.map((p: any) => p.department).filter(Boolean))].sort(), [prs]);
+  const statuses = useMemo(() => [...new Set(prs.map((p: any) => p.derived_status ?? p.status).filter(Boolean))].sort(), [prs]);
+
+  const filteredPrs = useMemo(() => prs.filter((p: any) => {
+    if (statusFilter && (p.derived_status ?? p.status) !== statusFilter) return false;
+    if (deptFilter && p.department !== deptFilter) return false;
+    return true;
+  }), [prs, statusFilter, deptFilter]);
 
   const sync = async () => {
     const ok = await sa.confirmAction("Sync from ERP?", "Fetch latest purchase requisitions from the ERP system.", "Sync");
@@ -29,18 +46,37 @@ export default function PRs({ prs }: any) {
     });
   };
 
+  const setItem = (i: number, field: string, value: string) => {
+    const copy = [...form.items];
+    copy[i] = { ...copy[i], [field]: value };
+    setForm({ ...form, items: copy });
+  };
+  const addItem = () => setForm({ ...form, items: [...form.items, blankItem()] });
+  const removeItem = (i: number) => {
+    if (form.items.length === 1) return;
+    setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
+  };
+
   const createManual = async () => {
     if (!form.pr_number.trim()) { sa.alert("PR number required", "Enter a PR number.", "error"); return; }
     if (!form.title.trim()) { sa.alert("Title required", "Enter a PR title.", "error"); return; }
-    if (!form.items.trim()) { sa.alert("Items required", "Add at least one item (one per line: name | qty | unit).", "error"); return; }
+    for (const [idx, it] of form.items.entries()) {
+      if (!it.name.trim()) { sa.alert("Item name required", `Enter a name for item #${idx + 1}.`, "error"); return; }
+      if (!it.qty || Number(it.qty) < 1) { sa.alert("Quantity required", `Enter a quantity of at least 1 for "${it.name || `item #${idx + 1}`}."`, "error"); return; }
+      if (!it.unit.trim()) { sa.alert("Unit required", `Enter a unit for "${it.name || `item #${idx + 1}`}."`, "error"); return; }
+      if (it.approximate_price !== "" && Number(it.approximate_price) < 0) { sa.alert("Invalid budget", `Approximate price for "${it.name}" cannot be negative.`, "error"); return; }
+    }
     const ok = await sa.confirmAction("Create PR?", `Create PR "${form.pr_number}"?`, "Create");
     if (!ok) return;
-    const items = form.items.split("\n").map((l) => l.trim()).filter(Boolean).map((line) => {
-      const [name, qty, unit] = line.split("|").map((s) => s.trim());
-      return { name, qty: Number(qty || 1), unit: unit || "pcs" };
-    });
-    router.post("/app/prs", { ...form, items }, {
-      onSuccess: () => { setOpen(false); setForm({ pr_number:"",title:"",department:"",items:"" }); sa.alert("PR created", `"${form.pr_number}" has been created.`, "success"); },
+    const items = form.items.map((it) => ({
+      name: it.name.trim(),
+      qty: Number(it.qty),
+      unit: it.unit.trim() || "pcs",
+      approximate_price: it.approximate_price === "" ? null : Number(it.approximate_price),
+      currency: it.currency,
+    }));
+    router.post("/app/prs", { pr_number: form.pr_number, title: form.title, department: form.department, items }, {
+      onSuccess: () => { setOpen(false); setForm({ pr_number:"",title:"",department:"",items:[blankItem()] }); sa.alert("PR created", `"${form.pr_number}" has been created.`, "success"); },
       onError: (e) => sa.alert("Error", Object.values(e).join(", "), "error"),
     });
   };
@@ -81,6 +117,23 @@ export default function PRs({ prs }: any) {
       label: "Department",
       sortable: true,
       render: (r) => <span className="text-xs text-foreground whitespace-nowrap">{r.department ?? "—"}</span>
+    },
+    {
+      key: "budget",
+      label: "Est. Budget",
+      sortable: false,
+      render: (r) => {
+        const budgeted = (r.items ?? []).filter((i: any) => i.approximate_price != null);
+        if (budgeted.length === 0) return <span className="text-xs text-foreground/60">—</span>;
+        const byCur: Record<string, number> = {};
+        budgeted.forEach((i: any) => { const c = i.currency || "BDT"; byCur[c] = (byCur[c] ?? 0) + Number(i.approximate_price); });
+        const parts = Object.entries(byCur).map(([c, sum]) => `${currencySymbol(c)}${Number(sum).toLocaleString()}`);
+        return (
+          <span className="font-mono text-xs font-bold text-foreground whitespace-nowrap" title={`${budgeted.length} item(s) budgeted`}>
+            {parts.join(" + ")}
+          </span>
+        );
+      }
     },
     {
       key: "items",
@@ -171,14 +224,14 @@ export default function PRs({ prs }: any) {
                   <Plus className="h-4 w-4" /> Manual PR
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogHeader className="shrink-0">
                   <DialogTitle className="flex items-center gap-2">
                     <FileStack className="h-4 w-4 text-primary" />
                     Create Purchase Requisition
                   </DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
+                <div className="space-y-4 overflow-y-auto flex-1 pr-1" ref={itemsScrollRef}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">PR number <span className="text-destructive">*</span></Label>
@@ -195,14 +248,53 @@ export default function PRs({ prs }: any) {
                       <Input className={errors.title && "border-destructive focus-visible:ring-destructive"} value={form.title} onChange={(e)=>setForm({...form, title:e.target.value})} placeholder="e.g. Procurement of Laptops for HQ" />
                       {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
                     </div>
-                    <div className="sm:col-span-2 space-y-1.5">
-                      <Label className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Items <span className="text-destructive">*</span> <span className="text-[11px] text-foreground lowercase normal-case">(Format: Name | Quantity | Unit - one per line)</span></Label>
-                      <Textarea rows={4} className={errors.items && "border-destructive focus-visible:ring-destructive"} value={form.items} onChange={(e)=>setForm({...form, items:e.target.value})} placeholder="Dell Latitude 5440 | 15 | pcs&#10;Logitech Wireless Mouse | 20 | pcs" />
-                      {errors.items && <p className="text-xs text-destructive">{errors.items}</p>}
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-border/40">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-foreground/80">Items <span className="text-destructive">*</span></Label>
+                      <Button size="sm" variant="outline" onClick={addItem} className="h-8 text-xs gap-1"><Plus className="h-3.5 w-3.5" /> Add Item</Button>
+                    </div>
+                    {errors.items && typeof errors.items === "string" && <p className="text-xs text-destructive">{errors.items}</p>}
+                    <div className="space-y-3">
+                      {form.items.map((it, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-border/60 bg-gradient-to-br from-card to-muted/15 space-y-3 relative">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold font-mono text-foreground/60">Item #{i + 1}</span>
+                            {form.items.length > 1 && (
+                              <button onClick={() => removeItem(i)} className="text-xs font-semibold text-destructive hover:underline">Remove</button>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="sm:col-span-2 space-y-1">
+                              <Label className="text-[10px] font-bold uppercase tracking-wider text-foreground/60">Item Name *</Label>
+                              <Input value={it.name} onChange={(e) => setItem(i, "name", e.target.value)} className="h-9 text-xs" placeholder="e.g. Dell Latitude 5440" />
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-[10px] font-bold uppercase tracking-wider text-foreground/60">Qty *</Label>
+                              <Input type="number" min="1" inputMode="numeric" value={it.qty} onChange={(e) => setItem(i, "qty", e.target.value)} className="h-9 text-xs" placeholder="15" />
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-[10px] font-bold uppercase tracking-wider text-foreground/60">Unit *</Label>
+                              <Input value={it.unit} onChange={(e) => setItem(i, "unit", e.target.value)} className="h-9 text-xs" placeholder="pcs" />
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-[10px] font-bold uppercase tracking-wider text-foreground/60">Approx. Price <span className="normal-case font-medium">(in-house)</span></Label>
+                              <Input type="number" min="0" step="0.01" inputMode="decimal" value={it.approximate_price} onChange={(e) => setItem(i, "approximate_price", e.target.value)} className="h-9 text-xs" placeholder="e.g. 50000" />
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-[10px] font-bold uppercase tracking-wider text-foreground/60">Currency</Label>
+                              <select value={it.currency} onChange={(e) => setItem(i, "currency", e.target.value)}
+                                className="w-full h-9 rounded-xl border bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-accent/25">
+                                {["BDT", "USD", "EUR", "GBP", "INR"].map((c) => <option key={c} value={c}>{c}</option>)}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
-                <DialogFooter>
+                <DialogFooter className="shrink-0 pt-4 border-t border-border/40">
                   <Button variant="outline" onClick={()=>setOpen(false)}>Cancel</Button>
                   <Button onClick={createManual}>Create</Button>
                 </DialogFooter>
@@ -227,7 +319,30 @@ export default function PRs({ prs }: any) {
         ))}
       </div>
 
-      <DataTable columns={columns} data={prs} exportFilename="purchase-requisitions" emptyMessage="No PRs synced. Click 'Sync from ERP'." searchPlaceholder="Search PRs..." />
+      <DataTable columns={columns} data={filteredPrs} exportFilename="purchase-requisitions" emptyMessage="No PRs match the current search / filters." searchPlaceholder="Search PRs..."
+        filterable
+        filters={
+          <div className="flex flex-col sm:flex-row items-end gap-3.5">
+            <div className="w-full sm:flex-1 space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Status</label>
+              <select className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/25 transition-all" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                <option value="">All statuses</option>
+                {statuses.map((s: any) => <option key={s} value={s}>{String(s).replace(/_/g, " ").toUpperCase()}</option>)}
+              </select>
+            </div>
+            <div className="w-full sm:flex-1 space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Department</label>
+              <select className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/25 transition-all" value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
+                <option value="">All departments</option>
+                {departments.map((d: any) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            {(statusFilter || deptFilter) && (
+              <Button variant="outline" onClick={() => { setStatusFilter(""); setDeptFilter(""); }} className="w-full sm:w-auto h-10 px-5 shrink-0">Clear</Button>
+            )}
+          </div>
+        }
+      />
       {sa.SweetAlert}
     </AppShell>
   );
